@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FlipCheck</title>
+<meta name="description" content="Phone intake, inspection, pricing & listing tool for used-phone flipping">
+<meta name="theme-color" content="#0b0f14">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FlipCheck">
+<style>
+:root{--bg:#0b0f14;--card:#131b26;--card2:#0f1620;--line:#223042;--tx:#e8eef5;--dim:#8fa1b5;
+--green:#2ecc71;--red:#ff4d4f;--amber:#f5a623;--blue:#4aa3ff;--r:14px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
+font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+#topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;
+padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(11,15,20,.94);
+-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+#topbar h1{font-size:19px;margin:0;letter-spacing:.3px}
+#topbar .zap{color:var(--green)}
+#bridgedot{width:10px;height:10px;border-radius:50%;background:#3a4a5e;margin-left:auto}
+#bridgedot.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+main{padding:12px 14px calc(88px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
+.screen{display:none}.screen.active{display:block}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:18px 2px 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+label.f{display:block;font-size:13px;color:var(--dim);margin:10px 0 6px}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--card2);
+border:1px solid var(--line);border-radius:10px;color:var(--tx);font-size:17px;padding:12px;
+font-family:inherit;-webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);
+background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+textarea{min-height:70px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+button{font-family:inherit;cursor:pointer}
+.btn{display:block;width:100%;padding:16px;border-radius:12px;border:0;font-size:18px;font-weight:700;
+background:var(--blue);color:#fff;margin-top:10px}
+.btn.green{background:var(--green);color:#06130b}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--dim);font-weight:600;font-size:15px;padding:12px}
+.btn:active{transform:scale(.985)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+button.chip,.chip{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card2);
+color:var(--dim);font-size:14px;font-weight:600}
+.chip.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.banner{border-radius:var(--r);padding:16px;margin-bottom:10px;text-align:center;position:sticky;
+top:calc(env(safe-area-inset-top) + 54px);z-index:20;border:1px solid var(--line)}
+.banner .btitle{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.banner .bsub{font-size:14px;margin-top:4px;opacity:.92}
+.banner.bad{background:#3a1114;border-color:var(--red);color:#ffb3b5}
+.banner.good{background:#0e2a1a;border-color:var(--green);color:#b9f4d0}
+.banner.ok{background:#122234;border-color:var(--blue);color:#cfe6ff}
+.banner.warn{background:#332508;border-color:var(--amber);color:#ffe1a6}
+.banner.idle{background:var(--card);color:var(--dim)}
+#timerrow{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:14px;margin:2px 2px 10px}
+#timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tx);font-size:18px}
+#timer.over{color:var(--amber)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.item .lab{font-size:16px;font-weight:600}
+.item .help{font-size:12.5px;color:var(--dim);margin-top:3px}
+.item.done{border-color:var(--green);background:#0d2013}
+.item.failed{border-color:var(--red)}
+.itemhead{display:flex;gap:12px;align-items:flex-start}
+.tick{flex:0 0 26px;height:26px;border:2px solid var(--line);border-radius:8px;margin-top:2px;
+display:flex;align-items:center;justify-content:center;color:transparent;font-weight:800;font-size:16px}
+.item.done .tick{background:var(--green);border-color:var(--green);color:#06130b}
+.seg{display:flex;gap:8px;margin-top:10px}
+.seg button{flex:1;padding:12px 6px;border-radius:10px;border:1px solid var(--line);background:var(--card2);
+color:var(--dim);font-size:13.5px;font-weight:700}
+.seg button.sel.ok{background:var(--green);border-color:var(--green);color:#06130b}
+.seg button.sel.bad{background:var(--red);border-color:var(--red);color:#fff}
+.seg button.sel.mid{background:var(--amber);border-color:var(--amber);color:#231a02}
+.note{font-size:12.5px;color:var(--amber);margin-top:8px}
+.row2{display:flex;gap:8px}
+.row2>*{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.provcard{text-align:center}
+.provcard .big{font-size:46px;font-weight:800;letter-spacing:-1.5px;margin:2px 0}
+.provcard .k{color:var(--dim);font-size:11px;letter-spacing:.14em;font-weight:700}
+.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.tot{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.tot .v{font-size:17px;font-weight:800}
+.tot .k{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+.gradecard .l{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;color:var(--dim)}
+.gradecard .l b{color:var(--tx)}
+.badge{font-weight:800;border-radius:8px;padding:2px 8px;font-size:13px}
+.gA{background:#0e2a1a;color:var(--green)}.gB{background:#122234;color:var(--blue)}
+.gC{background:#332508;color:var(--amber)}.gD{background:#3a1114;color:var(--red)}
+.pill{font-size:12px;border-radius:999px;padding:3px 10px;border:1px solid var(--line);color:var(--dim)}
+.st-sold{color:var(--green);border-color:var(--green)}
+.st-listed{color:var(--blue);border-color:var(--blue)}
+.st-dead{color:var(--red);border-color:var(--red)}
+.st-returned{color:var(--amber);border-color:var(--amber)}
+#tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:rgba(13,18,25,.97);
+-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
+#tabbar button{flex:1;background:none;border:0;color:var(--dim);font-size:11px;padding:6px 2px;border-radius:10px}
+#tabbar button .ico{display:block;font-size:22px;margin-bottom:2px}
+#tabbar button.sel{color:#fff;background:#1b2836}
+#toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
+bottom:calc(96px + env(safe-area-inset-bottom));background:#1e2b3b;border:1px solid var(--line);
+padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;
+z-index:99;max-width:88vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <h1>FlipCheck <span class="zap">⚡</span></h1>
+  <div id="bridgedot" title="Auto-read bridge"></div>
+</header>
+
+<main>
+
+<!-- ============ 1. NEW INTAKE ============ -->
+<section id="scr-intake" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h2 style="margin:8px 2px">New Intake</h2>
+    <button class="chip bridgebtn hidden" onclick="FC.autoRead()">🔌 Auto-Read</button>
+  </div>
+  <div class="card">
+    <label class="f">Model</label>
+    <select id="in-model" onchange="FC.model(this.value)"></select>
+    <div id="customwrap" class="hidden">
+      <div class="row2">
+        <div><label class="f">Custom model name</label>
+          <input id="in-custom" type="text" placeholder="e.g. Pixel 8" oninput="FC.customName(this.value)"></div>
+        <div style="flex:0 0 120px"><label class="f">Mint value $</label>
+          <input id="in-mint" type="number" inputmode="numeric" placeholder="0" oninput="FC.customMint(this.value)"></div>
+      </div>
+    </div>
+    <label class="f">Storage</label>
+    <div class="chips" id="in-storage"></div>
+    <div class="row2">
+      <div><label class="f">Color</label>
+        <input id="in-color" type="text" placeholder="Midnight" oninput="FC.field('color',this.value)"></div>
+      <div><label class="f">Carrier / SIM</label>
+        <select id="in-carrier" onchange="FC.field('carrier',this.value)">
+          <option>Unlocked</option><option>AT&amp;T</option><option>T-Mobile</option>
+          <option>Verizon</option><option>Other / unknown</option>
+        </select></div>
+    </div>
+    <label class="f">Accessories included</label>
+    <input id="in-acc" type="text" placeholder="box, cable, case…" oninput="FC.field('accessories',this.value)">
+  </div>
+  <div class="card provcard" id="provcard"></div>
+  <button class="btn" onclick="FC.startInspection()">▶ Start Inspection</button>
+  <button class="btn ghost" onclick="FC.newPhone()">↺ Clear / new phone</button>
+</section>
+
+<!-- ============ 2+3. CHECKLIST + GRADE/PRICE ENGINE ============ -->
+<section id="scr-check" class="screen">
+  <div id="banner" class="banner idle"></div>
+  <div id="timerrow">⏱ <span id="timer">0:00</span><span style="opacity:.7">/ 8:00 target</span>
+    <button class="chip" style="margin-left:auto" onclick="FC.timerReset()">reset</button>
+    <button class="chip bridgebtn hidden" onclick="FC.autoRead()">🔌</button>
+  </div>
+  <div class="card gradecard" id="gradecard"></div>
+  <div id="checklist"></div>
+</section>
+
+<!-- ============ 5. INVENTORY ============ -->
+<section id="scr-inv" class="screen">
+  <h2 style="margin-top:8px">Inventory</h2>
+  <div class="totals" id="totals"></div>
+  <div class="chips" id="invfilters" style="margin-bottom:10px"></div>
+  <div id="invlist"></div>
+  <div class="row2" style="margin-top:12px">
+    <button class="btn ghost" onclick="FC.exportCSV()">⬇ CSV</button>
+    <button class="btn ghost" onclick="FC.copyCSV()">📋 Copy CSV</button>
+    <button class="btn ghost" onclick="document.getElementById('csvfile').click()">⬆ Import</button>
+  </div>
+  <input id="csvfile" type="file" accept=".csv,text/csv" class="hidden" onchange="FC.importCSV(this)">
+</section>
+
+<!-- ============ 6. LISTING GENERATOR ============ -->
+<section id="scr-listings" class="screen">
+  <button class="chip" style="margin-top:8px" onclick="FC.nav('inv')">← Inventory</button>
+  <div class="card" id="listhead" style="margin-top:10px"></div>
+  <div id="listbody"></div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section id="scr-settings" class="screen">
+  <h2 style="margin-top:8px">Pricing table — mint market value</h2>
+  <div class="card" id="set-models"></div>
+  <h2>Grade engine</h2>
+  <div class="card">
+    <div class="grid2" id="set-grades"></div>
+    <label class="f">Max buy = list × margin %</label>
+    <input id="set-margin" type="number" inputmode="numeric" oninput="FC.sUpd('margin',this.value)">
+    <label class="f">Per functional-fail penalty (pts, also $ off list)</label>
+    <input id="set-fail" type="number" inputmode="numeric" oninput="FC.sUpd('failPenalty',this.value)">
+  </div>
+  <h2>Cosmetic deductions (pts, also $ off list)</h2>
+  <div class="card"><div class="grid2" id="set-cosm"></div></div>
+  <h2>Battery deductions (pts, also $ off list)</h2>
+  <div class="card"><div class="grid2" id="set-batt"></div>
+    <div class="help" style="font-size:12.5px;color:var(--dim);margin-top:8px">≥90% = no deduction. Tiers: 85–89 · 80–84 (flags "battery likely needs replacement") · below 80.</div>
+  </div>
+  <h2>Storage options</h2>
+  <div class="card">
+    <input id="set-storages" type="text" onchange="FC.storUpd(this.value)">
+    <div class="help" style="font-size:12.5px;color:var(--dim);margin-top:6px">Comma-separated list</div>
+  </div>
+  <h2>Data</h2>
+  <div class="card">
+    <button class="btn ghost" onclick="FC.backup()">⬇ Export full backup (JSON)</button>
+    <button class="btn ghost" onclick="FC.copyBackup()">📋 Copy backup (if download won’t work on iOS)</button>
+    <button class="btn ghost" onclick="document.getElementById('restorefile').click()">⬆ Restore backup</button>
+    <input id="restorefile" type="file" accept=".json,application/json" class="hidden" onchange="FC.restore(this)">
+    <button class="btn ghost" style="color:var(--red);border-color:#5c2326" onclick="FC.clearAll()">🗑 Erase ALL app data</button>
+  </div>
+  <h2>Auto-read bridge</h2>
+  <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.0.0</div>
+</section>
+
+</main>
+
+<nav id="tabbar">
+  <button data-s="intake" onclick="FC.nav('intake')"><span class="ico">✚</span>Intake</button>
+  <button data-s="check" onclick="FC.nav('check')"><span class="ico">✓</span>Check</button>
+  <button data-s="inv" onclick="FC.nav('inv')"><span class="ico">📦</span>Stock</button>
+  <button data-s="settings" onclick="FC.nav('settings')"><span class="ico">⚙︎</span>Settings</button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const round5=v=>Math.max(0,Math.round(v/5)*5);
+const money=v=>'$'+(Math.round(v)||0);
+const dateStr=ts=>{const d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate();};
+function toast(msg,ms=2600){const t=$('#toast');t.textContent=msg;t.classList.add('show');
+clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),ms);}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('⚠️ Could not save — storage full?');}}
+function load(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);toast('Copied ✓');return;}catch(e){}
+  try{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.focus();ta.select();const ok=document.execCommand('copy');ta.remove();
+  toast(ok?'Copied ✓':'Copy failed — long-press the text to copy');}catch(e){toast('Copy failed — long-press the text to copy');}
+}
+function download(name,content,type){
+  const b=new Blob([content],{type});const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
+}
+
+/* ================= settings ================= */
+const DEF_SETTINGS={
+  models:[
+    {name:'iPhone 11',mint:110},{name:'iPhone 12',mint:150},{name:'iPhone 12 Pro',mint:210},
+    {name:'iPhone 13',mint:230},{name:'iPhone 13 Pro',mint:300},{name:'iPhone 14',mint:260},
+    {name:'iPhone 14 Plus',mint:300},{name:'iPhone 14 Pro',mint:380},{name:'iPhone 14 Pro Max',mint:450},
+    {name:'iPhone 15',mint:400},{name:'iPhone 15 Pro',mint:520},{name:'iPhone 15 Pro Max',mint:620},
+    {name:'iPhone 16',mint:530},{name:'iPhone 16 Pro',mint:680},
+    {name:'Galaxy S23',mint:220},{name:'Galaxy S24',mint:330}
+  ],
+  storages:['64GB','128GB','256GB','512GB','1TB'],
+  gradeMult:{A:95,B:85,C:70,D:55},
+  margin:62,
+  cosmetic:{'Like New':0,'Light Wear':5,'Moderate Wear':12,'Heavy Wear':20,'Cracked':35},
+  battery:{t85:5,t80:10,t0:20},
+  failPenalty:8
+};
+let settings=(()=>{const s=load('fc_settings_v1',null);
+  if(!s)return JSON.parse(JSON.stringify(DEF_SETTINGS));
+  for(const k in DEF_SETTINGS){if(s[k]===undefined)s[k]=JSON.parse(JSON.stringify(DEF_SETTINGS[k]));}
+  return s;})();
+function saveSettings(){store('fc_settings_v1',settings);}
+let inv=load('fc_inv_v1',[]);
+function saveInv(){store('fc_inv_v1',inv);}
+
+/* ================= session (current phone being inspected) =================
+   NOTE: the full IMEI lives here only while inspecting (needed for the copy/
+   check buttons). On save, only the last 4 digits are kept — never the full. */
+function blankSession(){return {model:'',custom:false,customName:'',mint:'',
+  storage:(settings.storages[1]||settings.storages[0]||'128GB'),color:'',carrier:'Unlocked',
+  accessories:'',imei:'',battery:'',cosmetic:'Like New',checks:{},notes:'',startedAt:null,meta:{}};}
+let session=load('fc_session_v1',null)||blankSession();
+function saveSession(){store('fc_session_v1',session);}
+let lastStors=[];  /* storage chips rendered last (index-addressed click handlers) */
+
+/* ================= checklist definition ================= */
+const FUNC_IDS=['sim_call','cameras','flashlight','speaker_mic','biometric','charging'];
+const SHORT_LABELS={sim_call:'SIM/calls',cameras:'cameras',flashlight:'flashlight',
+  speaker_mic:'speaker & mic',biometric:'Face ID / Touch ID',charging:'charging port'};
+const CHECKLIST=[
+  {id:'imei_match',t:'check',label:'Dial *#06# — IMEI matches box / listing',
+   help:'Dial *#06# on the phone; type the IMEI below'},
+  {id:'imei_check',t:'imei',label:'IMEI blacklist / legality check',
+   help:'Needs signal — run it on YOUR phone’s data if the meetup has no wifi'},
+  {id:'about_match',t:'check',label:'Serial / IMEI / storage cross-check',
+   help:'Settings > General > About'},
+  {id:'battery',t:'battery',label:'Battery health %',
+   help:'Settings > Battery > Battery Health & Charging'},
+  {id:'icloud_off',t:'seg',label:'iCloud / Find My turned OFF (by the seller)',
+   help:'Settings > [Apple ID name] > Find My > Find My iPhone',
+   opts:[{v:'off',l:'OFF ✓',c:'ok'},{v:'locked',l:'CAN’T DISABLE',c:'bad'}]},
+  {id:'financing',t:'seg',label:'No financing / loan lock',
+   help:'Red flags: "still paying it off", carrier payment plan, leasing apps',
+   opts:[{v:'clear',l:'CLEAR ✓',c:'ok'},{v:'locked',l:'LOCK DETECTED',c:'bad'}]},
+  {id:'sim_call',t:'pf',label:'SIM test call completed'},
+  {id:'cameras',t:'pf',label:'Front + back cameras'},
+  {id:'flashlight',t:'pf',label:'Flashlight'},
+  {id:'speaker_mic',t:'pf',label:'Speaker + mic (voice memo test)'},
+  {id:'biometric',t:'pf',label:'Face ID / Touch ID'},
+  {id:'charging',t:'pf',label:'Charging port / cable test'},
+  {id:'screen',t:'seg',label:'Screen check (dead pixels, burn-in, edges, touch)',
+   opts:[{v:'pass',l:'GOOD ✓',c:'ok'},{v:'wear',l:'MINOR WEAR',c:'mid'},{v:'fail',l:'NOT WORKING',c:'bad'}]},
+  {id:'reset',t:'check',label:'Factory reset completed',
+   help:'Settings > General > Transfer or Reset iPhone > Erase All Content and Settings',
+   note:'⚠️ Do this AFTER cash changes hands and the phone is yours — never mid-negotiation.'}
+];
+function labelOf(id){const it=CHECKLIST.find(x=>x.id===id);return SHORT_LABELS[id]||(it?it.label:id);}
+
+/* ================= grade + price engine ================= */
+function mintOf(sn){
+  if(sn.custom)return parseFloat(sn.mint)||0;
+  const m=settings.models.find(x=>x.name===sn.model);
+  return m?(parseFloat(m.mint)||0):0;
+}
+function computeGrade(sn){
+  const r={score:100,letter:'D',hard:[],fails:0,deducts:[],manual:false,list:0,buy:0,mint:mintOf(sn),mult:0};
+  const b=parseFloat(sn.battery);
+  if(!isNaN(b)){
+    if(b>=90){/* no deduction */}
+    else if(b>=85){r.score-=settings.battery.t85;r.deducts.push('Battery '+b+'% (−'+settings.battery.t85+')');}
+    else if(b>=80){r.score-=settings.battery.t80;r.deducts.push('Battery '+b+'% — likely needs replacement (−'+settings.battery.t80+')');}
+    else{r.score-=settings.battery.t0;r.deducts.push('Battery '+b+'% — needs replacement (−'+settings.battery.t0+')');}
+  }
+  const cd=parseFloat(settings.cosmetic[sn.cosmetic])||0;
+  if(cd){r.score-=cd;r.deducts.push(sn.cosmetic+' (−'+cd+')');}
+  FUNC_IDS.forEach(id=>{if(sn.checks[id]==='fail'){r.fails++;r.score-=settings.failPenalty;
+    r.deducts.push(labelOf(id)+' FAIL (−'+settings.failPenalty+')');}});
+  if(sn.checks.screen==='wear'){r.score-=6;r.deducts.push('Screen minor wear (−6)');}
+  /* hard-fail conditions — DO NOT BUY, overrides every price */
+  if(sn.checks.screen==='fail')r.hard.push('Screen not functional');
+  if(sn.checks.imei_check==='flagged')r.hard.push('IMEI blacklisted / reported lost-stolen');
+  if(sn.checks.icloud_off==='locked')r.hard.push('iCloud / Find My can’t be disabled');
+  if(sn.checks.financing==='locked')r.hard.push('Financing / loan lock detected');
+  /* deduction points double as flat $ off the list price (spec: list = mint × mult − deductions) */
+  r.flatDed=Math.round(Math.max(0,100-r.score));
+  r.score=Math.max(0,Math.round(r.score));
+  let letter=r.score>=90?'A':r.score>=75?'B':r.score>=60?'C':'D';
+  if(r.fails>1){letter={A:'B',B:'C',C:'D',D:'D'}[letter];r.deducts.push('2+ functional fails → letter dropped');}
+  if(r.fails>2)r.manual=true;
+  r.letter=letter;
+  const multRaw=parseFloat(settings.gradeMult[letter]);
+  r.mult=(isNaN(multRaw)?55:multRaw)/100;
+  r.list=round5(r.mint*r.mult-r.flatDed);
+  const marginRaw=parseFloat(settings.margin);
+  r.buy=round5(r.list*((isNaN(marginRaw)?62:marginRaw)/100));
+  return r;
+}
+function progressCount(){
+  let n=0;CHECKLIST.forEach(it=>{
+    if(it.t==='battery'){if(session.battery!=='')n++;}
+    else if(session.checks[it.id])n++;});
+  return n;
+}
+/* STRONG BUY is an endorsement — only earned once every decision-critical
+   check has actually been answered, not on an untouched checklist. */
+function coreChecksDone(sn){
+  return sn.battery!=='' &&
+    FUNC_IDS.every(id=>sn.checks[id]) &&
+    !!sn.checks.screen && !!sn.checks.icloud_off &&
+    !!sn.checks.imei_check && !!sn.checks.financing;
+}
+
+/* ================= banner + grade card ================= */
+function renderBanner(){
+  const g=computeGrade(session);const el=$('#banner');if(!el)return;
+  const prog=progressCount()+'/'+CHECKLIST.length+' checked';
+  if(g.hard.length){
+    el.className='banner bad';
+    el.innerHTML='<div class="btitle">🚫 DO NOT BUY</div><div class="bsub">'+g.hard.map(esc).join(' · ')+'</div>';
+  }else if(!g.mint){
+    el.className='banner idle';
+    el.innerHTML='<div class="btitle" style="font-size:18px">Pick a model on Intake to price this phone</div>';
+  }else if(g.manual){
+    el.className='banner warn';
+    el.innerHTML='<div class="btitle">⚠️ MANUAL REVIEW</div><div class="bsub">3+ functional fails — Grade '+g.letter+' · '+g.score+' · would be Offer '+money(g.buy)+' / List '+money(g.list)+'</div>';
+  }else if(g.score>=90&&g.fails===0&&coreChecksDone(session)){
+    el.className='banner good';
+    el.innerHTML='<div class="btitle">💪 STRONG BUY — OFFER '+money(g.buy)+'</div><div class="bsub">Grade A · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
+  }else{
+    el.className='banner ok';
+    el.innerHTML='<div class="btitle">OFFER '+money(g.buy)+'</div><div class="bsub">Grade '+g.letter+' · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
+  }
+  renderGradeCard(g);
+}
+function renderGradeCard(g){
+  const gc=$('#gradecard');if(!gc)return;
+  if(!g.mint){gc.innerHTML='<div class="help" style="color:var(--dim);font-size:14px">No model / mint value set yet.</div>';return;}
+  gc.innerHTML=
+    '<div class="l"><span>Mint market value</span><b>'+money(g.mint)+'</b></div>'+
+    '<div class="l"><span>Grade '+g.letter+' multiplier</span><b>×'+Math.round(g.mult*100)+'%</b></div>'+
+    (g.flatDed?'<div class="l"><span>Flat deductions</span><b style="color:var(--amber)">−$'+g.flatDed+'</b></div>':'')+
+    '<div class="l"><span>SUGGESTED LIST PRICE</span><b style="color:var(--blue)">'+money(g.list)+'</b></div>'+
+    '<div class="l"><span>Target margin</span><b>×'+settings.margin+'%</b></div>'+
+    '<div class="l"><span>MAX BUY PRICE</span><b style="color:var(--green);font-size:18px">'+money(g.buy)+'</b></div>'+
+    (g.deducts.length?'<div style="font-size:12.5px;color:var(--dim);margin-top:8px">Deductions: '+g.deducts.map(esc).join(' · ')+'</div>':'');
+}
+
+/* ================= checklist rendering ================= */
+function buildChecklist(){
+  const wrap=$('#checklist');if(!wrap)return;
+  let h='';
+  CHECKLIST.forEach(it=>{
+    if(it.t==='check'){
+      const done=session.checks[it.id]==='done';
+      h+='<div class="item'+(done?' done':'')+'" onclick="FC.tgl(\''+it.id+'\')">'+
+        '<div class="itemhead"><div class="tick">✓</div><div>'+
+        '<div class="lab">'+it.label+'</div>'+
+        (it.help?'<div class="help">'+it.help+'</div>':'')+
+        (it.note?'<div class="note">'+it.note+'</div>':'')+
+        '</div></div></div>';
+    }
+    else if(it.t==='pf'){
+      const v=session.checks[it.id];
+      h+='<div class="item'+(v==='pass'?' done':v==='fail'?' failed':'')+'">'+
+        '<div class="lab">'+it.label+'</div>'+
+        '<div class="seg">'+
+        '<button class="ok'+(v==='pass'?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\'pass\')">PASS ✓</button>'+
+        '<button class="bad'+(v==='fail'?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\'fail\')">FAIL ✗</button>'+
+        '</div></div>';
+    }
+    else if(it.t==='seg'){
+      const v=session.checks[it.id];
+      h+='<div class="item'+(v&&v!=='locked'&&v!=='fail'?' done':(v==='locked'||v==='fail')?' failed':'')+'">'+
+        '<div class="lab">'+it.label+'</div>'+
+        (it.help?'<div class="help">'+it.help+'</div>':'')+
+        '<div class="seg">'+it.opts.map(o=>
+          '<button class="'+o.c+(v===o.v?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\''+o.v+'\')">'+o.l+'</button>'
+        ).join('')+'</div></div>';
+    }
+    else if(it.t==='battery'){
+      h+='<div class="item'+(session.battery!==''?' done':'')+'">'+
+        '<div class="lab">'+it.label+'</div>'+
+        '<div class="help">'+it.help+'</div>'+
+        '<input type="number" inputmode="numeric" min="0" max="100" placeholder="e.g. 87" value="'+esc(session.battery)+'"'+
+        ' oninput="FC.batt(this.value,this)" style="margin-top:8px;font-size:22px;font-weight:700;text-align:center">'+
+        '</div>';
+    }
+    else if(it.t==='imei'){
+      const v=session.checks[it.id];
+      h+='<div class="item'+(v==='clean'?' done':v==='flagged'?' failed':'')+'">'+
+        '<div class="lab">'+it.label+'</div>'+
+        '<div class="help">'+it.help+'</div>'+
+        '<input type="text" inputmode="numeric" maxlength="17" placeholder="IMEI (from *#06#)" value="'+esc(session.imei)+'"'+
+        ' oninput="FC.imei(this.value)" style="margin-top:8px">'+
+        '<div class="row2" style="margin-top:8px">'+
+        '<button class="btn ghost" style="margin:0" onclick="FC.copyImei()">📋 Copy</button>'+
+        '<button class="btn ghost" style="margin:0" onclick="FC.openCheck(\'https://www.stolenphonechecker.org/\')">Stolen ↗</button>'+
+        '<button class="btn ghost" style="margin:0" onclick="FC.openCheck(\'https://swappa.com/imei\')">Swappa ↗</button>'+
+        '</div>'+
+        '<div class="seg">'+
+        '<button class="ok'+(v==='clean'?' sel':'')+'" onclick="FC.seg(\'imei_check\',\'clean\')">CLEAN ✓</button>'+
+        '<button class="bad'+(v==='flagged'?' sel':'')+'" onclick="FC.seg(\'imei_check\',\'flagged\')">FLAGGED 🚫</button>'+
+        '</div></div>';
+    }
+    if(it.id==='screen'){
+      /* cosmetic condition selector, right after the screen check */
+      h+='<div class="item"><div class="lab">Cosmetic condition</div>'+
+        '<div class="chips" style="margin-top:10px">'+
+        Object.keys(settings.cosmetic).map(c=>
+          '<button class="chip'+(session.cosmetic===c?' sel':'')+'" onclick="FC.cosm(\''+c+'\')">'+c+'</button>'
+        ).join('')+'</div></div>';
+    }
+  });
+  h+='<div class="item"><div class="lab">Notes</div>'+
+    '<textarea placeholder="scratch on corner, seller story, meetup spot…" oninput="FC.notes(this.value)">'+esc(session.notes)+'</textarea></div>';
+  h+='<button class="btn green" onclick="FC.save()">💾 Save &amp; Draft Listings</button>'+
+    '<div style="text-align:center;font-size:12.5px;color:var(--dim);margin-top:8px">Logs this phone to inventory and opens ready-to-post listings</div>';
+  wrap.innerHTML=h;
+}
+
+/* ================= intake rendering ================= */
+function renderIntake(){
+  const sel=$('#in-model');
+  let opts='<option value="">— pick model —</option>';
+  settings.models.forEach(m=>{opts+='<option value="'+esc(m.name)+'"'+(!session.custom&&session.model===m.name?' selected':'')+'>'+
+    esc(m.name)+' — $'+esc(m.mint)+'</option>';});
+  opts+='<option value="__custom"'+(session.custom?' selected':'')+'>Other / custom…</option>';
+  sel.innerHTML=opts;
+  $('#customwrap').classList.toggle('hidden',!session.custom);
+  $('#in-custom').value=session.customName||'';
+  $('#in-mint').value=session.mint||'';
+  const stors=settings.storages.slice();
+  if(session.storage&&!stors.includes(session.storage))stors.push(session.storage);
+  lastStors=stors;  /* index-based handler: user-defined labels may contain quotes */
+  $('#in-storage').innerHTML=stors.map((s,i)=>
+    '<button class="chip'+(session.storage===s?' sel':'')+'" onclick="FC.storageIdx('+i+')">'+esc(s)+'</button>').join('');
+  $('#in-color').value=session.color||'';
+  $('#in-carrier').value=session.carrier||'Unlocked';
+  $('#in-acc').value=session.accessories||'';
+  updateProv();
+}
+function updateProv(){
+  const mint=mintOf(session);const el=$('#provcard');if(!el)return;
+  if(!mint){
+    el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div><div class="big" style="color:var(--dim)">—</div>'+
+    '<div style="font-size:13px;color:var(--dim)">Pick a model (or enter a custom mint value)</div>';return;
+  }
+  const list=round5(mint*((parseFloat(settings.gradeMult.B)||85)/100));
+  const buy=round5(list*((parseFloat(settings.margin)||62)/100));
+  el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div>'+
+    '<div class="big" style="color:var(--green)">'+money(buy)+'</div>'+
+    '<div style="font-size:13px;color:var(--dim)">Assumes Grade B mid · Mint '+money(mint)+' · List ~'+money(list)+'<br>Goes live &amp; grade-adjusted as you run the checklist ▸</div>';
+}
+
+/* ================= save to inventory ================= */
+function saveEntry(){
+  const modelName=session.custom?(session.customName||'').trim():session.model;
+  if(!modelName){toast('Pick a model first');FC.nav('intake');return;}
+  const g=computeGrade(session);
+  if(g.hard.length&&!confirm('🚫 DO NOT BUY — '+g.hard.join(', ')+'.\nLog it anyway as a walk-away / dead entry?'))return;
+  const entry={
+    id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    ts:Date.now(),model:modelName,storage:session.storage,color:session.color,
+    carrier:session.carrier,accessories:session.accessories,
+    imeiLast4:(session.imei||'').replace(/\D/g,'').slice(-4),
+    battery:session.battery,cosmetic:session.cosmetic,checks:Object.assign({},session.checks),
+    grade:g.letter,score:g.score,fails:g.fails,hard:g.hard.slice(),manual:g.manual,
+    buyPrice:g.buy,listPrice:g.list,paid:g.hard.length?'0':'',salePrice:'',
+    notes:session.notes,status:g.hard.length?'dead-DOA':'bought',
+    history:[{ts:Date.now(),status:g.hard.length?'dead-DOA':'bought'}],meta:session.meta||{}
+  };
+  inv.unshift(entry);saveInv();
+  session=blankSession();saveSession();
+  toast(g.hard.length?'Logged as dead / walk-away (paid $0 — edit if you bought it)':'Saved to inventory ✓',3500);
+  openListings(entry.id);
+}
+
+/* ================= listing generator ================= */
+function genListings(e){
+  const photos='[ADD PHOTOS HERE — front, back, screen-on, ports, any wear]';
+  const title=(e.model+' '+(e.storage||'')).trim();
+  const carrier=e.carrier||'Unlocked';
+  const colorStr=e.color?(' — '+e.color):'';
+  const passItems=FUNC_IDS.filter(id=>e.checks&&e.checks[id]==='pass').map(id=>SHORT_LABELS[id]);
+  const passStr=passItems.length?passItems.join(', '):'all core functions';
+  const bat=e.battery?(e.battery+'% battery health'):'battery health shared on request';
+  const cond=e.cosmetic||'good condition';
+  const imeiLine=(e.checks&&e.checks.imei_check==='clean')?'IMEI verified clean — check it yourself if you like':'';
+  const icloudLocked=e.checks&&e.checks.icloud_off==='locked';
+  const resetLine=icloudLocked?'SOLD AS-IS FOR PARTS/REPAIR: iCloud / Activation Lock NOT removed':
+    (e.checks&&e.checks.reset==='done')?'Factory reset with iCloud fully removed — sets up like new':
+    'Will be factory reset + iCloud removed at handoff';
+  const accLine=e.accessories?('Includes: '+e.accessories):'';
+  const notes=e.notes?('\nNote: '+e.notes):'';
+  const price=money(e.listPrice);
+  const fb=photos+'\n\n'+title+colorStr+' — '+carrier+' — '+price+'\n\n'+
+    '• Condition: '+cond+'\n'+
+    '• '+bat+'\n'+
+    '• Tested working: '+passStr+'\n'+
+    '• '+resetLine+
+    (imeiLine?'\n• '+imeiLine:'')+
+    (accLine?'\n• '+accLine:'')+notes+
+    '\n\nCash meetup, local. First come, first served.';
+  const ou=photos+'\n\n'+e.model+' '+(e.storage||'')+' ('+carrier+')'+colorStr+' for '+price+'.\n\n'+
+    'This phone has been through my full inspection: '+passStr+' — all tested and working. '+
+    (e.battery?('Battery health is at '+e.battery+'%. '):'')+
+    'Cosmetic condition is '+cond.toLowerCase()+'.'+
+    (accLine?(' '+accLine+'.'):'')+'\n\n'+resetLine+'.'+
+    (imeiLine?(' '+imeiLine+'.'):'')+notes+
+    '\n\nLocal pickup, cash or Zelle. No trades.';
+  const sw=photos+'\n\n'+e.model+' — '+(e.storage||'')+colorStr+'\n\n'+
+    'Carrier status: '+carrier+'\n'+
+    'Battery health: '+(e.battery?e.battery+'%':'—')+'\n'+
+    'Storage: '+(e.storage||'—')+'\n'+
+    'Condition: '+cond+'\n'+
+    'Functional: '+passStr+' — pass\n'+
+    resetLine+'\n'+
+    (imeiLine?imeiLine+'\n':'')+
+    (accLine?accLine+'\n':'')+notes+
+    '\nAsking '+price+'. Ships fast, well packed.';
+  return {fb:fb,ou:ou,sw:sw};
+}
+let curListing=null;
+function openListings(id){
+  const e=inv.find(x=>x.id===id);if(!e){toast('Entry not found');return;}
+  curListing=id;
+  if(!e.listings)e.listings=genListings(e);
+  $('#listhead').innerHTML='<b>'+esc(e.model)+' '+esc(e.storage||'')+'</b> · Grade '+e.grade+' · List '+money(e.listPrice)+
+    (e.hard&&e.hard.length?'<div style="color:var(--red);font-weight:700;margin-top:6px">🚫 DO NOT BUY was flagged: '+e.hard.map(esc).join(' · ')+' — list as PARTS / AS-IS only, if at all.</div>':'')+
+    '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Edit freely below, then copy per platform. Photos are the only manual step left.</div>';
+  const L=e.listings;
+  $('#listbody').innerHTML=[['fb','Facebook Marketplace'],['ou','OfferUp / Craigslist'],['sw','Swappa']].map(p=>
+    '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+    '<b>'+p[1]+'</b><button class="chip" onclick="FC.copyListing(\''+p[0]+'\')">📋 Copy</button></div>'+
+    '<textarea rows="10" oninput="FC.listEdit(\''+p[0]+'\',this.value)">'+esc(L[p[0]])+'</textarea></div>'
+  ).join('')+
+  '<button class="btn ghost" onclick="FC.regen()">↻ Regenerate drafts (overwrites edits)</button>';
+  showScreen('listings');
+}
+
+/* ================= inventory ================= */
+const STATUSES=['bought','listed','sold','dead-DOA','returned'];
+let invFilter='all';let expanded=null;
+function renderInv(){
+  let spent=0,realized=0,inflight=0,spentSold=0;
+  inv.forEach(e=>{
+    const pRaw=parseFloat(e.paid);                       /* honor an explicit $0 (walk-away) */
+    const paid=isNaN(pRaw)?(parseFloat(e.buyPrice)||0):pRaw;
+    spent+=paid;
+    if(e.status==='sold'){realized+=parseFloat(e.salePrice)||0;spentSold+=paid;}
+    if(e.status==='bought'||e.status==='listed')inflight++;
+  });
+  const profit=realized-spentSold;
+  $('#totals').innerHTML=
+    '<div class="tot"><div class="v">'+money(spent)+'</div><div class="k">Spent</div></div>'+
+    '<div class="tot"><div class="v">'+money(realized)+'</div><div class="k">Realized</div></div>'+
+    '<div class="tot"><div class="v">'+inflight+'</div><div class="k">In flight</div></div>'+
+    '<div class="tot"><div class="v" style="color:'+(profit>=0?'var(--green)':'var(--red)')+'">'+money(profit)+'</div><div class="k">Profit·sold</div></div>';
+  $('#invfilters').innerHTML=['all'].concat(STATUSES).map(s=>
+    '<button class="chip'+(invFilter===s?' sel':'')+'" onclick="FC.filter(\''+s+'\')">'+s+'</button>').join('');
+  const list=inv.filter(e=>invFilter==='all'||e.status===invFilter);
+  $('#invlist').innerHTML=list.length?list.map(rowHTML).join(''):
+    '<div class="card" style="color:var(--dim);text-align:center">No phones here yet</div>';
+}
+function rowHTML(e){
+  const open=expanded===e.id;
+  const stCls='st-'+e.status.split('-')[0];
+  return '<div class="item">'+
+    '<div onclick="FC.expand(\''+e.id+'\')">'+
+    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+    '<b style="font-size:16px">'+esc(e.model)+' '+esc(e.storage||'')+'</b>'+
+    '<span class="badge g'+e.grade+'">'+e.grade+'·'+e.score+'</span>'+
+    '<span class="pill '+stCls+'">'+e.status+'</span>'+
+    (e.hard&&e.hard.length?'<span class="pill st-dead">🚫 do not buy</span>':'')+
+    (e.manual?'<span class="pill st-returned">⚠ review</span>':'')+'</div>'+
+    '<div class="help">Buy '+money(e.buyPrice)+(e.paid?' · Paid '+money(e.paid):'')+
+    ' · List '+money(e.listPrice)+(e.salePrice?' · Sold '+money(e.salePrice):'')+
+    ' · '+dateStr(e.ts)+(e.imeiLast4?' · …'+esc(e.imeiLast4):'')+'</div>'+
+    '</div>'+(open?editorHTML(e):'')+'</div>';
+}
+function editorHTML(e){
+  return '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+
+    '<label class="f">Status (auto-timestamps the change)</label>'+
+    '<select onchange="FC.setStatus(\''+e.id+'\',this.value)">'+
+    STATUSES.map(s=>'<option'+(s===e.status?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
+    '<div class="row2">'+
+    '<div><label class="f">Paid $</label><input type="number" inputmode="numeric" value="'+esc(e.paid||'')+'" oninput="FC.entryField(\''+e.id+'\',\'paid\',this.value)"></div>'+
+    '<div><label class="f">Sold $</label><input type="number" inputmode="numeric" value="'+esc(e.salePrice||'')+'" oninput="FC.entryField(\''+e.id+'\',\'salePrice\',this.value)"></div>'+
+    '</div>'+
+    '<label class="f">Notes</label><textarea oninput="FC.entryField(\''+e.id+'\',\'notes\',this.value)">'+esc(e.notes||'')+'</textarea>'+
+    '<div class="row2" style="margin-top:10px">'+
+    '<button class="btn ghost" style="margin:0" onclick="FC.openListings(\''+e.id+'\')">📝 Listings</button>'+
+    '<button class="btn ghost" style="margin:0;color:var(--red);border-color:#5c2326" onclick="FC.del(\''+e.id+'\')">🗑 Delete</button>'+
+    '</div></div>';
+}
+
+/* ================= CSV export / import ================= */
+const CSV_COLS=['date','model','storage','color','carrier','grade','score','battery_pct','cosmetic',
+'fail_count','buy_price','paid','list_price','sale_price','status','imei_last4','do_not_buy','hard_fails','notes'];
+function entryToRow(e){
+  return [new Date(e.ts).toISOString().slice(0,10),e.model,e.storage,e.color,e.carrier,e.grade,e.score,
+    e.battery,e.cosmetic,e.fails,e.buyPrice,e.paid,e.listPrice,e.salePrice,e.status,e.imeiLast4,
+    (e.hard&&e.hard.length?'YES':''),(e.hard||[]).join('; '),e.notes];
+}
+function csvEscape(v){v=String(v??'');return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function buildCSV(){
+  const lines=[CSV_COLS.join(',')];
+  inv.forEach(e=>lines.push(entryToRow(e).map(csvEscape).join(',')));
+  return lines.join('\n');
+}
+function parseCSV(text){
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+    else{if(ch==='"')q=true;
+      else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;
+        row.push(cur);cur='';
+        if(row.length>1||row[0]!=='')rows.push(row);row=[];}
+      else cur+=ch;}}
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows;
+}
+function importRows(rows){
+  if(!rows.length)return 0;
+  const head=rows[0].map(h=>h.trim().toLowerCase());
+  const idx=n=>head.indexOf(n);
+  if(idx('model')<0){toast('CSV missing a "model" column');return 0;}
+  let n=0;
+  rows.slice(1).forEach(r=>{
+    const get=c=>{const i=idx(c);return i>=0?(r[i]||''):'';};
+    if(!get('model'))return;
+    const ts=Date.parse(get('date'))||Date.now();
+    const status=STATUSES.includes(get('status'))?get('status'):'bought';
+    inv.push({id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+n,
+      ts:ts,model:get('model'),storage:get('storage'),color:get('color'),carrier:get('carrier'),
+      accessories:'',imeiLast4:get('imei_last4'),battery:get('battery_pct'),cosmetic:get('cosmetic')||'Like New',
+      checks:{},grade:get('grade')||'B',score:parseInt(get('score'))||0,fails:parseInt(get('fail_count'))||0,
+      hard:get('hard_fails')?get('hard_fails').split('; ').filter(Boolean):[],
+      manual:false,buyPrice:parseFloat(get('buy_price'))||0,paid:get('paid'),
+      listPrice:parseFloat(get('list_price'))||0,salePrice:get('sale_price'),status:status,
+      notes:get('notes'),history:[{ts:ts,status:status}],meta:{}});
+    n++;
+  });
+  saveInv();return n;
+}
+
+/* ================= settings screen ================= */
+function renderSettings(){
+  const s=settings;
+  $('#set-models').innerHTML=s.models.map((m,i)=>
+    '<div class="row2" style="margin-bottom:8px;align-items:center">'+
+    '<input type="text" value="'+esc(m.name)+'" oninput="FC.mUpd('+i+',\'name\',this.value)">'+
+    '<input type="number" inputmode="numeric" value="'+esc(m.mint)+'" style="flex:0 0 100px" oninput="FC.mUpd('+i+',\'mint\',this.value)">'+
+    '<button class="chip" style="flex:0 0 auto" onclick="FC.mDel('+i+')">✕</button></div>'
+  ).join('')+'<button class="btn ghost" onclick="FC.mAdd()">＋ Add model</button>';
+  $('#set-grades').innerHTML=['A','B','C','D'].map(g=>
+    '<div><label class="f">Grade '+g+' × %</label>'+
+    '<input type="number" inputmode="numeric" value="'+esc(s.gradeMult[g])+'" oninput="FC.gUpd(\''+g+'\',this.value)"></div>'
+  ).join('');
+  $('#set-margin').value=s.margin;
+  $('#set-fail').value=s.failPenalty;
+  $('#set-cosm').innerHTML=Object.keys(s.cosmetic).map(c=>
+    '<div><label class="f">'+esc(c)+' (−pts)</label>'+
+    '<input type="number" inputmode="numeric" value="'+esc(s.cosmetic[c])+'" oninput="FC.cUpd(\''+c+'\',this.value)"></div>'
+  ).join('');
+  $('#set-batt').innerHTML=[['t85','85–89%'],['t80','80–84%'],['t0','Below 80%']].map(p=>
+    '<div><label class="f">'+p[1]+' (−pts)</label>'+
+    '<input type="number" inputmode="numeric" value="'+esc(s.battery[p[0]])+'" oninput="FC.bUpd(\''+p[0]+'\',this.value)"></div>'
+  ).join('');
+  $('#set-storages').value=s.storages.join(', ');
+  updateBridgeStatus();
+}
+function updateBridgeStatus(){
+  const el=$('#bridgestatus');if(!el)return;
+  el.innerHTML=bridgeUp?
+    '<span style="color:var(--green)">● Connected</span> — auto-read available on Intake &amp; Check screens (port 5052)':
+    '<span style="color:var(--dim)">○ Not detected (looking on port '+BRIDGE_PORT+').</span> On the laptop, run <b style="color:var(--tx)">python3 bridge/bridge.py</b> then reload. Non-default port? Open the app with ?bridge=PORT. Manual entry always works without it.';
+}
+
+/* ================= navigation ================= */
+function showScreen(name){
+  $$('.screen').forEach(s=>s.classList.remove('active'));
+  const scr=$('#scr-'+name);if(scr)scr.classList.add('active');
+  $$('#tabbar button').forEach(b=>b.classList.toggle('sel',b.dataset.s===name));
+  window.scrollTo(0,0);
+}
+function nav(name){
+  if(name==='intake')renderIntake();
+  if(name==='check'){
+    if(!session.startedAt){session.startedAt=Date.now();saveSession();}
+    buildChecklist();renderBanner();
+  }
+  if(name==='inv')renderInv();
+  if(name==='settings')renderSettings();
+  showScreen(name);
+}
+
+/* ================= timer ================= */
+setInterval(()=>{
+  const el=$('#timer');if(!el)return;
+  if(!session.startedAt){el.textContent='0:00';el.classList.remove('over');return;}
+  const s=Math.max(0,Math.floor((Date.now()-session.startedAt)/1000));
+  el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  el.classList.toggle('over',s>480);
+},1000);
+
+/* ================= auto-read bridge ================= */
+/* default port 5052; override by opening the app with ?bridge=PORT (remembered) */
+const BRIDGE_PORT=(function(){
+  try{
+    const m=location.search.match(/[?&]bridge=(\d{2,5})/);
+    if(m){localStorage.setItem('fc_bridge_port',m[1]);return m[1];}
+    return localStorage.getItem('fc_bridge_port')||'5052';
+  }catch(e){return '5052';}
+})();
+const BRIDGE='http://127.0.0.1:'+BRIDGE_PORT;
+let bridgeUp=false;
+async function pingBridge(){
+  try{
+    const c=new AbortController();const t=setTimeout(()=>c.abort(),1500);
+    const r=await fetch(BRIDGE+'/health',{signal:c.signal});clearTimeout(t);
+    bridgeUp=r.ok;
+  }catch(e){bridgeUp=false;}
+  $$('.bridgebtn').forEach(b=>b.classList.toggle('hidden',!bridgeUp));
+  const dot=$('#bridgedot');if(dot)dot.classList.toggle('on',bridgeUp);
+  updateBridgeStatus();
+}
+async function autoRead(){
+  toast('Reading device over USB…');
+  try{
+    const r=await fetch(BRIDGE+'/device-info');const d=await r.json();
+    if(!d.ok){toast('Bridge: '+((d.warnings&&d.warnings.join(' · '))||'no device found'),4500);return;}
+    const dev=d.device;const filled=[];
+    if(dev.model){
+      const m=settings.models.find(x=>x.name.toLowerCase()===String(dev.model).toLowerCase());
+      if(m){session.model=m.name;session.custom=false;}
+      else{session.custom=true;session.customName=dev.model;session.model='';}
+      filled.push('model');
+    }
+    if(dev.storage){session.storage=dev.storage;filled.push('storage');}
+    if(dev.imei){session.imei=String(dev.imei);filled.push('IMEI');}
+    if(dev.batteryPct){const bp=Math.min(100,Math.max(1,Math.round(dev.batteryPct)));
+      session.battery=String(bp);filled.push('battery '+bp+'%');}
+    if(dev.serial)session.meta.serial=dev.serial;
+    if(dev.os)session.meta.os=dev.os;
+    saveSession();
+    if($('#scr-intake').classList.contains('active'))renderIntake();
+    if($('#scr-check').classList.contains('active')){buildChecklist();renderBanner();}
+    toast('Auto-read ✓ '+filled.join(', ')+
+      (d.warnings&&d.warnings.length?' · '+d.warnings.join(' · '):''),5000);
+  }catch(e){toast('Bridge not reachable — is bridge.py running?',3500);}
+}
+setInterval(pingBridge,15000);
+
+/* ================= public handlers ================= */
+window.FC={
+  nav:nav,
+  /* intake */
+  model(v){
+    if(v==='__custom'){session.custom=true;session.model='';}
+    else{session.custom=false;session.model=v;}
+    saveSession();renderIntake();
+  },
+  customName(v){session.customName=v;saveSession();},
+  customMint(v){session.mint=v;saveSession();updateProv();},
+  storageIdx(i){if(lastStors[i]!=null){session.storage=lastStors[i];saveSession();renderIntake();}},
+  field(k,v){session[k]=v;saveSession();},
+  startInspection(){
+    if(!session.model&&!(session.custom&&session.customName))toast('Tip: pick a model to get live pricing');
+    nav('check');
+  },
+  newPhone(){
+    const dirty=session.model||session.customName||session.imei||session.notes||session.color||
+      session.accessories||session.battery!==''||Object.keys(session.checks).length;
+    if(dirty&&!confirm('Clear the current intake and start a new phone?'))return;
+    session=blankSession();saveSession();renderIntake();toast('Fresh intake ready');
+  },
+  /* checklist */
+  tgl(id){
+    if(session.checks[id]==='done')delete session.checks[id];else session.checks[id]='done';
+    saveSession();buildChecklist();renderBanner();
+  },
+  seg(id,v){
+    if(session.checks[id]===v)delete session.checks[id];else session.checks[id]=v;
+    saveSession();buildChecklist();renderBanner();
+  },
+  cosm(c){session.cosmetic=c;saveSession();buildChecklist();renderBanner();},
+  batt(v,el){
+    if(v!==''){let n=parseFloat(v);
+      if(isNaN(n)){v='';}
+      else{n=Math.min(100,Math.max(0,n));v=String(n);}
+      if(el&&el.value!==v)el.value=v;}
+    session.battery=v;saveSession();renderBanner();
+  },
+  imei(v){session.imei=v;saveSession();},
+  notes(v){session.notes=v;saveSession();},
+  copyImei(){
+    const im=(session.imei||'').trim();
+    if(!im){toast('Type the IMEI first (*#06#)');return;}
+    copyText(im);
+  },
+  openCheck(url){
+    const im=(session.imei||'').trim();
+    if(im)copyText(im);
+    window.open(url,'_blank');
+  },
+  timerReset(){session.startedAt=Date.now();saveSession();},
+  save:saveEntry,
+  /* inventory */
+  filter(s){invFilter=s;renderInv();},
+  expand(id){expanded=(expanded===id)?null:id;renderInv();},
+  setStatus(id,v){
+    const e=inv.find(x=>x.id===id);if(!e)return;
+    e.status=v;(e.history=e.history||[]).push({ts:Date.now(),status:v});
+    saveInv();renderInv();toast('Status → '+v);
+  },
+  entryField(id,k,v){const e=inv.find(x=>x.id===id);if(!e)return;e[k]=v;saveInv();},
+  del(id){
+    const e=inv.find(x=>x.id===id);if(!e)return;
+    if(!confirm('Delete '+e.model+' '+(e.storage||'')+' from inventory? This can’t be undone.'))return;
+    inv=inv.filter(x=>x.id!==id);expanded=null;saveInv();renderInv();toast('Deleted');
+  },
+  exportCSV(){download('flipcheck-inventory.csv',buildCSV(),'text/csv');},
+  copyCSV(){copyText(buildCSV());},
+  importCSV(input){
+    const f=input.files&&input.files[0];if(!f)return;
+    const rd=new FileReader();
+    rd.onload=()=>{const n=importRows(parseCSV(String(rd.result)));renderInv();toast('Imported '+n+' entries');};
+    rd.readAsText(f);input.value='';
+  },
+  /* listings */
+  openListings:openListings,
+  copyListing(k){const e=inv.find(x=>x.id===curListing);if(e&&e.listings)copyText(e.listings[k]);},
+  listEdit(k,v){const e=inv.find(x=>x.id===curListing);if(e&&e.listings){e.listings[k]=v;saveInv();}},
+  regen(){
+    const e=inv.find(x=>x.id===curListing);if(!e)return;
+    if(!confirm('Regenerate all three drafts? Your edits will be overwritten.'))return;
+    e.listings=genListings(e);saveInv();openListings(e.id);
+  },
+  /* settings */
+  mUpd(i,k,v){if(settings.models[i]){settings.models[i][k]=k==='mint'?v:v;saveSettings();}},
+  mDel(i){settings.models.splice(i,1);saveSettings();renderSettings();},
+  mAdd(){settings.models.push({name:'',mint:0});saveSettings();renderSettings();},
+  gUpd(g,v){settings.gradeMult[g]=parseFloat(v)||0;saveSettings();},
+  cUpd(c,v){settings.cosmetic[c]=parseFloat(v)||0;saveSettings();},
+  bUpd(k,v){settings.battery[k]=parseFloat(v)||0;saveSettings();},
+  sUpd(k,v){settings[k]=parseFloat(v)||0;saveSettings();},
+  storUpd(v){
+    const list=v.split(',').map(x=>x.trim()).filter(Boolean);
+    if(list.length){settings.storages=list;saveSettings();toast('Storage options saved');}
+  },
+  backup(){
+    download('flipcheck-backup.json',JSON.stringify({settings:settings,inv:inv,exported:Date.now()},null,2),'application/json');
+  },
+  copyBackup(){copyText(JSON.stringify({settings:settings,inv:inv,exported:Date.now()}));},
+  restore(input){
+    const f=input.files&&input.files[0];if(!f)return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      try{
+        const d=JSON.parse(String(rd.result));
+        if(!d.settings||!Array.isArray(d.inv))throw new Error('bad file');
+        if(!confirm('Replace current settings + inventory ('+inv.length+' entries) with this backup ('+d.inv.length+' entries)?'))return;
+        settings=d.settings;inv=d.inv;saveSettings();saveInv();renderSettings();toast('Backup restored ✓');
+      }catch(e){toast('Not a valid FlipCheck backup file');}
+    };
+    rd.readAsText(f);input.value='';
+  },
+  clearAll(){
+    if(!confirm('Erase EVERYTHING — settings, inventory, current intake?'))return;
+    if(!confirm('Last chance. This deletes all FlipCheck data on this device.'))return;
+    ['fc_settings_v1','fc_inv_v1','fc_session_v1','fc_bridge_port'].forEach(k=>localStorage.removeItem(k));
+    location.reload();
+  },
+  autoRead:autoRead
+};
+
+/* ================= boot ================= */
+nav('intake');
+pingBridge();
+if('serviceWorker' in navigator &&
+   (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
