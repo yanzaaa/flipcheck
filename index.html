@@ -763,7 +763,7 @@ function nav(name){
     buildChecklist();renderBanner();
   }
   if(name==='inv')renderInv();
-  if(name==='settings')renderSettings();
+  if(name==='settings'){renderSettings();if(!bridgeUp)pingBridge();}
   showScreen(name);
 }
 
@@ -822,7 +822,10 @@ async function autoRead(){
       (d.warnings&&d.warnings.length?' · '+d.warnings.join(' · '):''),5000);
   }catch(e){toast('Bridge not reachable — is bridge.py running?',3500);}
 }
-setInterval(pingBridge,15000);
+/* on a hosted (https) origin some browsers block page→localhost fetches; ping once
+   at load + on Settings visits instead of spamming blocked retries every 15s */
+const IS_LOCAL=['localhost','127.0.0.1'].includes(location.hostname)||location.protocol==='file:';
+setInterval(()=>{if(IS_LOCAL||bridgeUp)pingBridge();},15000);
 
 /* ================= public handlers ================= */
 window.FC={
