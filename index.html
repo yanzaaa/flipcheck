@@ -17,8 +17,10 @@
 :root{--bg:#0b0f14;--card:#131b26;--card2:#0f1620;--line:#223042;--tx:#e8eef5;--dim:#8fa1b5;
 --green:#2ecc71;--red:#ff4d4f;--amber:#f5a623;--blue:#4aa3ff;--r:14px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
-font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+html,body{margin:0;padding:0;color:var(--tx);
+background:var(--bg) radial-gradient(1100px 700px at 50% -220px,#13202f 0%,var(--bg) 62%) no-repeat fixed;
+font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+-webkit-font-smoothing:antialiased}
 #topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;
 padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(11,15,20,.94);
 -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
@@ -29,7 +31,8 @@ padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(11,15,20
 main{padding:12px 14px calc(88px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
 .screen{display:none}.screen.active{display:block}
 h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:18px 2px 10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card{background:linear-gradient(180deg,#15202e 0%,var(--card) 100%);border:1px solid var(--line);
+border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
 label.f{display:block;font-size:13px;color:var(--dim);margin:10px 0 6px}
 input[type=text],input[type=number],select,textarea{width:100%;background:var(--card2);
 border:1px solid var(--line);border-radius:10px;color:var(--tx);font-size:17px;padding:12px;
@@ -37,30 +40,44 @@ font-family:inherit;-webkit-appearance:none;appearance:none}
 select{background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);
 background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
 textarea{min-height:70px}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,163,255,.16)}
 button{font-family:inherit;cursor:pointer}
-.btn{display:block;width:100%;padding:16px;border-radius:12px;border:0;font-size:18px;font-weight:700;
-background:var(--blue);color:#fff;margin-top:10px}
-.btn.green{background:var(--green);color:#06130b}
-.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--dim);font-weight:600;font-size:15px;padding:12px}
-.btn:active{transform:scale(.985)}
+.btn{display:block;width:100%;padding:16px;border-radius:13px;border:0;font-size:18px;font-weight:700;
+background:linear-gradient(180deg,#5cb0ff,#3a8ce6);color:#fff;margin-top:10px;
+box-shadow:0 6px 16px rgba(61,143,232,.28);transition:transform .12s,box-shadow .2s}
+.btn.green{background:linear-gradient(180deg,#41e08b,#1fb562);color:#06130b;box-shadow:0 6px 16px rgba(46,204,113,.28)}
+.btn.ghost{background:rgba(255,255,255,.02);border:1px solid var(--line);color:var(--dim);font-weight:600;
+font-size:15px;padding:12px;box-shadow:none}
+.btn:active{transform:scale(.97);box-shadow:none}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 button.chip,.chip{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card2);
 color:var(--dim);font-size:14px;font-weight:600}
-.chip.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.chip.sel{background:linear-gradient(180deg,#5cb0ff,#3a8ce6);border-color:var(--blue);color:#fff;
+box-shadow:0 3px 10px rgba(61,143,232,.3)}
 .banner{border-radius:var(--r);padding:16px;margin-bottom:10px;text-align:center;position:sticky;
-top:calc(env(safe-area-inset-top) + 54px);z-index:20;border:1px solid var(--line)}
+top:calc(env(safe-area-inset-top) + 54px);z-index:20;border:1px solid var(--line);
+transition:background .3s,border-color .3s,box-shadow .3s}
 .banner .btitle{font-size:26px;font-weight:800;letter-spacing:-.5px}
 .banner .bsub{font-size:14px;margin-top:4px;opacity:.92}
-.banner.bad{background:#3a1114;border-color:var(--red);color:#ffb3b5}
-.banner.good{background:#0e2a1a;border-color:var(--green);color:#b9f4d0}
-.banner.ok{background:#122234;border-color:var(--blue);color:#cfe6ff}
-.banner.warn{background:#332508;border-color:var(--amber);color:#ffe1a6}
+.banner.bad{background:linear-gradient(180deg,#48151a,#330e12);border-color:var(--red);color:#ffb3b5;
+box-shadow:0 0 24px rgba(255,77,79,.25)}
+.banner.good{background:linear-gradient(180deg,#123524,#0c2517);border-color:var(--green);color:#b9f4d0;
+box-shadow:0 0 24px rgba(46,204,113,.22)}
+.banner.ok{background:linear-gradient(180deg,#16293f,#101f30);border-color:var(--blue);color:#cfe6ff;
+box-shadow:0 0 20px rgba(74,163,255,.16)}
+.banner.warn{background:linear-gradient(180deg,#3d2c0a,#2c2007);border-color:var(--amber);color:#ffe1a6;
+box-shadow:0 0 20px rgba(245,166,35,.18)}
 .banner.idle{background:var(--card);color:var(--dim)}
+#prog{height:4px;border-radius:99px;background:#1a2635;margin:0 2px 10px;overflow:hidden}
+#prog i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--green));
+transition:width .3s ease}
+#sigpad{width:100%;height:120px;background:var(--card2);border:1px solid var(--line);border-radius:10px;
+touch-action:none;display:block}
 #timerrow{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:14px;margin:2px 2px 10px}
 #timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tx);font-size:18px}
 #timer.over{color:var(--amber)}
-.item{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;
+margin-bottom:8px;transition:border-color .2s,background .2s}
 .item .lab{font-size:16px;font-weight:600}
 .item .help{font-size:12.5px;color:var(--dim);margin-top:3px}
 .item.done{border-color:var(--green);background:#0d2013}
@@ -101,7 +118,8 @@ color:var(--dim);font-size:13.5px;font-weight:700}
 padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
 #tabbar button{flex:1;background:none;border:0;color:var(--dim);font-size:11px;padding:6px 2px;border-radius:10px}
 #tabbar button .ico{display:block;font-size:22px;margin-bottom:2px}
-#tabbar button.sel{color:#fff;background:#1b2836}
+#tabbar button.sel{color:#fff;background:linear-gradient(180deg,#22344a,#1b2836);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.seg button{transition:background .15s,border-color .15s,color .15s}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
 bottom:calc(96px + env(safe-area-inset-bottom));background:#1e2b3b;border:1px solid var(--line);
 padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;
@@ -167,6 +185,7 @@ z-index:99;max-width:88vw;text-align:center}
     <button class="chip" onclick="FC.comps('ebay')" title="eBay sold comps">📊</button>
     <button class="chip bridgebtn hidden" onclick="FC.autoRead()">🔌</button>
   </div>
+  <div id="prog"><i></i></div>
   <div class="card gradecard" id="gradecard"></div>
   <div id="checklist"></div>
 </section>
@@ -175,6 +194,7 @@ z-index:99;max-width:88vw;text-align:center}
 <section id="scr-inv" class="screen">
   <h2 style="margin-top:8px">Inventory</h2>
   <div class="totals" id="totals"></div>
+  <div id="fitcard"></div>
   <div class="chips" id="invfilters" style="margin-bottom:10px"></div>
   <div id="invlist"></div>
   <div class="row2" style="margin-top:12px">
@@ -192,10 +212,46 @@ z-index:99;max-width:88vw;text-align:center}
   <div id="listbody"></div>
 </section>
 
+<!-- ============ BILL OF SALE ============ -->
+<section id="scr-bos" class="screen">
+  <button class="chip" style="margin-top:8px" onclick="FC.nav('inv')">← Inventory</button>
+  <div class="card" id="boshead" style="margin-top:10px"></div>
+  <div class="card">
+    <div class="row2">
+      <div><label class="f">Buyer (you)</label><input id="bos-buyer" type="text" oninput="FC.bosField('buyer',this.value)"></div>
+      <div><label class="f">Seller name</label><input id="bos-seller" type="text" placeholder="from their ID" oninput="FC.bosField('seller',this.value)"></div>
+    </div>
+    <div class="row2">
+      <div><label class="f">Price paid $</label><input id="bos-price" type="number" inputmode="numeric" oninput="FC.bosField('price',this.value)"></div>
+      <div><label class="f">Location</label><input id="bos-loc" type="text" placeholder="city / spot" oninput="FC.bosField('loc',this.value)"></div>
+    </div>
+    <label class="f">Seller signature (finger-sign below)</label>
+    <canvas id="sigpad" width="640" height="200"></canvas>
+    <div class="row2" style="margin-top:10px">
+      <button class="btn ghost" style="margin:0" onclick="FC.sigClear()">✕ Clear</button>
+      <button class="btn green" style="margin:0" onclick="FC.bosPNG()">🧾 Generate PNG</button>
+    </div>
+    <div style="font-size:12px;color:var(--dim);margin-top:8px">Generates a signed receipt image — share it to yourself and the seller. Simple protection that most flippers skip.</div>
+  </div>
+</section>
+
 <!-- ============ SETTINGS ============ -->
 <section id="scr-settings" class="screen">
-  <h2 style="margin-top:8px">Pricing table — mint market value</h2>
+  <h2 style="margin-top:8px">Pricing table — mint market value (128GB base)</h2>
+  <div class="card">
+    <div id="syncstatus" style="font-size:13px;color:var(--dim);margin-bottom:10px"></div>
+    <div class="row2">
+      <button class="btn ghost" style="margin:0" onclick="FC.togglePriceSync()" id="syncbtn">…</button>
+      <button class="btn ghost" style="margin:0" onclick="FC.syncNow()">↻ Check now</button>
+    </div>
+  </div>
   <div class="card" id="set-models"></div>
+  <h2>Storage &amp; carrier adjustments</h2>
+  <div class="card">
+    <div class="grid2" id="set-storadj"></div>
+    <label class="f">Carrier-locked discount (% off mint when not Unlocked)</label>
+    <input id="set-carrier" type="number" inputmode="numeric" oninput="FC.sUpd('carrierLockPct',this.value)">
+  </div>
   <h2>Grade engine</h2>
   <div class="card">
     <div class="grid2" id="set-grades"></div>
@@ -225,7 +281,7 @@ z-index:99;max-width:88vw;text-align:center}
   </div>
   <h2>Auto-read bridge</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.1.0</div>
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.2.0</div>
 </section>
 
 </main>
@@ -266,15 +322,22 @@ function download(name,content,type){
 
 /* ================= settings ================= */
 const DEF_SETTINGS={
+  /* mint = clean grade-A sale value at the BASE storage (128GB); anchored to
+     Swappa market data July 2026 — auto-refreshed from prices.json when online */
   models:[
-    {name:'iPhone 11',mint:110},{name:'iPhone 12',mint:150},{name:'iPhone 12 Pro',mint:210},
-    {name:'iPhone 13',mint:230},{name:'iPhone 13 Pro',mint:300},{name:'iPhone 14',mint:260},
-    {name:'iPhone 14 Plus',mint:300},{name:'iPhone 14 Pro',mint:380},{name:'iPhone 14 Pro Max',mint:450},
-    {name:'iPhone 15',mint:400},{name:'iPhone 15 Pro',mint:520},{name:'iPhone 15 Pro Max',mint:620},
-    {name:'iPhone 16',mint:530},{name:'iPhone 16 Pro',mint:680},
-    {name:'Galaxy S23',mint:220},{name:'Galaxy S24',mint:330}
+    {name:'iPhone 11',mint:105},{name:'iPhone 12',mint:150},{name:'iPhone 12 Pro',mint:200},
+    {name:'iPhone 13',mint:230},{name:'iPhone 13 Pro',mint:300},{name:'iPhone 13 Pro Max',mint:330},
+    {name:'iPhone 14',mint:260},{name:'iPhone 14 Plus',mint:290},{name:'iPhone 14 Pro',mint:380},
+    {name:'iPhone 14 Pro Max',mint:420},{name:'iPhone 15',mint:360},{name:'iPhone 15 Plus',mint:390},
+    {name:'iPhone 15 Pro',mint:490},{name:'iPhone 15 Pro Max',mint:570},
+    {name:'iPhone 16',mint:520},{name:'iPhone 16 Pro',mint:650},
+    {name:'Galaxy S23',mint:200},{name:'Galaxy S24',mint:300}
   ],
   storages:['64GB','128GB','256GB','512GB','1TB'],
+  /* $ vs the 128GB base — deltas anchored to real Swappa per-storage averages */
+  storageAdj:{'64GB':-25,'128GB':0,'256GB':30,'512GB':55,'1TB':85},
+  carrierLockPct:12,          /* % off mint when not Unlocked */
+  priceSync:true,             /* pull prices.json from the host ~daily when online */
   gradeMult:{A:95,B:85,C:70,D:55},
   margin:62,
   cosmetic:{'Like New':0,'Light Wear':5,'Moderate Wear':12,'Heavy Wear':20,'Cracked':35},
@@ -338,8 +401,24 @@ function mintOf(sn){
   const m=settings.models.find(x=>x.name===sn.model);
   return m?(parseFloat(m.mint)||0):0;
 }
+/* model base + storage delta + carrier-lock cut = the mint the engine prices from */
+function effectiveMint(sn){
+  let m=mintOf(sn);
+  if(!m)return {mint:0,parts:[]};
+  const parts=['base '+money(m)];
+  const adj=parseFloat((settings.storageAdj||{})[sn.storage]);
+  if(!isNaN(adj)&&adj!==0){m+=adj;parts.push((adj>0?'+':'−')+'$'+Math.abs(adj)+' '+sn.storage);}
+  const lpRaw=parseFloat(settings.carrierLockPct);
+  const lp=isNaN(lpRaw)?0:lpRaw;
+  if(sn.carrier&&sn.carrier!=='Unlocked'&&lp>0){
+    const cut=Math.round(m*lp/100);m-=cut;parts.push('−$'+cut+' carrier-locked');
+  }
+  return {mint:Math.max(0,Math.round(m)),parts:parts};
+}
 function computeGrade(sn){
-  const r={score:100,letter:'D',hard:[],fails:0,deducts:[],manual:false,list:0,buy:0,mint:mintOf(sn),mult:0};
+  const em=effectiveMint(sn);
+  const r={score:100,letter:'D',hard:[],fails:0,deducts:[],manual:false,list:0,buy:0,
+    mint:em.mint,mintParts:em.parts,mult:0};
   const b=parseFloat(sn.battery);
   if(!isNaN(b)){
     if(b>=90){/* no deduction */}
@@ -389,7 +468,9 @@ function coreChecksDone(sn){
 /* ================= banner + grade card ================= */
 function renderBanner(){
   const g=computeGrade(session);const el=$('#banner');if(!el)return;
-  const prog=progressCount()+'/'+CHECKLIST.length+' checked';
+  const done=progressCount();
+  const prog=done+'/'+CHECKLIST.length+' checked';
+  const bar=$('#prog i');if(bar)bar.style.width=Math.round(100*done/CHECKLIST.length)+'%';
   if(g.hard.length){
     el.className='banner bad';
     el.innerHTML='<div class="btitle">🚫 DO NOT BUY</div><div class="bsub">'+g.hard.map(esc).join(' · ')+'</div>';
@@ -413,6 +494,7 @@ function renderGradeCard(g){
   if(!g.mint){gc.innerHTML='<div class="help" style="color:var(--dim);font-size:14px">No model / mint value set yet.</div>';return;}
   gc.innerHTML=
     '<div class="l"><span>Mint market value</span><b>'+money(g.mint)+'</b></div>'+
+    (g.mintParts&&g.mintParts.length>1?'<div style="font-size:12px;color:var(--dim);margin:-2px 0 4px">'+g.mintParts.map(esc).join(' · ')+'</div>':'')+
     '<div class="l"><span>Grade '+g.letter+' multiplier</span><b>×'+Math.round(g.mult*100)+'%</b></div>'+
     (g.flatDed?'<div class="l"><span>Flat deductions</span><b style="color:var(--amber)">−$'+g.flatDed+'</b></div>':'')+
     '<div class="l"><span>SUGGESTED LIST PRICE</span><b style="color:var(--blue)">'+money(g.list)+'</b></div>'+
@@ -516,16 +598,18 @@ function renderIntake(){
   updateProv();
 }
 function updateProv(){
-  const mint=mintOf(session);const el=$('#provcard');if(!el)return;
-  if(!mint){
+  const em=effectiveMint(session);const el=$('#provcard');if(!el)return;
+  if(!em.mint){
     el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div><div class="big" style="color:var(--dim)">—</div>'+
     '<div style="font-size:13px;color:var(--dim)">Pick a model (or enter a custom mint value)</div>';return;
   }
-  const list=round5(mint*((parseFloat(settings.gradeMult.B)||85)/100));
+  const list=round5(em.mint*((parseFloat(settings.gradeMult.B)||85)/100));
   const buy=round5(list*((parseFloat(settings.margin)||62)/100));
   el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div>'+
     '<div class="big" style="color:var(--green)">'+money(buy)+'</div>'+
-    '<div style="font-size:13px;color:var(--dim)">Assumes Grade B mid · Mint '+money(mint)+' · List ~'+money(list)+'<br>Goes live &amp; grade-adjusted as you run the checklist ▸</div>';
+    '<div style="font-size:13px;color:var(--dim)">Assumes Grade B mid · Mint '+money(em.mint)+
+    (em.parts.length>1?' ('+em.parts.map(esc).join(' · ')+')':'')+
+    ' · List ~'+money(list)+'<br>Goes live &amp; grade-adjusted as you run the checklist ▸</div>';
 }
 
 /* ================= save to inventory ================= */
@@ -610,8 +694,16 @@ function genListings(e){
   return {fb:fb,ou:ou,sw:sw,eb:eb};
 }
 let curListing=null;
+let photoFiles=[];   /* session-only: ride along with Share, never stored (quota + privacy) */
+function photoThumbs(){
+  return photoFiles.length?photoFiles.map((f,i)=>
+    '<img src="'+URL.createObjectURL(f)+'" onclick="FC.photoDel('+i+')" alt="photo" '+
+    'style="width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">'
+  ).join(''):'<span style="color:var(--dim);font-size:13px">none yet — tap ＋ Add</span>';
+}
 function openListings(id){
   const e=inv.find(x=>x.id===id);if(!e){toast('Entry not found');return;}
+  if(curListing!==id)photoFiles=[];
   curListing=id;
   if(!e.listings)e.listings=genListings(e);
   else if(!e.listings.eb)e.listings.eb=genListings(e).eb; /* entries saved before v1.1 */
@@ -620,7 +712,14 @@ function openListings(id){
     '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Edit freely below, then copy per platform. Photos are the only manual step left.</div>';
   const L=e.listings;
   const canShare=typeof navigator.share==='function';
-  $('#listbody').innerHTML=[['fb','Facebook Marketplace'],['ou','OfferUp / Craigslist'],['sw','Swappa'],['eb','eBay']].map(p=>
+  const photosCard='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">'+
+    '<b>📷 Photos ('+photoFiles.length+')</b>'+
+    '<button class="chip" onclick="document.getElementById(\'photoin\').click()">＋ Add</button></div>'+
+    '<div class="chips" style="margin-top:10px">'+photoThumbs()+'</div>'+
+    '<div style="font-size:12px;color:var(--dim);margin-top:8px">Shots: front · back · screen-on · ports · any wear. '+
+    'Photos ride along when you tap 📤 Share (tap a thumbnail to remove; not stored in the app).</div>'+
+    '<input id="photoin" type="file" accept="image/*" multiple class="hidden" onchange="FC.photosPicked(this)"></div>';
+  $('#listbody').innerHTML=photosCard+[['fb','Facebook Marketplace'],['ou','OfferUp / Craigslist'],['sw','Swappa'],['eb','eBay']].map(p=>
     '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px">'+
     '<b>'+p[1]+'</b><span style="display:flex;gap:6px">'+
     (canShare?'<button class="chip" onclick="FC.shareListing(\''+p[0]+'\')">📤 Share</button>':'')+
@@ -629,6 +728,79 @@ function openListings(id){
   ).join('')+
   '<button class="btn ghost" onclick="FC.regen()">↻ Regenerate drafts (overwrites edits)</button>';
   showScreen('listings');
+}
+
+/* ================= bill of sale ================= */
+let bos={entry:null,buyer:load('fc_myname',''),seller:'',price:'',loc:''};
+function openBoS(id){
+  const e=inv.find(x=>x.id===id);if(!e){toast('Entry not found');return;}
+  bos.entry=id;bos.seller='';bos.price=e.paid||e.buyPrice||'';bos.loc='';
+  $('#boshead').innerHTML='<b>'+esc(e.model)+' '+esc(e.storage||'')+'</b> · IMEI …'+esc(e.imeiLast4||'—')+
+    ' · '+new Date().toLocaleDateString()+
+    '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Fill in, have the seller sign, generate — done before the cash leaves your hand.</div>';
+  $('#bos-buyer').value=bos.buyer;$('#bos-seller').value='';
+  $('#bos-price').value=bos.price;$('#bos-loc').value='';
+  sigClear();
+  showScreen('bos');
+}
+function sigClear(){
+  const c=$('#sigpad');if(!c)return;
+  const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
+}
+(function initSig(){
+  const c=$('#sigpad');if(!c)return;
+  const x=c.getContext('2d');x.lineWidth=3;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#e8eef5';
+  let down=false;
+  const pos=ev=>{const r=c.getBoundingClientRect();
+    return [(ev.clientX-r.left)*c.width/r.width,(ev.clientY-r.top)*c.height/r.height];};
+  c.addEventListener('pointerdown',ev=>{down=true;const p=pos(ev);x.beginPath();x.moveTo(p[0],p[1]);
+    try{c.setPointerCapture(ev.pointerId);}catch(e){}ev.preventDefault();});
+  c.addEventListener('pointermove',ev=>{if(!down)return;const p=pos(ev);x.lineTo(p[0],p[1]);x.stroke();ev.preventDefault();});
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>c.addEventListener(t,()=>{down=false;}));
+})();
+function bosPNG(){
+  const e=inv.find(x=>x.id===bos.entry);if(!e){toast('Open it from an inventory entry');return;}
+  const c=document.createElement('canvas');c.width=1000;c.height=1320;
+  const x=c.getContext('2d');
+  x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);
+  x.fillStyle='#111111';x.font='bold 42px Helvetica,Arial';
+  x.fillText('BILL OF SALE — USED MOBILE PHONE',60,95);
+  x.font='26px Helvetica,Arial';
+  const lines=[
+    'Date: '+new Date().toLocaleString(),
+    'Device: '+e.model+' '+(e.storage||'')+(e.color?' — '+e.color:''),
+    'IMEI (last 4): …'+(e.imeiLast4||'—')+'     Serial: '+((e.meta&&e.meta.serial)||'—'),
+    'Sale price: $'+(bos.price||0)+'     Location: '+(bos.loc||'—'),
+    '',
+    'Seller: '+(bos.seller||'_____________________________'),
+    'Buyer:  '+(bos.buyer||'_____________________________'),
+    '',
+    'The seller affirms that they are the lawful owner of the device described',
+    'above; that it is not stolen, lost, financed, leased, or subject to any',
+    'lien or carrier payment plan; and that all accounts (including iCloud /',
+    'Find My / Google) have been removed. Sold as-is following joint',
+    'inspection. Payment received in full.'
+  ];
+  let yy=175;lines.forEach(t=>{x.fillText(t,60,yy);yy+=42;});
+  yy+=30;x.fillText('Seller signature:',60,yy);
+  const sig=$('#sigpad');
+  x.strokeStyle='#bbbbbb';x.strokeRect(60,yy+20,640,200);
+  x.drawImage(sig,60,yy+20,640,200);
+  /* signature was drawn light-on-dark; invert region to read on white */
+  const img=x.getImageData(60,yy+20,640,200);const px=img.data;
+  for(let i=0;i<px.length;i+=4){if(px[i+3]>0){px[i]=17;px[i+1]=17;px[i+2]=17;}}
+  x.putImageData(img,60,yy+20);
+  c.toBlob(async b=>{
+    if(!b){toast('Could not render');return;}
+    const fname='bill-of-sale-'+(e.model||'phone').replace(/\s+/g,'-').toLowerCase()+'.png';
+    const file=new File([b],fname,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],text:'Bill of sale — '+e.model});return;}catch(err){}
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
+  },'image/png');
 }
 
 /* ================= inventory ================= */
@@ -649,6 +821,29 @@ function renderInv(){
     '<div class="tot"><div class="v">'+money(realized)+'</div><div class="k">Realized</div></div>'+
     '<div class="tot"><div class="v">'+inflight+'</div><div class="k">In flight</div></div>'+
     '<div class="tot"><div class="v" style="color:'+(profit>=0?'var(--green)':'var(--red)')+'">'+money(profit)+'</div><div class="k">Profit·sold</div></div>';
+  /* what-actually-sells insight: avg sale ÷ list per model */
+  const fitEl=$('#fitcard');
+  if(fitEl){
+    const byModel={};
+    inv.forEach(e=>{
+      if(e.status!=='sold')return;
+      const sp=parseFloat(e.salePrice),lp=parseFloat(e.listPrice);
+      if(sp>0&&lp>0)(byModel[e.model]=byModel[e.model]||[]).push(sp/lp);
+    });
+    const rows=Object.keys(byModel).map(m=>{
+      const arr=byModel[m];const r=arr.reduce((a,b)=>a+b,0)/arr.length;
+      return {m:m,n:arr.length,r:r};
+    });
+    if(rows.length){
+      const overall=rows.reduce((a,x)=>a+x.r*x.n,0)/rows.reduce((a,x)=>a+x.n,0);
+      fitEl.innerHTML='<div class="card" style="padding:12px 14px"><b style="font-size:14px">📈 Your market fit</b>'+
+        rows.map(x=>'<div style="font-size:13px;color:var(--dim);margin-top:4px">'+esc(x.m)+
+          ' — sells at <b style="color:var(--tx)">'+Math.round(x.r*100)+'%</b> of your list (n='+x.n+')</div>').join('')+
+        (overall<0.9?'<div style="font-size:12.5px;color:var(--amber);margin-top:6px">Selling ~'+Math.round((1-overall)*100)+'% under list — consider trimming list prices or margin in Settings.</div>':
+         overall>1.0?'<div style="font-size:12.5px;color:var(--green);margin-top:6px">Selling above list — you can price more aggressively.</div>':'')+
+        '</div>';
+    } else fitEl.innerHTML='';
+  }
   $('#invfilters').innerHTML=['all'].concat(STATUSES).map(s=>
     '<button class="chip'+(invFilter===s?' sel':'')+'" onclick="FC.filter(\''+s+'\')">'+s+'</button>').join('');
   const list=inv.filter(e=>invFilter==='all'||e.status===invFilter);
@@ -683,7 +878,8 @@ function editorHTML(e){
     '<label class="f">Notes</label><textarea oninput="FC.entryField(\''+e.id+'\',\'notes\',this.value)">'+esc(e.notes||'')+'</textarea>'+
     '<div class="row2" style="margin-top:10px">'+
     '<button class="btn ghost" style="margin:0" onclick="FC.openListings(\''+e.id+'\')">📝 Listings</button>'+
-    '<button class="btn ghost" style="margin:0;color:var(--red);border-color:#5c2326" onclick="FC.del(\''+e.id+'\')">🗑 Delete</button>'+
+    '<button class="btn ghost" style="margin:0" onclick="FC.openBoS(\''+e.id+'\')">🧾 Bill of Sale</button>'+
+    '<button class="btn ghost" style="margin:0;color:var(--red);border-color:#5c2326" onclick="FC.del(\''+e.id+'\')">🗑</button>'+
     '</div></div>';
 }
 
@@ -761,8 +957,23 @@ function renderSettings(){
     '<div><label class="f">'+p[1]+' (−pts)</label>'+
     '<input type="number" inputmode="numeric" value="'+esc(s.battery[p[0]])+'" oninput="FC.bUpd(\''+p[0]+'\',this.value)"></div>'
   ).join('');
+  $('#set-storadj').innerHTML=s.storages.map((st,i)=>
+    '<div><label class="f">'+esc(st)+' (±$ vs base)</label>'+
+    '<input type="number" inputmode="numeric" value="'+esc((s.storageAdj||{})[st]??0)+'" oninput="FC.saUpd('+i+',this.value)"></div>'
+  ).join('');
+  $('#set-carrier').value=s.carrierLockPct??12;
   $('#set-storages').value=s.storages.join(', ');
+  renderSyncStatus();
   updateBridgeStatus();
+}
+function renderSyncStatus(){
+  const el=$('#syncstatus');if(!el)return;
+  el.innerHTML=settings.priceSync?
+    'Market-price sync <b style="color:var(--green)">ON</b> — checks the host\'s prices.json about once a day when online'+
+    (settings.pricesApplied?'; last applied: <b style="color:var(--tx)">'+esc(settings.pricesApplied)+'</b>':'; nothing applied yet')+
+    '. Your manual edits below hold until the file\'s date changes.':
+    'Market-price sync <b style="color:var(--amber)">OFF</b> — the table below is fully manual.';
+  const b=$('#syncbtn');if(b)b.textContent=settings.priceSync?'⏸ Turn sync off':'▶ Turn sync on';
 }
 function updateBridgeStatus(){
   const el=$('#bridgestatus');if(!el)return;
@@ -854,6 +1065,34 @@ async function autoRead(){
 const IS_LOCAL=['localhost','127.0.0.1'].includes(location.hostname)||location.protocol==='file:';
 setInterval(()=>{if(IS_LOCAL||bridgeUp)pingBridge();},15000);
 
+/* ============ daily market-price sync (prices.json on the host) ============ */
+async function syncPrices(force){
+  if(!settings.priceSync&&!force)return;
+  if(location.protocol==='file:'){if(force)toast('Price sync needs the hosted/served version');return;}
+  const last=load('fc_price_sync_ts',0);
+  if(!force&&Date.now()-last<20*3600*1000)return;   /* ~once a day */
+  try{
+    const r=await fetch('prices.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok){if(force)toast('No prices.json on this host');return;}
+    const d=await r.json();
+    store('fc_price_sync_ts',Date.now());
+    if(!d||!d.updated||!Array.isArray(d.models))return;
+    if(d.updated===settings.pricesApplied){if(force)toast('Prices already current ('+d.updated+')');renderSyncStatus();return;}
+    d.models.forEach(pm=>{
+      if(!pm||!pm.name)return;
+      const m=settings.models.find(x=>x.name===pm.name);
+      if(m)m.mint=pm.mint;else settings.models.push({name:pm.name,mint:pm.mint});
+    });
+    if(d.storageAdj)settings.storageAdj=Object.assign({},settings.storageAdj,d.storageAdj);
+    settings.pricesApplied=d.updated;
+    saveSettings();
+    toast('📈 Pricing updated from market file ('+d.updated+')',3500);
+    if($('#scr-intake').classList.contains('active'))renderIntake();
+    if($('#scr-settings').classList.contains('active'))renderSettings();
+    renderBanner();
+  }catch(e){if(force)toast('Price sync failed — offline?');}
+}
+
 /* ================= public handlers ================= */
 window.FC={
   nav:nav,
@@ -866,7 +1105,7 @@ window.FC={
   customName(v){session.customName=v;saveSession();},
   customMint(v){session.mint=v;saveSession();updateProv();},
   storageIdx(i){if(lastStors[i]!=null){session.storage=lastStors[i];saveSession();renderIntake();}},
-  field(k,v){session[k]=v;saveSession();},
+  field(k,v){session[k]=v;saveSession();if(k==='carrier'){updateProv();renderBanner();}},
   startInspection(){
     if(!session.model&&!(session.custom&&session.customName))toast('Tip: pick a model to get live pricing');
     nav('check');
@@ -942,8 +1181,17 @@ window.FC={
   copyListing(k){const e=inv.find(x=>x.id===curListing);if(e&&e.listings)copyText(e.listings[k]);},
   shareListing(k){
     const e=inv.find(x=>x.id===curListing);
-    if(e&&e.listings&&navigator.share)navigator.share({text:e.listings[k]}).catch(()=>{});
+    if(!e||!e.listings||!navigator.share)return;
+    const data={text:e.listings[k]};
+    if(photoFiles.length&&navigator.canShare&&navigator.canShare({files:photoFiles}))data.files=photoFiles;
+    navigator.share(data).catch(()=>{});
   },
+  photosPicked(input){
+    const fs=Array.from(input.files||[]);
+    if(fs.length){photoFiles=photoFiles.concat(fs);openListings(curListing);}
+    input.value='';
+  },
+  photoDel(i){photoFiles.splice(i,1);openListings(curListing);},
   listEdit(k,v){const e=inv.find(x=>x.id===curListing);if(e&&e.listings){e.listings[k]=v;saveInv();}},
   regen(){
     const e=inv.find(x=>x.id===curListing);if(!e)return;
@@ -955,6 +1203,13 @@ window.FC={
   mDel(i){settings.models.splice(i,1);saveSettings();renderSettings();},
   mAdd(){settings.models.push({name:'',mint:0});saveSettings();renderSettings();},
   gUpd(g,v){settings.gradeMult[g]=parseFloat(v)||0;saveSettings();},
+  saUpd(i,v){
+    const st=settings.storages[i];if(st==null)return;
+    settings.storageAdj=settings.storageAdj||{};
+    settings.storageAdj[st]=parseFloat(v)||0;saveSettings();
+  },
+  togglePriceSync(){settings.priceSync=!settings.priceSync;saveSettings();renderSyncStatus();},
+  syncNow(){syncPrices(true);},
   cUpd(c,v){settings.cosmetic[c]=parseFloat(v)||0;saveSettings();},
   bUpd(k,v){settings.battery[k]=parseFloat(v)||0;saveSettings();},
   sUpd(k,v){settings[k]=parseFloat(v)||0;saveSettings();},
@@ -982,15 +1237,20 @@ window.FC={
   clearAll(){
     if(!confirm('Erase EVERYTHING — settings, inventory, current intake?'))return;
     if(!confirm('Last chance. This deletes all FlipCheck data on this device.'))return;
-    ['fc_settings_v1','fc_inv_v1','fc_session_v1','fc_bridge_port'].forEach(k=>localStorage.removeItem(k));
+    ['fc_settings_v1','fc_inv_v1','fc_session_v1','fc_bridge_port','fc_price_sync_ts','fc_myname'].forEach(k=>localStorage.removeItem(k));
     location.reload();
   },
+  openBoS:openBoS,
+  bosField(k,v){bos[k]=v;if(k==='buyer')store('fc_myname',v);},
+  sigClear:sigClear,
+  bosPNG:bosPNG,
   autoRead:autoRead
 };
 
 /* ================= boot ================= */
 nav('intake');
 pingBridge();
+syncPrices();
 if('serviceWorker' in navigator &&
    (location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
