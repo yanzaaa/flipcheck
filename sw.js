@@ -1,6 +1,6 @@
 /* FlipCheck service worker — cache-first so the app works fully offline
    after the first load. Bump VERSION whenever index.html changes. */
-const VERSION = 'flipcheck-v3';
+const VERSION = 'flipcheck-v4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
