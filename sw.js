@@ -1,7 +1,7 @@
 /* FlipCheck service worker — cache-first so the app works fully offline
    after the first load. Bump VERSION whenever index.html changes.
    prices.json is network-first so daily market prices actually refresh. */
-const VERSION = 'flipcheck-v9';
+const VERSION = 'flipcheck-v10';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './prices.json'];
 
 self.addEventListener('install', e => {
