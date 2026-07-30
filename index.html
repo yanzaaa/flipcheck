@@ -24,8 +24,7 @@ font:17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Aria
 #topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;
 padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(11,15,20,.94);
 -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-#topbar h1{font-size:19px;margin:0;letter-spacing:.3px}
-#topbar .zap{color:var(--green)}
+#topbar h1{font-size:19px;margin:0;letter-spacing:.2px;display:flex;align-items:center;gap:9px;font-weight:800}
 #bridgedot{width:10px;height:10px;border-radius:50%;background:#3a4a5e;margin-left:auto}
 #bridgedot.on{background:var(--green);animation:dotpulse 2.2s ease-in-out infinite}
 @keyframes dotpulse{0%,100%{box-shadow:0 0 5px var(--green)}50%{box-shadow:0 0 14px var(--green)}}
@@ -144,7 +143,7 @@ z-index:99;max-width:88vw;text-align:center}
 <body>
 
 <header id="topbar">
-  <h1>FlipCheck <span class="zap">⚡</span></h1>
+  <h1><svg width="26" height="26" viewBox="0 0 24 24" style="border-radius:8px;background:linear-gradient(135deg,#2ecc71 0%,#4aa3ff 100%);padding:4px;flex:0 0 auto" fill="#071018"><path d="M13 2 4.5 13.5h5L10 22l8.5-11.5h-5z"/></svg><span id="brandname">FlipCheck</span></h1>
   <div id="bridgedot" title="Auto-read bridge"></div>
 </header>
 
@@ -256,22 +255,51 @@ z-index:99;max-width:88vw;text-align:center}
     <button class="btn" onclick="FC.syncNow()">↻ Sync prices now</button>
     <button class="btn ghost" onclick="FC.togglePriceSync()" id="syncbtn">…</button>
   </div>
-  <h2>Phone values — what a clean one sells for</h2>
-  <div class="card" id="set-models"></div>
   <h2>Your data</h2>
   <div class="card">
     <button class="btn" onclick="FC.exportCSV()">⬇ Download my flip log (CSV)</button>
-    <button class="btn ghost" onclick="FC.backup()">Full backup (settings + log)</button>
-    <button class="btn ghost" onclick="FC.copyBackup()">Copy backup as text (iOS-safe)</button>
-    <button class="btn ghost" onclick="document.getElementById('restorefile').click()">Restore a backup</button>
+    <div class="row2" style="margin-top:10px">
+      <button class="btn ghost" style="margin:0" onclick="FC.backup()">Backup</button>
+      <button class="btn ghost" style="margin:0" onclick="FC.copyBackup()">Copy backup</button>
+      <button class="btn ghost" style="margin:0" onclick="FC.pasteRestore()">Paste backup</button>
+    </div>
+    <div class="row2" style="margin-top:8px">
+      <button class="btn ghost" style="margin:0" onclick="document.getElementById('restorefile').click()">Restore file</button>
+      <button class="btn ghost" style="margin:0;color:var(--red);border-color:#5c2326" onclick="FC.clearAll()">Erase all</button>
+    </div>
     <input id="restorefile" type="file" accept=".json,application/json" class="hidden" onchange="FC.restore(this)">
-    <button class="btn ghost" style="color:var(--red);border-color:#5c2326" onclick="FC.clearAll()">Erase everything</button>
+    <div style="font-size:12px;color:var(--dim);margin-top:8px">Move to a new device: Copy backup there → Paste backup here. Everything stays on your devices.</div>
   </div>
+  <details class="adv"><summary>Phone values — what a clean one sells for</summary>
+    <div class="card" id="set-models"></div>
+  </details>
+  <details class="adv"><summary>Connections — eBay drafts &amp; AI wear check (optional)</summary>
+    <div class="card">
+      <label class="f">eBay token (Sell API user token from developer.ebay.com)</label>
+      <input id="set-ebay" type="text" placeholder="v^1.1#i^1#…" oninput="FC.ebayTok(this.value)">
+      <div style="font-size:12px;color:var(--dim);margin:4px 0 8px">Adds a "Draft on eBay" button to listings — creates the draft, you add photos in the eBay app. Goes through the USB bridge.</div>
+      <label class="f">Anthropic API key (console.anthropic.com)</label>
+      <input id="set-aikey" type="text" placeholder="sk-ant-…" oninput="FC.aiKey(this.value)">
+      <div style="font-size:12px;color:var(--dim);margin-top:4px">Adds "📸 AI wear check" to the checklist — photos in, suggested cosmetic grade out. Keys never leave this device.</div>
+    </div>
+  </details>
+  <details class="adv"><summary>Branding — put your own name on it</summary>
+    <div class="card">
+      <div class="row2">
+        <div><label class="f">App name</label>
+          <input id="set-brand" type="text" oninput="FC.brandName(this.value)"></div>
+        <div style="flex:0 0 110px"><label class="f">Accent</label>
+          <input id="set-accent" type="color" style="height:49px;padding:6px" oninput="FC.brandAccent(this.value)"></div>
+      </div>
+    </div>
+  </details>
   <details class="adv"><summary>Advanced tuning — optional, the defaults are already market-tuned</summary>
   <h2>Storage &amp; carrier adjustments</h2>
   <div class="card">
     <div class="grid2" id="set-storadj"></div>
-    <label class="f">Carrier-locked discount (% off mint when not Unlocked)</label>
+    <label class="f">Per-carrier discount (% off mint)</label>
+    <div class="grid2" id="set-carriers"></div>
+    <label class="f">Fallback % for carriers not listed</label>
     <input id="set-carrier" type="number" inputmode="numeric" oninput="FC.sUpd('carrierLockPct',this.value)">
     <div class="grid2" id="set-extras"></div>
   </div>
@@ -297,7 +325,7 @@ z-index:99;max-width:88vw;text-align:center}
   </details>
   <h2>USB auto-read</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.4.0</div>
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.5.0</div>
 </section>
 
 </main>
@@ -352,8 +380,12 @@ const DEF_SETTINGS={
   storages:['64GB','128GB','256GB','512GB','1TB'],
   /* $ vs the 128GB base — deltas anchored to real Swappa per-storage averages */
   storageAdj:{'64GB':-25,'128GB':0,'256GB':30,'512GB':55,'1TB':85},
-  carrierLockPct:12,          /* % off mint when not Unlocked */
+  carrierLockPct:12,          /* fallback % when a carrier isn't in the map */
+  carrierAdjPct:{'AT&T':10,'T-Mobile':12,'Verizon':10,'Other / unknown':15},
   accessoryAdj:{box:10,cable:5},
+  brand:{name:'FlipCheck',accent:''},
+  ebay:{token:'',sandbox:false},
+  aikey:'',
   priceSync:true,             /* pull prices.json from the host ~daily when online */
   gradeMult:{A:95,B:85,C:70,D:55},
   margin:62,
@@ -458,10 +490,15 @@ function effectiveMint(sn){
   if(!isNaN(adj)&&adj!==0){m+=adj;parts.push((adj>0?'+':'−')+'$'+Math.abs(adj)+' '+sn.storage);}
   const cadj=colorAdjOf(sn);
   if(cadj){m+=cadj;parts.push((cadj>0?'+':'−')+'$'+Math.abs(cadj)+' '+sn.color);}
-  const lpRaw=parseFloat(settings.carrierLockPct);
-  const lp=isNaN(lpRaw)?0:lpRaw;
-  if(sn.carrier&&sn.carrier!=='Unlocked'&&lp>0){
-    const cut=Math.round(m*lp/100);m-=cut;parts.push('−$'+cut+' carrier-locked');
+  if(sn.carrier&&sn.carrier!=='Unlocked'){
+    /* each carrier carries its own market haircut (editable in Advanced) */
+    let pct=parseFloat((settings.carrierAdjPct||{})[sn.carrier]);
+    if(isNaN(pct))pct=parseFloat(settings.carrierLockPct);
+    if(isNaN(pct))pct=12;
+    if(pct>0){
+      const cut=Math.round(m*pct/100);m-=cut;
+      parts.push('−$'+cut+' '+(sn.carrier==='Other / unknown'?'carrier':sn.carrier)+'-locked');
+    }
   }
   /* accessories add straight $ on top (not subject to the carrier % cut) */
   const aa=settings.accessoryAdj||{box:10,cable:5};
@@ -647,8 +684,10 @@ function buildChecklist(){
     }
     if(it.id==='screen'){
       /* cosmetic condition selector, right after the screen check */
-      h+='<div class="item"><div class="lab">Cosmetic condition</div>'+
-        '<div class="chips" style="margin-top:10px">'+
+      h+='<div class="item"><div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<div class="lab">Cosmetic condition</div>'+
+        (settings.aikey?'<button class="chip" onclick="FC.aiGrade()">📸 AI wear check</button>':'')+
+        '</div><div class="chips" style="margin-top:10px">'+
         Object.keys(settings.cosmetic).map(c=>
           '<button class="chip'+(session.cosmetic===c?' sel':'')+'" onclick="FC.cosm(\''+c+'\')">'+c+'</button>'
         ).join('')+'</div></div>';
@@ -825,7 +864,8 @@ function openListings(id){
     '<input id="photoin" type="file" accept="image/*" multiple class="hidden" onchange="FC.photosPicked(this)"></div>';
   $('#listbody').innerHTML=photosCard+[['fb','Facebook Marketplace'],['ou','OfferUp / Craigslist'],['sw','Swappa'],['eb','eBay']].map(p=>
     '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px">'+
-    '<b>'+p[1]+'</b><span style="display:flex;gap:6px">'+
+    '<b>'+p[1]+'</b><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">'+
+    (p[0]==='eb'&&((settings.ebay||{}).token||'').trim()?'<button class="chip" onclick="FC.ebayDraft()">🛒 Draft on eBay</button>':'')+
     (canShare?'<button class="chip" onclick="FC.shareListing(\''+p[0]+'\')">📤 Share</button>':'')+
     '<button class="chip" onclick="FC.copyListing(\''+p[0]+'\')">📋 Copy</button></span></div>'+
     '<textarea rows="10" oninput="FC.listEdit(\''+p[0]+'\',this.value)">'+esc(L[p[0]])+'</textarea></div>'
@@ -1066,6 +1106,15 @@ function renderSettings(){
     '<input type="number" inputmode="numeric" value="'+esc((s.storageAdj||{})[st]??0)+'" oninput="FC.saUpd('+i+',this.value)"></div>'
   ).join('');
   $('#set-carrier').value=s.carrierLockPct??12;
+  const cmap=s.carrierAdjPct||{};
+  $('#set-carriers').innerHTML=['AT&T','T-Mobile','Verizon','Other / unknown'].map(c=>
+    '<div><label class="f">'+esc(c)+' (−%)</label>'+
+    '<input type="number" inputmode="numeric" value="'+esc(cmap[c]??12)+'" oninput="FC.carUpd(\''+esc(c).replace(/'/g,'')+'\',this.value)"></div>'
+  ).join('');
+  $('#set-ebay').value=(s.ebay&&s.ebay.token)||'';
+  $('#set-aikey').value=s.aikey||'';
+  $('#set-brand').value=(s.brand&&s.brand.name)||'FlipCheck';
+  $('#set-accent').value=(s.brand&&s.brand.accent)||'#4aa3ff';
   const aa=s.accessoryAdj||{box:10,cable:5};
   $('#set-extras').innerHTML=
     '<div><label class="f">Original box (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.box)+'" oninput="FC.exUpd(\'accessoryAdj\',\'box\',this.value)"></div>'+
@@ -1334,6 +1383,70 @@ window.FC={
     settings.storageAdj[st]=parseFloat(v)||0;saveSettings();
   },
   exUpd(g,k,v){settings[g]=settings[g]||{};settings[g][k]=parseFloat(v)||0;saveSettings();},
+  carUpd(c,v){settings.carrierAdjPct=settings.carrierAdjPct||{};settings.carrierAdjPct[c]=parseFloat(v)||0;saveSettings();},
+  ebayTok(v){settings.ebay=settings.ebay||{};settings.ebay.token=v.trim();saveSettings();},
+  aiKey(v){settings.aikey=v.trim();saveSettings();},
+  brandName(v){settings.brand=settings.brand||{};settings.brand.name=v;saveSettings();applyBrand();},
+  brandAccent(v){settings.brand=settings.brand||{};settings.brand.accent=v;saveSettings();applyBrand();},
+  async pasteRestore(){
+    let txt='';
+    try{txt=await navigator.clipboard.readText();}catch(e){txt=prompt('Paste the backup text here:')||'';}
+    if(!txt.trim())return;
+    try{
+      const d=JSON.parse(txt);
+      if(!d.settings||!Array.isArray(d.inv))throw 0;
+      if(!confirm('Replace current data with this backup ('+d.inv.length+' entries)?'))return;
+      settings=d.settings;inv=d.inv;saveSettings();saveInv();applyBrand();renderSettings();toast('Backup restored ✓');
+    }catch(e){toast('Clipboard doesn’t hold a FlipCheck backup — use Copy backup on the other device first');}
+  },
+  async ebayDraft(){
+    const e=inv.find(x=>x.id===curListing);if(!e)return;
+    const tok=((settings.ebay||{}).token||'').trim();
+    if(!tok){toast('Add your eBay token in Settings → Connections first');return;}
+    if(!bridgeUp){toast('eBay drafting goes through the USB bridge — run bridge.py on the laptop',4500);return;}
+    toast('Creating eBay draft…');
+    const title=((e.listings&&e.listings.eb)||'').split('\n')[1]||(e.model+' '+(e.storage||''));
+    const cond={A:'USED_EXCELLENT',B:'USED_VERY_GOOD',C:'USED_GOOD',D:'USED_ACCEPTABLE'}[e.grade]||'USED_GOOD';
+    try{
+      const r=await fetch(BRIDGE+'/ebay/list',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({token:tok,sandbox:!!(settings.ebay||{}).sandbox,
+          item:{title:title.slice(0,80),price:e.listPrice,condition:cond,categoryId:'9355'}})});
+      const d=await r.json();
+      if(d.ok){toast('✓ eBay draft created — add photos & publish in the eBay app',6000);
+        window.open('https://www.ebay.com/sh/lst/drafts','_blank');}
+      else toast('eBay: '+(d.error||'failed'),6000);
+    }catch(err){toast('Bridge not reachable',3000);}
+  },
+  aiGrade(){
+    if(!settings.aikey){toast('Add your Anthropic API key in Settings → Connections');return;}
+    const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
+    inp.onchange=async()=>{
+      const files=Array.from(inp.files||[]).slice(0,3);
+      if(!files.length)return;
+      toast('AI checking wear…',4000);
+      try{
+        const imgs=await Promise.all(files.map(f=>new Promise((res,rej)=>{
+          const rd=new FileReader();
+          rd.onload=()=>res({type:'image',source:{type:'base64',media_type:f.type||'image/jpeg',
+            data:String(rd.result).split(',')[1]}});
+          rd.onerror=rej;rd.readAsDataURL(f);})));
+        const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':settings.aikey,
+            'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:120,
+            messages:[{role:'user',content:imgs.concat([{type:'text',
+              text:'Grade this used phone’s COSMETIC wear as exactly one of: Like New, Light Wear, Moderate Wear, Heavy Wear, Cracked. Reply as: TIER | one short reason.'}])}]})});
+        const d=await r.json();
+        const txt=(d.content&&d.content[0]&&d.content[0].text)||'';
+        const tier=Object.keys(settings.cosmetic).find(t=>txt.toLowerCase().includes(t.toLowerCase()));
+        if(!tier){toast('AI: '+(d.error&&d.error.message||txt||'no verdict').slice(0,120),5000);return;}
+        if(confirm('AI suggests: '+txt.split('\n')[0]+'\n\nApply "'+tier+'"?')){
+          session.cosmetic=tier;saveSession();buildChecklist();renderBanner();toast('Cosmetic set: '+tier);
+        }
+      }catch(err){toast('AI check failed — key ok? online?',4000);}
+    };
+    inp.click();
+  },
   togglePriceSync(){settings.priceSync=!settings.priceSync;saveSettings();renderSyncStatus();},
   syncNow(){syncPrices(true);},
   cUpd(c,v){settings.cosmetic[c]=parseFloat(v)||0;saveSettings();},
@@ -1374,6 +1487,15 @@ window.FC={
 };
 
 /* ================= boot ================= */
+function applyBrand(){
+  const b=settings.brand||{};
+  const nm=(b.name||'').trim()||'FlipCheck';
+  const el=$('#brandname');if(el)el.textContent=nm;
+  document.title=nm;
+  if(b.accent&&/^#[0-9a-fA-F]{6}$/.test(b.accent)&&b.accent.toLowerCase()!=='#4aa3ff')
+    document.documentElement.style.setProperty('--blue',b.accent);
+}
+applyBrand();
 nav('intake');
 pingBridge();
 syncPrices();
