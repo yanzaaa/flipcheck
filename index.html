@@ -123,7 +123,14 @@ font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#63f2a5,#1fb
 -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);
 padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
 #tabbar button{flex:1;background:none;border:0;color:var(--dim);font-size:11px;padding:6px 2px;border-radius:10px}
-#tabbar button .ico{display:block;font-size:22px;margin-bottom:2px}
+#tabbar button .ico{display:block;width:22px;height:22px;margin:0 auto 3px}
+details.adv{margin-bottom:12px}
+details.adv>summary{cursor:pointer;list-style:none;background:var(--card);border:1px solid var(--line);
+border-radius:var(--r);padding:14px;font-weight:600;color:var(--dim);font-size:14.5px}
+details.adv>summary::-webkit-details-marker{display:none}
+details.adv>summary:before{content:'▸  ';color:var(--blue)}
+details.adv[open]>summary:before{content:'▾  '}
+details.adv[open]>summary{margin-bottom:4px;color:var(--tx)}
 #tabbar button.sel{color:#fff;background:linear-gradient(180deg,#22344a,#1b2836);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 .seg button{transition:background .15s,border-color .15s,color .15s}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
@@ -163,16 +170,13 @@ z-index:99;max-width:88vw;text-align:center}
     <label class="f">Storage</label>
     <div class="chips" id="in-storage"></div>
     <div class="row2">
-      <div><label class="f">Color</label>
-        <input id="in-color" type="text" placeholder="Midnight" oninput="FC.field('color',this.value)"></div>
+      <div><label class="f">Color</label><div id="colorwrap"></div></div>
       <div><label class="f">Carrier / SIM</label>
         <select id="in-carrier" onchange="FC.field('carrier',this.value)">
           <option>Unlocked</option><option>AT&amp;T</option><option>T-Mobile</option>
           <option>Verizon</option><option>Other / unknown</option>
         </select></div>
     </div>
-    <label class="f">Color demand (moves the price)</label>
-    <div class="chips" id="in-colordemand"></div>
     <label class="f">Accessories included (move the price)</label>
     <div class="chips" id="in-accs"></div>
     <input id="in-acc" type="text" placeholder="anything else: case, screen protector…" style="margin-top:8px" oninput="FC.field('accessories',this.value)">
@@ -246,15 +250,24 @@ z-index:99;max-width:88vw;text-align:center}
 
 <!-- ============ SETTINGS ============ -->
 <section id="scr-settings" class="screen">
-  <h2 style="margin-top:8px">Pricing table — mint market value (128GB base)</h2>
+  <h2 style="margin-top:8px">Market prices</h2>
   <div class="card">
-    <div id="syncstatus" style="font-size:13px;color:var(--dim);margin-bottom:10px"></div>
-    <div class="row2">
-      <button class="btn ghost" style="margin:0" onclick="FC.togglePriceSync()" id="syncbtn">…</button>
-      <button class="btn ghost" style="margin:0" onclick="FC.syncNow()">↻ Check now</button>
-    </div>
+    <div id="syncstatus" style="font-size:13.5px;color:var(--dim);margin-bottom:4px"></div>
+    <button class="btn" onclick="FC.syncNow()">↻ Sync prices now</button>
+    <button class="btn ghost" onclick="FC.togglePriceSync()" id="syncbtn">…</button>
   </div>
+  <h2>Phone values — what a clean one sells for</h2>
   <div class="card" id="set-models"></div>
+  <h2>Your data</h2>
+  <div class="card">
+    <button class="btn" onclick="FC.exportCSV()">⬇ Download my flip log (CSV)</button>
+    <button class="btn ghost" onclick="FC.backup()">Full backup (settings + log)</button>
+    <button class="btn ghost" onclick="FC.copyBackup()">Copy backup as text (iOS-safe)</button>
+    <button class="btn ghost" onclick="document.getElementById('restorefile').click()">Restore a backup</button>
+    <input id="restorefile" type="file" accept=".json,application/json" class="hidden" onchange="FC.restore(this)">
+    <button class="btn ghost" style="color:var(--red);border-color:#5c2326" onclick="FC.clearAll()">Erase everything</button>
+  </div>
+  <details class="adv"><summary>Advanced tuning — optional, the defaults are already market-tuned</summary>
   <h2>Storage &amp; carrier adjustments</h2>
   <div class="card">
     <div class="grid2" id="set-storadj"></div>
@@ -281,26 +294,19 @@ z-index:99;max-width:88vw;text-align:center}
     <input id="set-storages" type="text" onchange="FC.storUpd(this.value)">
     <div class="help" style="font-size:12.5px;color:var(--dim);margin-top:6px">Comma-separated list</div>
   </div>
-  <h2>Data</h2>
-  <div class="card">
-    <button class="btn ghost" onclick="FC.backup()">⬇ Export full backup (JSON)</button>
-    <button class="btn ghost" onclick="FC.copyBackup()">📋 Copy backup (if download won’t work on iOS)</button>
-    <button class="btn ghost" onclick="document.getElementById('restorefile').click()">⬆ Restore backup</button>
-    <input id="restorefile" type="file" accept=".json,application/json" class="hidden" onchange="FC.restore(this)">
-    <button class="btn ghost" style="color:var(--red);border-color:#5c2326" onclick="FC.clearAll()">🗑 Erase ALL app data</button>
-  </div>
-  <h2>Auto-read bridge</h2>
+  </details>
+  <h2>USB auto-read</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.3.0</div>
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.4.0</div>
 </section>
 
 </main>
 
 <nav id="tabbar">
-  <button data-s="intake" onclick="FC.nav('intake')"><span class="ico">✚</span>Intake</button>
-  <button data-s="check" onclick="FC.nav('check')"><span class="ico">✓</span>Check</button>
-  <button data-s="inv" onclick="FC.nav('inv')"><span class="ico">📦</span>Stock</button>
-  <button data-s="settings" onclick="FC.nav('settings')"><span class="ico">⚙︎</span>Settings</button>
+  <button data-s="intake" onclick="FC.nav('intake')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6M9 11h6"/></svg>Intake</button>
+  <button data-s="check" onclick="FC.nav('check')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16 9.5"/></svg>Check</button>
+  <button data-s="inv" onclick="FC.nav('inv')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/></svg>Stock</button>
+  <button data-s="settings" onclick="FC.nav('settings')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>Settings</button>
 </nav>
 
 <div id="toast"></div>
@@ -347,7 +353,6 @@ const DEF_SETTINGS={
   /* $ vs the 128GB base — deltas anchored to real Swappa per-storage averages */
   storageAdj:{'64GB':-25,'128GB':0,'256GB':30,'512GB':55,'1TB':85},
   carrierLockPct:12,          /* % off mint when not Unlocked */
-  colorAdj:{hi:10,lo:10},     /* +$ hot color / −$ slow color */
   accessoryAdj:{box:10,cable:5},
   priceSync:true,             /* pull prices.json from the host ~daily when online */
   gradeMult:{A:95,B:85,C:70,D:55},
@@ -368,9 +373,39 @@ function saveInv(){store('fc_inv_v1',inv);}
    NOTE: the full IMEI lives here only while inspecting (needed for the copy/
    check buttons). On save, only the last 4 digits are kept — never the full. */
 function blankSession(){return {model:'',custom:false,customName:'',mint:'',
-  storage:(settings.storages[1]||settings.storages[0]||'128GB'),color:'',colorDemand:'std',
+  storage:(settings.storages[1]||settings.storages[0]||'128GB'),color:'',colorFree:false,
   carrier:'Unlocked',accessories:'',accs:{},imei:'',battery:'',cosmetic:'Like New',
   checks:{},notes:'',startedAt:null,meta:{}};}
+
+/* Real color lineups per model with market $ adjustments (dark/neutral colors
+   move fastest per marketplace sale data; bright ones sit). Background data —
+   the user just picks the color, pricing adjusts itself. */
+const MODEL_COLORS={
+'iPhone 11':[['Black',5],['White',0],['Purple',-5],['Green',-5],['Yellow',-10],['Red',-5]],
+'iPhone 12':[['Black',5],['White',0],['Blue',0],['Green',-5],['Purple',-5],['Red',-5]],
+'iPhone 12 Pro':[['Graphite',5],['Silver',0],['Gold',0],['Pacific Blue',5]],
+'iPhone 13':[['Midnight',5],['Starlight',0],['Blue',0],['Pink',-5],['Green',-5],['Red',-5]],
+'iPhone 13 Pro':[['Graphite',5],['Silver',0],['Gold',0],['Sierra Blue',5],['Alpine Green',-5]],
+'iPhone 13 Pro Max':[['Graphite',5],['Silver',0],['Gold',0],['Sierra Blue',5],['Alpine Green',-5]],
+'iPhone 14':[['Midnight',5],['Starlight',0],['Blue',0],['Purple',-5],['Yellow',-10],['Red',-5]],
+'iPhone 14 Plus':[['Midnight',5],['Starlight',0],['Blue',0],['Purple',-5],['Yellow',-10],['Red',-5]],
+'iPhone 14 Pro':[['Space Black',5],['Silver',0],['Gold',0],['Deep Purple',5]],
+'iPhone 14 Pro Max':[['Space Black',5],['Silver',0],['Gold',0],['Deep Purple',5]],
+'iPhone 15':[['Black',5],['Blue',0],['Green',-5],['Yellow',-10],['Pink',-5]],
+'iPhone 15 Plus':[['Black',5],['Blue',0],['Green',-5],['Yellow',-10],['Pink',-5]],
+'iPhone 15 Pro':[['Black Titanium',5],['White Titanium',0],['Blue Titanium',0],['Natural Titanium',5]],
+'iPhone 15 Pro Max':[['Black Titanium',5],['White Titanium',0],['Blue Titanium',0],['Natural Titanium',5]],
+'iPhone 16':[['Black',5],['White',0],['Ultramarine',0],['Teal',-5],['Pink',-5]],
+'iPhone 16 Pro':[['Black Titanium',5],['White Titanium',0],['Natural Titanium',5],['Desert Titanium',0]],
+'Galaxy S23':[['Phantom Black',5],['Cream',0],['Green',-5],['Lavender',-5]],
+'Galaxy S24':[['Onyx Black',5],['Marble Gray',0],['Cobalt Violet',-5],['Amber Yellow',-10]]
+};
+function colorAdjOf(sn){
+  if(sn.custom||!sn.color)return 0;
+  const l=MODEL_COLORS[sn.model];if(!l)return 0;
+  const f=l.find(c=>c[0].toLowerCase()===String(sn.color).toLowerCase());
+  return f?f[1]:0;
+}
 let session=load('fc_session_v1',null)||blankSession();
 function saveSession(){store('fc_session_v1',session);}
 let lastStors=[];  /* storage chips rendered last (index-addressed click handlers) */
@@ -421,9 +456,8 @@ function effectiveMint(sn){
   const parts=['base '+money(m)];
   const adj=parseFloat((settings.storageAdj||{})[sn.storage]);
   if(!isNaN(adj)&&adj!==0){m+=adj;parts.push((adj>0?'+':'−')+'$'+Math.abs(adj)+' '+sn.storage);}
-  const ca=settings.colorAdj||{hi:10,lo:10};
-  if(sn.colorDemand==='hi'){const a=parseFloat(ca.hi)||0;if(a){m+=a;parts.push('+$'+a+' hot color');}}
-  if(sn.colorDemand==='lo'){const a=parseFloat(ca.lo)||0;if(a){m-=a;parts.push('−$'+a+' slow color');}}
+  const cadj=colorAdjOf(sn);
+  if(cadj){m+=cadj;parts.push((cadj>0?'+':'−')+'$'+Math.abs(cadj)+' '+sn.color);}
   const lpRaw=parseFloat(settings.carrierLockPct);
   const lp=isNaN(lpRaw)?0:lpRaw;
   if(sn.carrier&&sn.carrier!=='Unlocked'&&lp>0){
@@ -643,11 +677,19 @@ function renderIntake(){
   lastStors=stors;  /* index-based handler: user-defined labels may contain quotes */
   $('#in-storage').innerHTML=stors.map((s,i)=>
     '<button class="chip'+(session.storage===s?' sel':'')+'" onclick="FC.storageIdx('+i+')">'+esc(s)+'</button>').join('');
-  $('#in-color').value=session.color||'';
+  /* color: real per-model dropdown (pricing adjusts itself); text input otherwise */
+  const clist=!session.custom?MODEL_COLORS[session.model]:null;
+  if(clist&&!session.colorFree){
+    $('#colorwrap').innerHTML='<select onchange="FC.colorSel(this.value)">'+
+      '<option value="">— color —</option>'+
+      clist.map(c=>'<option'+(session.color===c[0]?' selected':'')+'>'+c[0]+'</option>').join('')+
+      '<option value="__other">Other / not listed</option></select>';
+  }else{
+    $('#colorwrap').innerHTML='<input type="text" placeholder="Midnight" value="'+esc(session.color||'')+'"'+
+      ' oninput="FC.field(\'color\',this.value)">'+
+      (clist?'<button class="chip" style="margin-top:6px" onclick="FC.colorList()">↩ pick from list</button>':'');
+  }
   $('#in-carrier').value=session.carrier||'Unlocked';
-  const cd=session.colorDemand||'std';
-  $('#in-colordemand').innerHTML=[['std','Standard'],['hi','🔥 High-demand'],['lo','🐢 Slow seller']].map(p=>
-    '<button class="chip'+(cd===p[0]?' sel':'')+'" onclick="FC.colorDemand(\''+p[0]+'\')">'+p[1]+'</button>').join('');
   const accs=session.accs||{};
   $('#in-accs').innerHTML=[['box','📦 Original box'],['cable','🔌 Cable / charger']].map(p=>
     '<button class="chip'+(accs[p[0]]?' sel':'')+'" onclick="FC.accTgl(\''+p[0]+'\')">'+p[1]+'</button>').join('');
@@ -678,7 +720,7 @@ function saveEntry(){
   const entry={
     id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     ts:Date.now(),model:modelName,storage:session.storage,color:session.color,
-    colorDemand:session.colorDemand,accs:Object.assign({},session.accs),
+    accs:Object.assign({},session.accs),
     carrier:session.carrier,accessories:session.accessories,
     imeiLast4:(session.imei||'').replace(/\D/g,'').slice(-4),
     battery:session.battery,cosmetic:session.cosmetic,checks:Object.assign({},session.checks),
@@ -1024,12 +1066,10 @@ function renderSettings(){
     '<input type="number" inputmode="numeric" value="'+esc((s.storageAdj||{})[st]??0)+'" oninput="FC.saUpd('+i+',this.value)"></div>'
   ).join('');
   $('#set-carrier').value=s.carrierLockPct??12;
-  const ca=s.colorAdj||{hi:10,lo:10},aa=s.accessoryAdj||{box:10,cable:5};
+  const aa=s.accessoryAdj||{box:10,cable:5};
   $('#set-extras').innerHTML=
-    '<div><label class="f">🔥 Hot color (+$)</label><input type="number" inputmode="numeric" value="'+esc(ca.hi)+'" oninput="FC.exUpd(\'colorAdj\',\'hi\',this.value)"></div>'+
-    '<div><label class="f">🐢 Slow color (−$)</label><input type="number" inputmode="numeric" value="'+esc(ca.lo)+'" oninput="FC.exUpd(\'colorAdj\',\'lo\',this.value)"></div>'+
-    '<div><label class="f">📦 Original box (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.box)+'" oninput="FC.exUpd(\'accessoryAdj\',\'box\',this.value)"></div>'+
-    '<div><label class="f">🔌 Cable/charger (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.cable)+'" oninput="FC.exUpd(\'accessoryAdj\',\'cable\',this.value)"></div>';
+    '<div><label class="f">Original box (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.box)+'" oninput="FC.exUpd(\'accessoryAdj\',\'box\',this.value)"></div>'+
+    '<div><label class="f">Cable/charger (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.cable)+'" oninput="FC.exUpd(\'accessoryAdj\',\'cable\',this.value)"></div>';
   $('#set-storages').value=s.storages.join(', ');
   renderSyncStatus();
   updateBridgeStatus();
@@ -1037,11 +1077,10 @@ function renderSettings(){
 function renderSyncStatus(){
   const el=$('#syncstatus');if(!el)return;
   el.innerHTML=settings.priceSync?
-    'Market-price sync <b style="color:var(--green)">ON</b> — checks the host\'s prices.json about once a day when online'+
-    (settings.pricesApplied?'; last applied: <b style="color:var(--tx)">'+esc(settings.pricesApplied)+'</b>':'; nothing applied yet')+
-    '. Your manual edits below hold until the file\'s date changes.':
-    'Market-price sync <b style="color:var(--amber)">OFF</b> — the table below is fully manual.';
-  const b=$('#syncbtn');if(b)b.textContent=settings.priceSync?'⏸ Turn sync off':'▶ Turn sync on';
+    'Auto-update is <b style="color:var(--green)">ON</b> — prices refresh themselves about once a day when you\'re online.'+
+    (settings.pricesApplied?' Last update: <b style="color:var(--tx)">'+esc(settings.pricesApplied)+'</b>.':' No update pulled yet.'):
+    'Auto-update is <b style="color:var(--amber)">OFF</b> — you manage the values below yourself.';
+  const b=$('#syncbtn');if(b)b.textContent=settings.priceSync?'Turn auto-update off':'Turn auto-update on';
 }
 function updateBridgeStatus(){
   const el=$('#bridgestatus');if(!el)return;
@@ -1111,6 +1150,11 @@ async function autoRead(){
       filled.push('model');
     }
     if(dev.storage){session.storage=dev.storage;filled.push('storage');}
+    if(dev.color){
+      const cl=!session.custom?MODEL_COLORS[session.model]:null;
+      const hit=cl&&cl.find(c=>c[0].toLowerCase()===String(dev.color).toLowerCase());
+      if(hit){session.color=hit[0];session.colorFree=false;filled.push('color '+hit[0]);}
+    }
     if(dev.imei){session.imei=String(dev.imei);filled.push('IMEI');}
     if(dev.batteryPct){const bp=Math.min(100,Math.max(1,Math.round(dev.batteryPct)));
       session.battery=String(bp);filled.push('battery '+bp+'%');}
@@ -1168,13 +1212,23 @@ window.FC={
   /* intake */
   model(v){
     if(v==='__custom'){session.custom=true;session.model='';}
-    else{session.custom=false;session.model=v;}
+    else{session.custom=false;session.model=v;
+      const l=MODEL_COLORS[v];
+      if(l&&session.color&&!l.some(c=>c[0].toLowerCase()===session.color.toLowerCase())){
+        session.color='';session.colorFree=false;   /* old color isn't in this model's lineup */
+      }
+    }
     saveSession();renderIntake();
   },
   customName(v){session.customName=v;saveSession();},
   customMint(v){session.mint=v;saveSession();updateProv();},
   storageIdx(i){if(lastStors[i]!=null){session.storage=lastStors[i];saveSession();renderIntake();}},
-  colorDemand(v){session.colorDemand=v;saveSession();renderIntake();renderBanner();},
+  colorSel(v){
+    if(v==='__other'){session.colorFree=true;session.color='';}
+    else{session.colorFree=false;session.color=v;}
+    saveSession();renderIntake();renderBanner();
+  },
+  colorList(){session.colorFree=false;session.color='';saveSession();renderIntake();renderBanner();},
   accTgl(k){session.accs=session.accs||{};session.accs[k]=!session.accs[k];saveSession();renderIntake();renderBanner();},
   field(k,v){session[k]=v;saveSession();if(k==='carrier'){updateProv();renderBanner();}},
   startInspection(){
