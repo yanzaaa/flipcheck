@@ -27,9 +27,12 @@ padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(11,15,20
 #topbar h1{font-size:19px;margin:0;letter-spacing:.3px}
 #topbar .zap{color:var(--green)}
 #bridgedot{width:10px;height:10px;border-radius:50%;background:#3a4a5e;margin-left:auto}
-#bridgedot.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+#bridgedot.on{background:var(--green);animation:dotpulse 2.2s ease-in-out infinite}
+@keyframes dotpulse{0%,100%{box-shadow:0 0 5px var(--green)}50%{box-shadow:0 0 14px var(--green)}}
 main{padding:12px 14px calc(88px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
-.screen{display:none}.screen.active{display:block}
+.screen{display:none}.screen.active{display:block;animation:scrfade .18s ease}
+@keyframes scrfade{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen.active{animation:none}}
 h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:18px 2px 10px}
 .card{background:linear-gradient(180deg,#15202e 0%,var(--card) 100%);border:1px solid var(--line);
 border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
@@ -97,7 +100,10 @@ color:var(--dim);font-size:13.5px;font-weight:700}
 .row2>*{flex:1;min-width:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 .provcard{text-align:center}
-.provcard .big{font-size:46px;font-weight:800;letter-spacing:-1.5px;margin:2px 0}
+.provcard .big{font-size:46px;font-weight:800;letter-spacing:-1.5px;margin:2px 0;
+font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#63f2a5,#1fb562);
+-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.provcard .big.dim{background:none;-webkit-text-fill-color:var(--dim)}
 .provcard .k{color:var(--dim);font-size:11px;letter-spacing:.14em;font-weight:700}
 .totals{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .tot{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
@@ -165,8 +171,11 @@ z-index:99;max-width:88vw;text-align:center}
           <option>Verizon</option><option>Other / unknown</option>
         </select></div>
     </div>
-    <label class="f">Accessories included</label>
-    <input id="in-acc" type="text" placeholder="box, cable, case…" oninput="FC.field('accessories',this.value)">
+    <label class="f">Color demand (moves the price)</label>
+    <div class="chips" id="in-colordemand"></div>
+    <label class="f">Accessories included (move the price)</label>
+    <div class="chips" id="in-accs"></div>
+    <input id="in-acc" type="text" placeholder="anything else: case, screen protector…" style="margin-top:8px" oninput="FC.field('accessories',this.value)">
   </div>
   <div class="card provcard" id="provcard"></div>
   <div class="row2">
@@ -251,6 +260,7 @@ z-index:99;max-width:88vw;text-align:center}
     <div class="grid2" id="set-storadj"></div>
     <label class="f">Carrier-locked discount (% off mint when not Unlocked)</label>
     <input id="set-carrier" type="number" inputmode="numeric" oninput="FC.sUpd('carrierLockPct',this.value)">
+    <div class="grid2" id="set-extras"></div>
   </div>
   <h2>Grade engine</h2>
   <div class="card">
@@ -281,7 +291,7 @@ z-index:99;max-width:88vw;text-align:center}
   </div>
   <h2>Auto-read bridge</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.2.0</div>
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.3.0</div>
 </section>
 
 </main>
@@ -337,6 +347,8 @@ const DEF_SETTINGS={
   /* $ vs the 128GB base — deltas anchored to real Swappa per-storage averages */
   storageAdj:{'64GB':-25,'128GB':0,'256GB':30,'512GB':55,'1TB':85},
   carrierLockPct:12,          /* % off mint when not Unlocked */
+  colorAdj:{hi:10,lo:10},     /* +$ hot color / −$ slow color */
+  accessoryAdj:{box:10,cable:5},
   priceSync:true,             /* pull prices.json from the host ~daily when online */
   gradeMult:{A:95,B:85,C:70,D:55},
   margin:62,
@@ -356,8 +368,9 @@ function saveInv(){store('fc_inv_v1',inv);}
    NOTE: the full IMEI lives here only while inspecting (needed for the copy/
    check buttons). On save, only the last 4 digits are kept — never the full. */
 function blankSession(){return {model:'',custom:false,customName:'',mint:'',
-  storage:(settings.storages[1]||settings.storages[0]||'128GB'),color:'',carrier:'Unlocked',
-  accessories:'',imei:'',battery:'',cosmetic:'Like New',checks:{},notes:'',startedAt:null,meta:{}};}
+  storage:(settings.storages[1]||settings.storages[0]||'128GB'),color:'',colorDemand:'std',
+  carrier:'Unlocked',accessories:'',accs:{},imei:'',battery:'',cosmetic:'Like New',
+  checks:{},notes:'',startedAt:null,meta:{}};}
 let session=load('fc_session_v1',null)||blankSession();
 function saveSession(){store('fc_session_v1',session);}
 let lastStors=[];  /* storage chips rendered last (index-addressed click handlers) */
@@ -408,12 +421,29 @@ function effectiveMint(sn){
   const parts=['base '+money(m)];
   const adj=parseFloat((settings.storageAdj||{})[sn.storage]);
   if(!isNaN(adj)&&adj!==0){m+=adj;parts.push((adj>0?'+':'−')+'$'+Math.abs(adj)+' '+sn.storage);}
+  const ca=settings.colorAdj||{hi:10,lo:10};
+  if(sn.colorDemand==='hi'){const a=parseFloat(ca.hi)||0;if(a){m+=a;parts.push('+$'+a+' hot color');}}
+  if(sn.colorDemand==='lo'){const a=parseFloat(ca.lo)||0;if(a){m-=a;parts.push('−$'+a+' slow color');}}
   const lpRaw=parseFloat(settings.carrierLockPct);
   const lp=isNaN(lpRaw)?0:lpRaw;
   if(sn.carrier&&sn.carrier!=='Unlocked'&&lp>0){
     const cut=Math.round(m*lp/100);m-=cut;parts.push('−$'+cut+' carrier-locked');
   }
+  /* accessories add straight $ on top (not subject to the carrier % cut) */
+  const aa=settings.accessoryAdj||{box:10,cable:5};
+  const accs=sn.accs||{};
+  if(accs.box){const a=parseFloat(aa.box)||0;if(a){m+=a;parts.push('+$'+a+' box');}}
+  if(accs.cable){const a=parseFloat(aa.cable)||0;if(a){m+=a;parts.push('+$'+a+' charger');}}
   return {mint:Math.max(0,Math.round(m)),parts:parts};
+}
+/* offline IMEI validity: 15 digits + Luhn checksum */
+function imeiStatus(v){
+  const d=(v||'').replace(/\D/g,'');
+  if(!d.length)return 'empty';
+  if(d.length!==15)return 'len';
+  let sum=0;
+  for(let i=0;i<15;i++){let n=+d[i];if(i%2===1){n*=2;if(n>9)n-=9;}sum+=n;}
+  return sum%10===0?'ok':'bad';
 }
 function computeGrade(sn){
   const em=effectiveMint(sn);
@@ -504,9 +534,29 @@ function renderGradeCard(g){
 }
 
 /* ================= checklist rendering ================= */
+function imeiStatHTML(){
+  const s=imeiStatus(session.imei);
+  if(s==='ok')return '<span style="color:var(--green)">✓ Valid IMEI — checksum passes</span>';
+  if(s==='bad')return '<span style="color:var(--red)">✗ Checksum fails — retype it (typo or fake)</span>';
+  if(s==='len')return '<span style="color:var(--dim)">'+(session.imei||'').replace(/\D/g,'').length+'/15 digits</span>';
+  return '<span style="color:var(--dim)">15-digit IMEI from *#06#</span>';
+}
 function buildChecklist(){
   const wrap=$('#checklist');if(!wrap)return;
   let h='';
+  /* auto-read report: what the cable filled, what's still on you */
+  if(session.meta&&session.meta.autoRead){
+    const ar=session.meta.autoRead;
+    const remaining=CHECKLIST.filter(it=>it.t==='battery'?session.battery==='':!session.checks[it.id])
+      .map(it=>SHORT_LABELS[it.id]||it.label.split('—')[0].split('(')[0].trim());
+    h+='<div class="item" style="border-color:var(--blue)">'+
+      '<div class="lab">🔌 Auto-read done</div>'+
+      '<div class="help">Filled from the cable: '+ar.filled.map(esc).join(', ')+'</div>'+
+      (remaining.length?
+        '<div class="note" style="color:var(--dim)">Still needs your hands: '+remaining.map(esc).join(' · ')+'</div>':
+        '<div class="note" style="color:var(--green)">Every check answered ✓</div>')+
+      '</div>';
+  }
   CHECKLIST.forEach(it=>{
     if(it.t==='check'){
       const done=session.checks[it.id]==='done';
@@ -550,6 +600,7 @@ function buildChecklist(){
         '<div class="help">'+it.help+'</div>'+
         '<input type="text" inputmode="numeric" maxlength="17" placeholder="IMEI (from *#06#)" value="'+esc(session.imei)+'"'+
         ' oninput="FC.imei(this.value)" style="margin-top:8px">'+
+        '<div id="imeistat" style="font-size:12.5px;margin-top:6px">'+imeiStatHTML()+'</div>'+
         '<div class="row2" style="margin-top:8px">'+
         '<button class="btn ghost" style="margin:0" onclick="FC.copyImei()">📋 Copy</button>'+
         '<button class="btn ghost" style="margin:0" onclick="FC.openCheck(\'https://www.stolenphonechecker.org/\')">Stolen ↗</button>'+
@@ -594,19 +645,25 @@ function renderIntake(){
     '<button class="chip'+(session.storage===s?' sel':'')+'" onclick="FC.storageIdx('+i+')">'+esc(s)+'</button>').join('');
   $('#in-color').value=session.color||'';
   $('#in-carrier').value=session.carrier||'Unlocked';
+  const cd=session.colorDemand||'std';
+  $('#in-colordemand').innerHTML=[['std','Standard'],['hi','🔥 High-demand'],['lo','🐢 Slow seller']].map(p=>
+    '<button class="chip'+(cd===p[0]?' sel':'')+'" onclick="FC.colorDemand(\''+p[0]+'\')">'+p[1]+'</button>').join('');
+  const accs=session.accs||{};
+  $('#in-accs').innerHTML=[['box','📦 Original box'],['cable','🔌 Cable / charger']].map(p=>
+    '<button class="chip'+(accs[p[0]]?' sel':'')+'" onclick="FC.accTgl(\''+p[0]+'\')">'+p[1]+'</button>').join('');
   $('#in-acc').value=session.accessories||'';
   updateProv();
 }
 function updateProv(){
   const em=effectiveMint(session);const el=$('#provcard');if(!el)return;
   if(!em.mint){
-    el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div><div class="big" style="color:var(--dim)">—</div>'+
+    el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div><div class="big dim">—</div>'+
     '<div style="font-size:13px;color:var(--dim)">Pick a model (or enter a custom mint value)</div>';return;
   }
   const list=round5(em.mint*((parseFloat(settings.gradeMult.B)||85)/100));
   const buy=round5(list*((parseFloat(settings.margin)||62)/100));
   el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div>'+
-    '<div class="big" style="color:var(--green)">'+money(buy)+'</div>'+
+    '<div class="big">'+money(buy)+'</div>'+
     '<div style="font-size:13px;color:var(--dim)">Assumes Grade B mid · Mint '+money(em.mint)+
     (em.parts.length>1?' ('+em.parts.map(esc).join(' · ')+')':'')+
     ' · List ~'+money(list)+'<br>Goes live &amp; grade-adjusted as you run the checklist ▸</div>';
@@ -621,6 +678,7 @@ function saveEntry(){
   const entry={
     id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     ts:Date.now(),model:modelName,storage:session.storage,color:session.color,
+    colorDemand:session.colorDemand,accs:Object.assign({},session.accs),
     carrier:session.carrier,accessories:session.accessories,
     imeiLast4:(session.imei||'').replace(/\D/g,'').slice(-4),
     battery:session.battery,cosmetic:session.cosmetic,checks:Object.assign({},session.checks),
@@ -650,7 +708,11 @@ function genListings(e){
   const resetLine=icloudLocked?'SOLD AS-IS FOR PARTS/REPAIR: iCloud / Activation Lock NOT removed':
     (e.checks&&e.checks.reset==='done')?'Factory reset with iCloud fully removed — sets up like new':
     'Will be factory reset + iCloud removed at handoff';
-  const accLine=e.accessories?('Includes: '+e.accessories):'';
+  const accBits=[];
+  if(e.accs&&e.accs.box)accBits.push('original box');
+  if(e.accs&&e.accs.cable)accBits.push('cable/charger');
+  if(e.accessories)accBits.push(e.accessories);
+  const accLine=accBits.length?('Includes: '+accBits.join(', ')):'';
   const notes=e.notes?('\nNote: '+e.notes):'';
   const price=money(e.listPrice);
   const fb=photos+'\n\n'+title+colorStr+' — '+carrier+' — '+price+'\n\n'+
@@ -962,6 +1024,12 @@ function renderSettings(){
     '<input type="number" inputmode="numeric" value="'+esc((s.storageAdj||{})[st]??0)+'" oninput="FC.saUpd('+i+',this.value)"></div>'
   ).join('');
   $('#set-carrier').value=s.carrierLockPct??12;
+  const ca=s.colorAdj||{hi:10,lo:10},aa=s.accessoryAdj||{box:10,cable:5};
+  $('#set-extras').innerHTML=
+    '<div><label class="f">🔥 Hot color (+$)</label><input type="number" inputmode="numeric" value="'+esc(ca.hi)+'" oninput="FC.exUpd(\'colorAdj\',\'hi\',this.value)"></div>'+
+    '<div><label class="f">🐢 Slow color (−$)</label><input type="number" inputmode="numeric" value="'+esc(ca.lo)+'" oninput="FC.exUpd(\'colorAdj\',\'lo\',this.value)"></div>'+
+    '<div><label class="f">📦 Original box (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.box)+'" oninput="FC.exUpd(\'accessoryAdj\',\'box\',this.value)"></div>'+
+    '<div><label class="f">🔌 Cable/charger (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.cable)+'" oninput="FC.exUpd(\'accessoryAdj\',\'cable\',this.value)"></div>';
   $('#set-storages').value=s.storages.join(', ');
   renderSyncStatus();
   updateBridgeStatus();
@@ -1053,6 +1121,7 @@ async function autoRead(){
     d.warnings=d.warnings||[];
     if(dev.findMyOn===true)d.warnings.unshift('⚠️ Find My reports ON — seller must turn it off BEFORE cash');
     if(dev.findMyOn===false)d.warnings.push('Find My reports OFF — confirm on screen, then mark it ✓');
+    session.meta.autoRead={filled:filled.slice(),ts:Date.now()};
     saveSession();
     if($('#scr-intake').classList.contains('active'))renderIntake();
     if($('#scr-check').classList.contains('active')){buildChecklist();renderBanner();}
@@ -1105,6 +1174,8 @@ window.FC={
   customName(v){session.customName=v;saveSession();},
   customMint(v){session.mint=v;saveSession();updateProv();},
   storageIdx(i){if(lastStors[i]!=null){session.storage=lastStors[i];saveSession();renderIntake();}},
+  colorDemand(v){session.colorDemand=v;saveSession();renderIntake();renderBanner();},
+  accTgl(k){session.accs=session.accs||{};session.accs[k]=!session.accs[k];saveSession();renderIntake();renderBanner();},
   field(k,v){session[k]=v;saveSession();if(k==='carrier'){updateProv();renderBanner();}},
   startInspection(){
     if(!session.model&&!(session.custom&&session.customName))toast('Tip: pick a model to get live pricing');
@@ -1133,7 +1204,7 @@ window.FC={
       if(el&&el.value!==v)el.value=v;}
     session.battery=v;saveSession();renderBanner();
   },
-  imei(v){session.imei=v;saveSession();},
+  imei(v){session.imei=v;saveSession();const st=$('#imeistat');if(st)st.innerHTML=imeiStatHTML();},
   notes(v){session.notes=v;saveSession();},
   copyImei(){
     const im=(session.imei||'').trim();
@@ -1208,6 +1279,7 @@ window.FC={
     settings.storageAdj=settings.storageAdj||{};
     settings.storageAdj[st]=parseFloat(v)||0;saveSettings();
   },
+  exUpd(g,k,v){settings[g]=settings[g]||{};settings[g][k]=parseFloat(v)||0;saveSettings();},
   togglePriceSync(){settings.priceSync=!settings.priceSync;saveSettings();renderSyncStatus();},
   syncNow(){syncPrices(true);},
   cUpd(c,v){settings.cosmetic[c]=parseFloat(v)||0;saveSettings();},
