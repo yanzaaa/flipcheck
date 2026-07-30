@@ -252,7 +252,7 @@ z-index:99;max-width:88vw;text-align:center}
       <button class="btn ghost" style="margin:0" onclick="FC.sigClear()">✕ Clear</button>
       <button class="btn green" style="margin:0" onclick="FC.bosPNG()">🧾 Generate PNG</button>
     </div>
-    <div style="font-size:12px;color:var(--dim);margin-top:8px">Generates a signed receipt image — share it to yourself and the seller. Simple protection that most flippers skip.</div>
+    <div style="font-size:12px;color:var(--dim);margin-top:8px">Generates a signed receipt image · share it to yourself and the seller. Simple protection that most flippers skip.</div>
   </div>
 </section>
 
@@ -279,20 +279,20 @@ z-index:99;max-width:88vw;text-align:center}
     <input id="restorefile" type="file" accept=".json,application/json" class="hidden" onchange="FC.restore(this)">
     <div style="font-size:12px;color:var(--dim);margin-top:8px">Move to a new device: Copy backup there → Paste backup here. Everything stays on your devices.</div>
   </div>
-  <details class="adv"><summary>Phone values — what a clean one sells for</summary>
+  <details class="adv"><summary>Phone values · what a clean one sells for</summary>
     <div class="card" id="set-models"></div>
   </details>
-  <details class="adv"><summary>Connections — eBay drafts &amp; AI wear check (optional)</summary>
+  <details class="adv"><summary>Connections · eBay drafts &amp; AI wear check (optional)</summary>
     <div class="card">
       <label class="f">eBay token (Sell API user token from developer.ebay.com)</label>
       <input id="set-ebay" type="text" placeholder="v^1.1#i^1#…" oninput="FC.ebayTok(this.value)">
-      <div style="font-size:12px;color:var(--dim);margin:4px 0 8px">Adds a "Draft on eBay" button to listings — creates the draft, you add photos in the eBay app. Goes through the USB bridge.</div>
+      <div style="font-size:12px;color:var(--dim);margin:4px 0 8px">Adds a "Draft on eBay" button to listings · creates the draft, you add photos in the eBay app. Goes through the USB bridge.</div>
       <label class="f">Anthropic API key (console.anthropic.com)</label>
       <input id="set-aikey" type="text" placeholder="sk-ant-…" oninput="FC.aiKey(this.value)">
-      <div style="font-size:12px;color:var(--dim);margin-top:4px">Adds "📸 AI wear check" to the checklist — photos in, suggested cosmetic grade out. Keys never leave this device.</div>
+      <div style="font-size:12px;color:var(--dim);margin-top:4px">Adds "📸 AI wear check" to the checklist · photos in, suggested cosmetic grade out. Keys never leave this device.</div>
     </div>
   </details>
-  <details class="adv"><summary>Branding — put your own name on it</summary>
+  <details class="adv"><summary>Branding · put your own name on it</summary>
     <div class="card">
       <div class="row2">
         <div><label class="f">App name</label>
@@ -302,7 +302,7 @@ z-index:99;max-width:88vw;text-align:center}
       </div>
     </div>
   </details>
-  <details class="adv"><summary>Advanced tuning — optional, the defaults are already market-tuned</summary>
+  <details class="adv"><summary>Advanced tuning · optional, the defaults are already market-tuned</summary>
   <h2>Storage &amp; carrier adjustments</h2>
   <div class="card">
     <div class="grid2" id="set-storadj"></div>
@@ -334,7 +334,7 @@ z-index:99;max-width:88vw;text-align:center}
   </details>
   <h2>USB auto-read</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.5.2 ·
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.5.3 ·
     <a href="https://getflipcheck.netlify.app" target="_blank" rel="noopener" style="color:var(--blue)">website</a> ·
     <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck" style="color:var(--blue)">support</a></div>
 </section>
@@ -361,13 +361,13 @@ const money=v=>'$'+(Math.round(v)||0);
 const dateStr=ts=>{const d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate();};
 function toast(msg,ms=2600){const t=$('#toast');t.textContent=msg;t.classList.add('show');
 clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),ms);}
-function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('⚠️ Could not save — storage full?');}}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('⚠️ Could not save · storage full?');}}
 function load(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
 async function copyText(t){
   try{await navigator.clipboard.writeText(t);toast('Copied ✓');return;}catch(e){}
   try{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
   document.body.appendChild(ta);ta.focus();ta.select();const ok=document.execCommand('copy');ta.remove();
-  toast(ok?'Copied ✓':'Copy failed — long-press the text to copy');}catch(e){toast('Copy failed — long-press the text to copy');}
+  toast(ok?'Copied ✓':'Copy failed · long-press the text to copy');}catch(e){toast('Copy failed · long-press the text to copy');}
 }
 function download(name,content,type){
   const b=new Blob([content],{type});const a=document.createElement('a');
@@ -378,7 +378,7 @@ function download(name,content,type){
 /* ================= settings ================= */
 const DEF_SETTINGS={
   /* mint = clean grade-A sale value at the BASE storage (128GB); anchored to
-     Swappa market data July 2026 — auto-refreshed from prices.json when online */
+     Swappa market data July 2026 · auto-refreshed from prices.json when online */
   models:[
     {name:'iPhone 11',mint:105},{name:'iPhone 12',mint:150},{name:'iPhone 12 Pro',mint:200},
     {name:'iPhone 13',mint:230},{name:'iPhone 13 Pro',mint:300},{name:'iPhone 13 Pro Max',mint:330},
@@ -389,7 +389,7 @@ const DEF_SETTINGS={
     {name:'Galaxy S23',mint:200},{name:'Galaxy S24',mint:300}
   ],
   storages:['64GB','128GB','256GB','512GB','1TB'],
-  /* $ vs the 128GB base — deltas anchored to real Swappa per-storage averages */
+  /* $ vs the 128GB base · deltas anchored to real Swappa per-storage averages */
   storageAdj:{'64GB':-25,'128GB':0,'256GB':30,'512GB':55,'1TB':85},
   carrierLockPct:12,          /* fallback % when a carrier isn't in the map */
   carrierAdjPct:{'AT&T':10,'T-Mobile':12,'Verizon':10,'Other / unknown':15},
@@ -414,7 +414,7 @@ function saveInv(){store('fc_inv_v1',inv);}
 
 /* ================= session (current phone being inspected) =================
    NOTE: the full IMEI lives here only while inspecting (needed for the copy/
-   check buttons). On save, only the last 4 digits are kept — never the full. */
+   check buttons). On save, only the last 4 digits are kept · never the full. */
 function blankSession(){return {model:'',custom:false,customName:'',mint:'',
   storage:(settings.storages[1]||settings.storages[0]||'128GB'),color:'',colorFree:false,
   carrier:'Unlocked',accessories:'',accs:{},imei:'',battery:'',cosmetic:'Like New',
@@ -458,10 +458,10 @@ const FUNC_IDS=['sim_call','cameras','flashlight','speaker_mic','biometric','cha
 const SHORT_LABELS={sim_call:'SIM/calls',cameras:'cameras',flashlight:'flashlight',
   speaker_mic:'speaker & mic',biometric:'Face ID / Touch ID',charging:'charging port'};
 const CHECKLIST=[
-  {id:'imei_match',t:'check',label:'Dial *#06# — IMEI matches box / listing',
+  {id:'imei_match',t:'check',label:'Dial *#06# · IMEI matches box / listing',
    help:'Dial *#06# on the phone; type the IMEI below'},
   {id:'imei_check',t:'imei',label:'IMEI blacklist / legality check',
-   help:'Needs signal — run it on YOUR phone’s data if the meetup has no wifi'},
+   help:'Needs signal · run it on YOUR phone’s data if the meetup has no wifi'},
   {id:'about_match',t:'check',label:'Serial / IMEI / storage cross-check',
    help:'Settings > General > About'},
   {id:'battery',t:'battery',label:'Battery health %',
@@ -482,7 +482,7 @@ const CHECKLIST=[
    opts:[{v:'pass',l:'GOOD ✓',c:'ok'},{v:'wear',l:'MINOR WEAR',c:'mid'},{v:'fail',l:'NOT WORKING',c:'bad'}]},
   {id:'reset',t:'check',label:'Factory reset completed',
    help:'Settings > General > Transfer or Reset iPhone > Erase All Content and Settings',
-   note:'⚠️ Do this AFTER cash changes hands and the phone is yours — never mid-negotiation.'}
+   note:'⚠️ Do this AFTER cash changes hands and the phone is yours · never mid-negotiation.'}
 ];
 function labelOf(id){const it=CHECKLIST.find(x=>x.id===id);return SHORT_LABELS[id]||(it?it.label:id);}
 
@@ -535,15 +535,15 @@ function computeGrade(sn){
   if(!isNaN(b)){
     if(b>=90){/* no deduction */}
     else if(b>=85){r.score-=settings.battery.t85;r.deducts.push('Battery '+b+'% (−'+settings.battery.t85+')');}
-    else if(b>=80){r.score-=settings.battery.t80;r.deducts.push('Battery '+b+'% — likely needs replacement (−'+settings.battery.t80+')');}
-    else{r.score-=settings.battery.t0;r.deducts.push('Battery '+b+'% — needs replacement (−'+settings.battery.t0+')');}
+    else if(b>=80){r.score-=settings.battery.t80;r.deducts.push('Battery '+b+'% · likely needs replacement (−'+settings.battery.t80+')');}
+    else{r.score-=settings.battery.t0;r.deducts.push('Battery '+b+'% · needs replacement (−'+settings.battery.t0+')');}
   }
   const cd=parseFloat(settings.cosmetic[sn.cosmetic])||0;
   if(cd){r.score-=cd;r.deducts.push(sn.cosmetic+' (−'+cd+')');}
   FUNC_IDS.forEach(id=>{if(sn.checks[id]==='fail'){r.fails++;r.score-=settings.failPenalty;
     r.deducts.push(labelOf(id)+' FAIL (−'+settings.failPenalty+')');}});
   if(sn.checks.screen==='wear'){r.score-=6;r.deducts.push('Screen minor wear (−6)');}
-  /* hard-fail conditions — DO NOT BUY, overrides every price */
+  /* hard-fail conditions · DO NOT BUY, overrides every price */
   if(sn.checks.screen==='fail')r.hard.push('Screen not functional');
   if(sn.checks.imei_check==='flagged')r.hard.push('IMEI blacklisted / reported lost-stolen');
   if(sn.checks.icloud_off==='locked')r.hard.push('iCloud / Find My can’t be disabled');
@@ -568,7 +568,7 @@ function progressCount(){
     else if(session.checks[it.id])n++;});
   return n;
 }
-/* STRONG BUY is an endorsement — only earned once every decision-critical
+/* STRONG BUY is an endorsement · only earned once every decision-critical
    check has actually been answered, not on an untouched checklist. */
 function coreChecksDone(sn){
   return sn.battery!=='' &&
@@ -591,10 +591,10 @@ function renderBanner(){
     el.innerHTML='<div class="btitle" style="font-size:18px">Pick a model on Intake to price this phone</div>';
   }else if(g.manual){
     el.className='banner warn';
-    el.innerHTML='<div class="btitle">⚠️ MANUAL REVIEW</div><div class="bsub">3+ functional fails — Grade '+g.letter+' · '+g.score+' · would be Offer '+money(g.buy)+' / List '+money(g.list)+'</div>';
+    el.innerHTML='<div class="btitle">⚠️ MANUAL REVIEW</div><div class="bsub">3+ functional fails · Grade '+g.letter+' · '+g.score+' · would be Offer '+money(g.buy)+' / List '+money(g.list)+'</div>';
   }else if(g.score>=90&&g.fails===0&&coreChecksDone(session)){
     el.className='banner good';
-    el.innerHTML='<div class="btitle">💪 STRONG BUY — OFFER '+money(g.buy)+'</div><div class="bsub">Grade A · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
+    el.innerHTML='<div class="btitle">💪 STRONG BUY · OFFER '+money(g.buy)+'</div><div class="bsub">Grade A · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
   }else{
     el.className='banner ok';
     el.innerHTML='<div class="btitle">OFFER '+money(g.buy)+'</div><div class="bsub">Grade '+g.letter+' · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
@@ -618,8 +618,8 @@ function renderGradeCard(g){
 /* ================= checklist rendering ================= */
 function imeiStatHTML(){
   const s=imeiStatus(session.imei);
-  if(s==='ok')return '<span style="color:var(--green)">✓ Valid IMEI — checksum passes</span>';
-  if(s==='bad')return '<span style="color:var(--red)">✗ Checksum fails — retype it (typo or fake)</span>';
+  if(s==='ok')return '<span style="color:var(--green)">✓ Valid IMEI · checksum passes</span>';
+  if(s==='bad')return '<span style="color:var(--red)">✗ Checksum fails · retype it (typo or fake)</span>';
   if(s==='len')return '<span style="color:var(--dim)">'+(session.imei||'').replace(/\D/g,'').length+'/15 digits</span>';
   return '<span style="color:var(--dim)">15-digit IMEI from *#06#</span>';
 }
@@ -716,7 +716,7 @@ function renderIntake(){
   const sel=$('#in-model');
   let opts='<option value="">— pick model —</option>';
   settings.models.forEach(m=>{opts+='<option value="'+esc(m.name)+'"'+(!session.custom&&session.model===m.name?' selected':'')+'>'+
-    esc(m.name)+' — $'+esc(m.mint)+'</option>';});
+    esc(m.name)+' · $'+esc(m.mint)+'</option>';});
   opts+='<option value="__custom"'+(session.custom?' selected':'')+'>Other / custom…</option>';
   sel.innerHTML=opts;
   $('#customwrap').classList.toggle('hidden',!session.custom);
@@ -766,7 +766,7 @@ function saveEntry(){
   const modelName=session.custom?(session.customName||'').trim():session.model;
   if(!modelName){toast('Pick a model first');FC.nav('intake');return;}
   const g=computeGrade(session);
-  if(g.hard.length&&!confirm('🚫 DO NOT BUY — '+g.hard.join(', ')+'.\nLog it anyway as a walk-away / dead entry?'))return;
+  if(g.hard.length&&!confirm('🚫 DO NOT BUY · '+g.hard.join(', ')+'.\nLog it anyway as a walk-away / dead entry?'))return;
   const entry={
     id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     ts:Date.now(),model:modelName,storage:session.storage,color:session.color,
@@ -781,24 +781,24 @@ function saveEntry(){
   };
   inv.unshift(entry);saveInv();
   session=blankSession();saveSession();
-  toast(g.hard.length?'Logged as dead / walk-away (paid $0 — edit if you bought it)':'Saved to inventory ✓',3500);
+  toast(g.hard.length?'Logged as dead / walk-away (paid $0 · edit if you bought it)':'Saved to inventory ✓',3500);
   openListings(entry.id);
 }
 
 /* ================= listing generator ================= */
 function genListings(e){
-  const photos='[ADD PHOTOS HERE — front, back, screen-on, ports, any wear]';
+  const photos='[ADD PHOTOS HERE · front, back, screen-on, ports, any wear]';
   const title=(e.model+' '+(e.storage||'')).trim();
   const carrier=e.carrier||'Unlocked';
-  const colorStr=e.color?(' — '+e.color):'';
+  const colorStr=e.color?(' · '+e.color):'';
   const passItems=FUNC_IDS.filter(id=>e.checks&&e.checks[id]==='pass').map(id=>SHORT_LABELS[id]);
   const passStr=passItems.length?passItems.join(', '):'all core functions';
   const bat=e.battery?(e.battery+'% battery health'):'battery health shared on request';
   const cond=e.cosmetic||'good condition';
-  const imeiLine=(e.checks&&e.checks.imei_check==='clean')?'IMEI verified clean — check it yourself if you like':'';
+  const imeiLine=(e.checks&&e.checks.imei_check==='clean')?'IMEI verified clean · check it yourself if you like':'';
   const icloudLocked=e.checks&&e.checks.icloud_off==='locked';
   const resetLine=icloudLocked?'SOLD AS-IS FOR PARTS/REPAIR: iCloud / Activation Lock NOT removed':
-    (e.checks&&e.checks.reset==='done')?'Factory reset with iCloud fully removed — sets up like new':
+    (e.checks&&e.checks.reset==='done')?'Factory reset with iCloud fully removed · sets up like new':
     'Will be factory reset + iCloud removed at handoff';
   const accBits=[];
   if(e.accs&&e.accs.box)accBits.push('original box');
@@ -807,7 +807,7 @@ function genListings(e){
   const accLine=accBits.length?('Includes: '+accBits.join(', ')):'';
   const notes=e.notes?('\nNote: '+e.notes):'';
   const price=money(e.listPrice);
-  const fb=photos+'\n\n'+title+colorStr+' — '+carrier+' — '+price+'\n\n'+
+  const fb=photos+'\n\n'+title+colorStr+' · '+carrier+' · '+price+'\n\n'+
     '• Condition: '+cond+'\n'+
     '• '+bat+'\n'+
     '• Tested working: '+passStr+'\n'+
@@ -816,25 +816,25 @@ function genListings(e){
     (accLine?'\n• '+accLine:'')+notes+
     '\n\nCash meetup, local. First come, first served.';
   const ou=photos+'\n\n'+e.model+' '+(e.storage||'')+' ('+carrier+')'+colorStr+' for '+price+'.\n\n'+
-    'This phone has been through my full inspection: '+passStr+' — all tested and working. '+
+    'This phone has been through my full inspection: '+passStr+' · all tested and working. '+
     (e.battery?('Battery health is at '+e.battery+'%. '):'')+
     'Cosmetic condition is '+cond.toLowerCase()+'.'+
     (accLine?(' '+accLine+'.'):'')+'\n\n'+resetLine+'.'+
     (imeiLine?(' '+imeiLine+'.'):'')+notes+
     '\n\nLocal pickup, cash or Zelle. No trades.';
-  const sw=photos+'\n\n'+e.model+' — '+(e.storage||'')+colorStr+'\n\n'+
+  const sw=photos+'\n\n'+e.model+' · '+(e.storage||'')+colorStr+'\n\n'+
     'Carrier status: '+carrier+'\n'+
     'Battery health: '+(e.battery?e.battery+'%':'—')+'\n'+
     'Storage: '+(e.storage||'—')+'\n'+
     'Condition: '+cond+'\n'+
-    'Functional: '+passStr+' — pass\n'+
+    'Functional: '+passStr+' · pass\n'+
     resetLine+'\n'+
     (imeiLine?imeiLine+'\n':'')+
     (accLine?accLine+'\n':'')+notes+
     '\nAsking '+price+'. Ships fast, well packed.';
   const ebTitle=(e.model+' '+(e.storage||'')+' '+carrier+
-    (e.battery?' '+e.battery+'% Battery':'')+' — '+cond).replace(/\s+/g,' ').trim().slice(0,80);
-  const eb='TITLE (max 80 chars — paste into the eBay title field):\n'+ebTitle+'\n\n'+
+    (e.battery?' '+e.battery+'% Battery':'')+' · '+cond).replace(/\s+/g,' ').trim().slice(0,80);
+  const eb='TITLE (max 80 chars · paste into the eBay title field):\n'+ebTitle+'\n\n'+
     'DESCRIPTION:\n'+photos+'\n\n'+
     e.model+' '+(e.storage||'')+colorStr+', '+carrier+'.\n\n'+
     '• Condition: '+cond+'\n'+
@@ -844,7 +844,7 @@ function genListings(e){
     (imeiLine?'\n• '+imeiLine:'')+
     (accLine?'\n• '+accLine:'')+notes+
     '\n\nShips within 1 business day, tracked and well packed. No returns on '+
-    'activation-lock issues — IMEI is verified clean before listing.';
+    'activation-lock issues · IMEI is verified clean before listing.';
   return {fb:fb,ou:ou,sw:sw,eb:eb};
 }
 let curListing=null;
@@ -853,7 +853,7 @@ function photoThumbs(){
   return photoFiles.length?photoFiles.map((f,i)=>
     '<img src="'+URL.createObjectURL(f)+'" onclick="FC.photoDel('+i+')" alt="photo" '+
     'style="width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">'
-  ).join(''):'<span style="color:var(--dim);font-size:13px">none yet — tap ＋ Add</span>';
+  ).join(''):'<span style="color:var(--dim);font-size:13px">none yet · tap ＋ Add</span>';
 }
 function openListings(id){
   const e=inv.find(x=>x.id===id);if(!e){toast('Entry not found');return;}
@@ -862,7 +862,7 @@ function openListings(id){
   if(!e.listings)e.listings=genListings(e);
   else if(!e.listings.eb)e.listings.eb=genListings(e).eb; /* entries saved before v1.1 */
   $('#listhead').innerHTML='<b>'+esc(e.model)+' '+esc(e.storage||'')+'</b> · Grade '+e.grade+' · List '+money(e.listPrice)+
-    (e.hard&&e.hard.length?'<div style="color:var(--red);font-weight:700;margin-top:6px">🚫 DO NOT BUY was flagged: '+e.hard.map(esc).join(' · ')+' — list as PARTS / AS-IS only, if at all.</div>':'')+
+    (e.hard&&e.hard.length?'<div style="color:var(--red);font-weight:700;margin-top:6px">🚫 DO NOT BUY was flagged: '+e.hard.map(esc).join(' · ')+' · list as PARTS / AS-IS only, if at all.</div>':'')+
     '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Edit freely below, then copy per platform. Photos are the only manual step left.</div>';
   const L=e.listings;
   const canShare=typeof navigator.share==='function';
@@ -892,7 +892,7 @@ function openBoS(id){
   bos.entry=id;bos.seller='';bos.price=e.paid||e.buyPrice||'';bos.loc='';
   $('#boshead').innerHTML='<b>'+esc(e.model)+' '+esc(e.storage||'')+'</b> · IMEI …'+esc(e.imeiLast4||'—')+
     ' · '+new Date().toLocaleDateString()+
-    '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Fill in, have the seller sign, generate — done before the cash leaves your hand.</div>';
+    '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Fill in, have the seller sign, generate · done before the cash leaves your hand.</div>';
   $('#bos-buyer').value=bos.buyer;$('#bos-seller').value='';
   $('#bos-price').value=bos.price;$('#bos-loc').value='';
   sigClear();
@@ -919,11 +919,11 @@ function bosPNG(){
   const x=c.getContext('2d');
   x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);
   x.fillStyle='#111111';x.font='bold 42px Helvetica,Arial';
-  x.fillText('BILL OF SALE — USED MOBILE PHONE',60,95);
+  x.fillText('BILL OF SALE · USED MOBILE PHONE',60,95);
   x.font='26px Helvetica,Arial';
   const lines=[
     'Date: '+new Date().toLocaleString(),
-    'Device: '+e.model+' '+(e.storage||'')+(e.color?' — '+e.color:''),
+    'Device: '+e.model+' '+(e.storage||'')+(e.color?' · '+e.color:''),
     'IMEI (last 4): …'+(e.imeiLast4||'—')+'     Serial: '+((e.meta&&e.meta.serial)||'—'),
     'Sale price: $'+(bos.price||0)+'     Location: '+(bos.loc||'—'),
     '',
@@ -950,7 +950,7 @@ function bosPNG(){
     const fname='bill-of-sale-'+(e.model||'phone').replace(/\s+/g,'-').toLowerCase()+'.png';
     const file=new File([b],fname,{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],text:'Bill of sale — '+e.model});return;}catch(err){}
+      try{await navigator.share({files:[file],text:'Bill of sale · '+e.model});return;}catch(err){}
     }
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;
     document.body.appendChild(a);a.click();
@@ -993,9 +993,9 @@ function renderInv(){
       const overall=rows.reduce((a,x)=>a+x.r*x.n,0)/rows.reduce((a,x)=>a+x.n,0);
       fitEl.innerHTML='<div class="card" style="padding:12px 14px"><b style="font-size:14px">📈 Your market fit</b>'+
         rows.map(x=>'<div style="font-size:13px;color:var(--dim);margin-top:4px">'+esc(x.m)+
-          ' — sells at <b style="color:var(--tx)">'+Math.round(x.r*100)+'%</b> of your list (n='+x.n+')</div>').join('')+
-        (overall<0.9?'<div style="font-size:12.5px;color:var(--amber);margin-top:6px">Selling ~'+Math.round((1-overall)*100)+'% under list — consider trimming list prices or margin in Settings.</div>':
-         overall>1.0?'<div style="font-size:12.5px;color:var(--green);margin-top:6px">Selling above list — you can price more aggressively.</div>':'')+
+          ' · sells at <b style="color:var(--tx)">'+Math.round(x.r*100)+'%</b> of your list (n='+x.n+')</div>').join('')+
+        (overall<0.9?'<div style="font-size:12.5px;color:var(--amber);margin-top:6px">Selling ~'+Math.round((1-overall)*100)+'% under list · consider trimming list prices or margin in Settings.</div>':
+         overall>1.0?'<div style="font-size:12.5px;color:var(--green);margin-top:6px">Selling above list · you can price more aggressively.</div>':'')+
         '</div>';
     } else fitEl.innerHTML='';
   }
@@ -1137,15 +1137,15 @@ function renderSettings(){
 function renderSyncStatus(){
   const el=$('#syncstatus');if(!el)return;
   el.innerHTML=settings.priceSync?
-    'Auto-update is <b style="color:var(--green)">ON</b> — prices refresh themselves about once a day when you\'re online.'+
+    'Auto-update is <b style="color:var(--green)">ON</b> · prices refresh themselves about once a day when you\'re online.'+
     (settings.pricesApplied?' Last update: <b style="color:var(--tx)">'+esc(settings.pricesApplied)+'</b>.':' No update pulled yet.'):
-    'Auto-update is <b style="color:var(--amber)">OFF</b> — you manage the values below yourself.';
+    'Auto-update is <b style="color:var(--amber)">OFF</b> · you manage the values below yourself.';
   const b=$('#syncbtn');if(b)b.textContent=settings.priceSync?'Turn auto-update off':'Turn auto-update on';
 }
 function updateBridgeStatus(){
   const el=$('#bridgestatus');if(!el)return;
   el.innerHTML=bridgeUp?
-    '<span style="color:var(--green)">● Connected</span> — auto-read available on Intake &amp; Check screens (port 5052)':
+    '<span style="color:var(--green)">● Connected</span> · auto-read available on Intake &amp; Check screens (port 5052)':
     '<span style="color:var(--dim)">○ Not detected (looking on port '+BRIDGE_PORT+').</span> On the laptop, run <b style="color:var(--tx)">python3 bridge/bridge.py</b> then reload. Non-default port? Open the app with ?bridge=PORT. Manual entry always works without it.';
 }
 
@@ -1221,17 +1221,17 @@ async function autoRead(){
     if(dev.serial)session.meta.serial=dev.serial;
     if(dev.os)session.meta.os=dev.os;
     if(dev.activationState)session.meta.activation=dev.activationState;
-    /* Find My hint — informational only; the iCloud hard-fail stays a manual confirm */
+    /* Find My hint · informational only; the iCloud hard-fail stays a manual confirm */
     d.warnings=d.warnings||[];
-    if(dev.findMyOn===true)d.warnings.unshift('⚠️ Find My reports ON — seller must turn it off BEFORE cash');
-    if(dev.findMyOn===false)d.warnings.push('Find My reports OFF — confirm on screen, then mark it ✓');
+    if(dev.findMyOn===true)d.warnings.unshift('⚠️ Find My reports ON · seller must turn it off BEFORE cash');
+    if(dev.findMyOn===false)d.warnings.push('Find My reports OFF · confirm on screen, then mark it ✓');
     session.meta.autoRead={filled:filled.slice(),ts:Date.now()};
     saveSession();
     if($('#scr-intake').classList.contains('active'))renderIntake();
     if($('#scr-check').classList.contains('active')){buildChecklist();renderBanner();}
     toast('Auto-read ✓ '+filled.join(', ')+
       (d.warnings&&d.warnings.length?' · '+d.warnings.join(' · '):''),5000);
-  }catch(e){toast('Bridge not reachable — is bridge.py running?',3500);}
+  }catch(e){toast('Bridge not reachable · is bridge.py running?',3500);}
 }
 /* on a hosted (https) origin some browsers block page→localhost fetches; ping once
    at load + on Settings visits instead of spamming blocked retries every 15s */
@@ -1263,7 +1263,7 @@ async function syncPrices(force){
     if($('#scr-intake').classList.contains('active'))renderIntake();
     if($('#scr-settings').classList.contains('active'))renderSettings();
     renderBanner();
-  }catch(e){if(force)toast('Price sync failed — offline?');}
+  }catch(e){if(force)toast('Price sync failed · offline?');}
 }
 
 /* ================= public handlers ================= */
@@ -1408,13 +1408,13 @@ window.FC={
       if(!d.settings||!Array.isArray(d.inv))throw 0;
       if(!confirm('Replace current data with this backup ('+d.inv.length+' entries)?'))return;
       settings=d.settings;inv=d.inv;saveSettings();saveInv();applyBrand();renderSettings();toast('Backup restored ✓');
-    }catch(e){toast('Clipboard doesn’t hold a FlipCheck backup — use Copy backup on the other device first');}
+    }catch(e){toast('Clipboard doesn’t hold a FlipCheck backup · use Copy backup on the other device first');}
   },
   async ebayDraft(){
     const e=inv.find(x=>x.id===curListing);if(!e)return;
     const tok=((settings.ebay||{}).token||'').trim();
     if(!tok){toast('Add your eBay token in Settings → Connections first');return;}
-    if(!bridgeUp){toast('eBay drafting goes through the USB bridge — run bridge.py on the laptop',4500);return;}
+    if(!bridgeUp){toast('eBay drafting goes through the USB bridge · run bridge.py on the laptop',4500);return;}
     toast('Creating eBay draft…');
     const title=((e.listings&&e.listings.eb)||'').split('\n')[1]||(e.model+' '+(e.storage||''));
     const cond={A:'USED_EXCELLENT',B:'USED_VERY_GOOD',C:'USED_GOOD',D:'USED_ACCEPTABLE'}[e.grade]||'USED_GOOD';
@@ -1423,7 +1423,7 @@ window.FC={
         body:JSON.stringify({token:tok,sandbox:!!(settings.ebay||{}).sandbox,
           item:{title:title.slice(0,80),price:e.listPrice,condition:cond,categoryId:'9355'}})});
       const d=await r.json();
-      if(d.ok){toast('✓ eBay draft created — add photos & publish in the eBay app',6000);
+      if(d.ok){toast('✓ eBay draft created · add photos & publish in the eBay app',6000);
         window.open('https://www.ebay.com/sh/lst/drafts','_blank');}
       else toast('eBay: '+(d.error||'failed'),6000);
     }catch(err){toast('Bridge not reachable',3000);}
@@ -1454,7 +1454,7 @@ window.FC={
         if(confirm('AI suggests: '+txt.split('\n')[0]+'\n\nApply "'+tier+'"?')){
           session.cosmetic=tier;saveSession();buildChecklist();renderBanner();toast('Cosmetic set: '+tier);
         }
-      }catch(err){toast('AI check failed — key ok? online?',4000);}
+      }catch(err){toast('AI check failed · key ok? online?',4000);}
     };
     inp.click();
   },
@@ -1485,7 +1485,7 @@ window.FC={
     rd.readAsText(f);input.value='';
   },
   clearAll(){
-    if(!confirm('Erase EVERYTHING — settings, inventory, current intake?'))return;
+    if(!confirm('Erase EVERYTHING · settings, inventory, current intake?'))return;
     if(!confirm('Last chance. This deletes all FlipCheck data on this device.'))return;
     ['fc_settings_v1','fc_inv_v1','fc_session_v1','fc_bridge_port','fc_price_sync_ts','fc_myname'].forEach(k=>localStorage.removeItem(k));
     location.reload();
