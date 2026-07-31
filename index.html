@@ -337,7 +337,7 @@ main,#topbar,#tabbar,#toast{position:relative;z-index:2}
   </details>
   <h2>USB auto-read</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.6.0 ·
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.7.0 ·
     <a href="https://getflipcheck.netlify.app" target="_blank" rel="noopener" style="color:var(--blue)">website</a> ·
     <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck" style="color:var(--blue)">support</a></div>
 </section>
@@ -388,8 +388,8 @@ const DEF_SETTINGS={
     {name:'iPhone 14',mint:260},{name:'iPhone 14 Plus',mint:290},{name:'iPhone 14 Pro',mint:380},
     {name:'iPhone 14 Pro Max',mint:420},{name:'iPhone 15',mint:360},{name:'iPhone 15 Plus',mint:390},
     {name:'iPhone 15 Pro',mint:490},{name:'iPhone 15 Pro Max',mint:570},
-    {name:'iPhone 16',mint:520},{name:'iPhone 16 Pro',mint:650},
-    {name:'Galaxy S23',mint:200},{name:'Galaxy S24',mint:300}
+    {name:'iPhone 16',mint:520},{name:'iPhone 16 Plus',mint:580},{name:'iPhone 16 Pro',mint:650},{name:'iPhone 16 Pro Max',mint:750},{name:'iPhone 16e',mint:420},{name:'iPhone SE (3rd gen)',mint:140},
+    {name:'Galaxy S23',mint:200},{name:'Galaxy S24',mint:300},{name:'Galaxy S25',mint:400},{name:'Galaxy S25 Ultra',mint:650}
   ],
   storages:['64GB','128GB','256GB','512GB','1TB'],
   /* $ vs the 128GB base · deltas anchored to real Swappa per-storage averages */
@@ -442,9 +442,15 @@ const MODEL_COLORS={
 'iPhone 15 Pro':[['Black Titanium',5],['White Titanium',0],['Blue Titanium',0],['Natural Titanium',5]],
 'iPhone 15 Pro Max':[['Black Titanium',5],['White Titanium',0],['Blue Titanium',0],['Natural Titanium',5]],
 'iPhone 16':[['Black',5],['White',0],['Ultramarine',0],['Teal',-5],['Pink',-5]],
+'iPhone 16 Plus':[['Black',5],['White',0],['Ultramarine',0],['Teal',-5],['Pink',-5]],
+'iPhone 16 Pro Max':[['Black Titanium',5],['White Titanium',0],['Natural Titanium',5],['Desert Titanium',0]],
+'iPhone 16e':[['Black',5],['White',0]],
+'iPhone SE (3rd gen)':[['Midnight',5],['Starlight',0],['Red',-5]],
 'iPhone 16 Pro':[['Black Titanium',5],['White Titanium',0],['Natural Titanium',5],['Desert Titanium',0]],
 'Galaxy S23':[['Phantom Black',5],['Cream',0],['Green',-5],['Lavender',-5]],
-'Galaxy S24':[['Onyx Black',5],['Marble Gray',0],['Cobalt Violet',-5],['Amber Yellow',-10]]
+'Galaxy S24':[['Onyx Black',5],['Marble Gray',0],['Cobalt Violet',-5],['Amber Yellow',-10]],
+'Galaxy S25':[['Navy',5],['Silver Shadow',0],['Icy Blue',0],['Mint',-5]],
+'Galaxy S25 Ultra':[['Titanium Black',5],['Titanium Gray',0],['Titanium Silver Blue',0],['Titanium White Silver',0]]
 };
 function colorAdjOf(sn){
   if(sn.custom||!sn.color)return 0;
