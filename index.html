@@ -337,7 +337,7 @@ main,#topbar,#tabbar,#toast{position:relative;z-index:2}
   </details>
   <h2>USB auto-read</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.7.0 ·
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.8.0 ·
     <a href="https://getflipcheck.netlify.app" target="_blank" rel="noopener" style="color:var(--blue)">website</a> ·
     <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck" style="color:var(--blue)">support</a></div>
 </section>
@@ -383,13 +383,13 @@ const DEF_SETTINGS={
   /* mint = clean grade-A sale value at the BASE storage (128GB); anchored to
      Swappa market data July 2026 · auto-refreshed from prices.json when online */
   models:[
-    {name:'iPhone 11',mint:105},{name:'iPhone 12',mint:150},{name:'iPhone 12 Pro',mint:200},
-    {name:'iPhone 13',mint:230},{name:'iPhone 13 Pro',mint:300},{name:'iPhone 13 Pro Max',mint:330},
+    {name:'iPhone 11',mint:105},{name:'iPhone 11 Pro',mint:150},{name:'iPhone 11 Pro Max',mint:175},{name:'iPhone 12 mini',mint:130},{name:'iPhone 12',mint:150},{name:'iPhone 12 Pro',mint:200},{name:'iPhone 12 Pro Max',mint:240},
+    {name:'iPhone 13 mini',mint:200},{name:'iPhone 13',mint:230},{name:'iPhone 13 Pro',mint:300},{name:'iPhone 13 Pro Max',mint:330},
     {name:'iPhone 14',mint:260},{name:'iPhone 14 Plus',mint:290},{name:'iPhone 14 Pro',mint:380},
     {name:'iPhone 14 Pro Max',mint:420},{name:'iPhone 15',mint:360},{name:'iPhone 15 Plus',mint:390},
     {name:'iPhone 15 Pro',mint:490},{name:'iPhone 15 Pro Max',mint:570},
     {name:'iPhone 16',mint:520},{name:'iPhone 16 Plus',mint:580},{name:'iPhone 16 Pro',mint:650},{name:'iPhone 16 Pro Max',mint:750},{name:'iPhone 16e',mint:420},{name:'iPhone SE (3rd gen)',mint:140},
-    {name:'Galaxy S23',mint:200},{name:'Galaxy S24',mint:300},{name:'Galaxy S25',mint:400},{name:'Galaxy S25 Ultra',mint:650}
+    {name:'Galaxy S23',mint:200},{name:'Galaxy S23 Ultra',mint:300},{name:'Galaxy S24 Ultra',mint:450},{name:'Pixel 8',mint:180},{name:'Pixel 9',mint:300},{name:'Galaxy S24',mint:300},{name:'Galaxy S25',mint:400},{name:'Galaxy S25 Ultra',mint:650}
   ],
   storages:['64GB','128GB','256GB','512GB','1TB'],
   /* $ vs the 128GB base · deltas anchored to real Swappa per-storage averages */
@@ -427,6 +427,15 @@ function blankSession(){return {model:'',custom:false,customName:'',mint:'',
    move fastest per marketplace sale data; bright ones sit). Background data —
    the user just picks the color, pricing adjusts itself. */
 const MODEL_COLORS={
+'iPhone 11 Pro':[['Midnight Green',5],['Space Gray',5],['Silver',0],['Gold',0]],
+'iPhone 11 Pro Max':[['Midnight Green',5],['Space Gray',5],['Silver',0],['Gold',0]],
+'iPhone 12 mini':[['Black',5],['White',0],['Blue',0],['Green',-5],['Purple',-5],['Red',-5]],
+'iPhone 12 Pro Max':[['Graphite',5],['Silver',0],['Gold',0],['Pacific Blue',5]],
+'iPhone 13 mini':[['Midnight',5],['Starlight',0],['Blue',0],['Pink',-5],['Green',-5],['Red',-5]],
+'Galaxy S23 Ultra':[['Phantom Black',5],['Cream',0],['Green',-5],['Lavender',-5]],
+'Galaxy S24 Ultra':[['Titanium Black',5],['Titanium Gray',0],['Titanium Violet',-5],['Titanium Yellow',-10]],
+'Pixel 8':[['Obsidian',5],['Hazel',0],['Rose',-5]],
+'Pixel 9':[['Obsidian',5],['Porcelain',0],['Wintergreen',-5],['Peony',-5]],
 'iPhone 11':[['Black',5],['White',0],['Purple',-5],['Green',-5],['Yellow',-10],['Red',-5]],
 'iPhone 12':[['Black',5],['White',0],['Blue',0],['Green',-5],['Purple',-5],['Red',-5]],
 'iPhone 12 Pro':[['Graphite',5],['Silver',0],['Gold',0],['Pacific Blue',5]],
