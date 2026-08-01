@@ -33,7 +33,7 @@ background:linear-gradient(90deg,transparent,#2ecc71 30%,#4aa3ff 70%,transparent
 #livechip{margin-left:auto;font-size:11px;color:var(--green);border:1px solid rgba(46,204,113,.35);
 background:rgba(46,204,113,.08);border-radius:999px;padding:5px 10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
 #sitelink{font-size:12.5px;color:var(--dim);border:1px solid var(--line);background:var(--card2);
-border-radius:999px;padding:6px 14px;font-weight:600;white-space:nowrap;min-height:44px;
+border-radius:999px;padding:6px 14px;font-weight:600;white-space:nowrap;min-height:44px;text-decoration:none;
 display:inline-flex;align-items:center}
 #sitelink:active{transform:scale(.96)}
 @media(max-width:390px){#livechip{display:none}}
@@ -45,6 +45,7 @@ padding:7px 13px;min-height:44px;white-space:nowrap;font-family:inherit}
 #bridgedot{width:9px;height:9px;border-radius:50%;background:#4a5b70;flex:0 0 auto}
 #bridgedot.on{background:var(--green);animation:dotpulse 2.2s ease-in-out infinite}
 @keyframes dotpulse{0%,100%{box-shadow:0 0 5px var(--green)}50%{box-shadow:0 0 14px var(--green)}}
+@media (prefers-reduced-motion:reduce){#bridgedot.on{animation:none}}
 /* keep the label as long as it fits · a lone dot reads as an empty button */
 @media(max-width:400px){#usbpill{padding:7px 10px;font-size:12px}
 #sitelink{padding:6px 11px}#topbar{gap:7px}}
@@ -59,7 +60,7 @@ background:#0e1723 linear-gradient(90deg,rgba(46,204,113,.16),rgba(74,163,255,.1
 border-bottom:1px solid var(--line)}
 #demobar b{color:var(--tx)}
 #demobar a{color:#06130b;background:linear-gradient(180deg,#41e08b,#1fb562);border-radius:999px;
-padding:9px 15px;min-height:40px;display:inline-flex;align-items:center;font-weight:700;text-decoration:none;white-space:nowrap}
+padding:11px 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:700;text-decoration:none;white-space:nowrap}
 main{padding:12px 14px calc(88px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
 .screen{display:none}.screen.active{display:block;animation:scrfade .18s ease}
 @keyframes scrfade{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
@@ -93,7 +94,7 @@ box-shadow:0 3px 10px rgba(61,143,232,.3)}
    banner is never painted over by it */
 top:calc(env(safe-area-inset-top) + var(--stickytop,54px));z-index:20;border:1px solid var(--line);
 transition:background .3s,border-color .3s,box-shadow .3s}
-.banner .btitle{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.banner .btitle{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.12}
 .banner .bsub{font-size:14px;margin-top:4px;opacity:.92}
 .banner.bad{background:linear-gradient(180deg,#48151a,#330e12);border-color:var(--red);color:#ffb3b5;
 box-shadow:0 0 24px rgba(255,77,79,.25)}
@@ -125,20 +126,25 @@ display:flex;align-items:center;justify-content:center;color:transparent;font-we
 .seg{display:flex;gap:8px;margin-top:10px}
 .seg button{flex:1;padding:13px 6px;min-height:46px;border-radius:10px;border:1px solid var(--line);background:var(--card2);
 color:var(--dim);font-size:13.5px;font-weight:700}
+.seg button.ok{color:#7fd7a6;border-color:rgba(46,204,113,.32)}
+.seg button.bad{color:#f0999a;border-color:rgba(255,77,79,.32)}
+.seg button.mid{color:#f0c579;border-color:rgba(245,166,35,.32)}
 .seg button.sel.ok{background:var(--green);border-color:var(--green);color:#06130b}
 .seg button.sel.bad{background:#c62a2c;border-color:var(--red);color:#fff}
 .seg button.sel.mid{background:var(--amber);border-color:var(--amber);color:#231a02}
 .note{font-size:12.5px;color:var(--amber);margin-top:8px}
 .row2{display:flex;gap:8px}
+/* a 999px radius on a wrapped 2-line label renders as an egg */
+.row2>.btn{border-radius:16px}
 .row2>*{flex:1;min-width:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 .provcard{text-align:center}
-.provcard .big{font-size:46px;font-weight:800;letter-spacing:-1.5px;margin:2px 0;
+.provcard .big{font-size:38px;font-weight:800;letter-spacing:-1.2px;margin:2px 0;
 font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#63f2a5,#1fb562);
 -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .provcard .big.dim{background:none;-webkit-text-fill-color:var(--dim)}
 .provcard .k{color:var(--dim);font-size:11px;letter-spacing:.14em;font-weight:700}
-.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .tot{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
 .tot .v{font-size:17px;font-weight:800}
 .tot .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
@@ -240,11 +246,11 @@ main{position:relative;z-index:2}
 
 <!-- ============ 2+3. CHECKLIST + GRADE/PRICE ENGINE ============ -->
 <section id="scr-check" class="screen">
-  <div id="banner" class="banner idle"></div>
+  <div id="banner" class="banner idle" role="status" aria-live="polite" aria-atomic="true"></div>
   <div id="timerrow">⏱ <span id="timer">0:00</span><span style="opacity:.7">/ 8:00 target</span>
     <button class="chip" style="margin-left:auto" onclick="FC.timerReset()">Reset</button>
-    <button class="chip" onclick="FC.comps('ebay')" title="eBay sold comps">📊</button>
-    <button class="chip bridgebtn hidden" onclick="FC.autoRead()">🔌</button>
+    <button class="chip" onclick="FC.comps('ebay')" title="eBay sold comps" aria-label="eBay sold comps">📊</button>
+    <button class="chip bridgebtn hidden" onclick="FC.autoRead()" aria-label="Auto-read the connected phone">🔌</button>
   </div>
   <div id="prog"><i></i></div>
   <div class="card gradecard" id="gradecard"></div>
@@ -305,7 +311,8 @@ main{position:relative;z-index:2}
 
 <!-- ============ SETTINGS ============ -->
 <section id="scr-settings" class="screen">
-  <h2 style="margin-top:8px">Market prices</h2>
+  <h2 style="margin-top:8px;font-size:19px;text-transform:none;letter-spacing:-.2px;color:var(--tx)">Settings</h2>
+  <h2>Market prices</h2>
   <div class="card">
     <div id="syncstatus" style="font-size:13.5px;color:var(--dim);margin-bottom:4px"></div>
     <button class="btn" onclick="FC.syncNow()">↻ Sync prices now</button>
@@ -405,7 +412,7 @@ main{position:relative;z-index:2}
   <button data-s="settings" onclick="FC.nav('settings')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>Settings</button>
 </nav>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 'use strict';
@@ -882,7 +889,13 @@ function demoLimitHit(){return IS_DEMO&&inv.length>=DEMO_MAX;}
 function renderDemoBar(){
   const bar=$('#demobar');if(!bar)return;
   bar.classList.toggle('hidden',!IS_DEMO);
-  if(!IS_DEMO)return;
+  if(!IS_DEMO){
+    /* paid/local copies have no ribbon · still clear the real topbar height,
+       otherwise the sticky DO NOT BUY banner tucks under it */
+    const tb=$('#topbar');
+    document.documentElement.style.setProperty('--stickytop',((tb?tb.offsetHeight:58)+4)+'px');
+    return;
+  }
   const left=Math.max(0,DEMO_MAX-inv.length);
   const el=$('#demoleft');
   if(el)el.textContent=left?(left+' left'):'limit reached';
@@ -890,8 +903,9 @@ function renderDemoBar(){
      56px, so the banner has to clear 56 + its rendered height (it wraps to two
      lines on narrow phones), plus a little breathing room */
   const place=()=>{
+    const tb=$('#topbar');
     const h=bar.offsetHeight||0;
-    document.documentElement.style.setProperty('--stickytop',(56+h+8)+'px');
+    document.documentElement.style.setProperty('--stickytop',((tb?tb.offsetHeight:56)+h+8)+'px');
   };
   requestAnimationFrame(place);
   if(!renderDemoBar._bound){renderDemoBar._bound=true;addEventListener('resize',place);}
