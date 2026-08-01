@@ -45,7 +45,10 @@ padding:7px 13px;min-height:38px;white-space:nowrap;font-family:inherit}
 #bridgedot{width:9px;height:9px;border-radius:50%;background:#4a5b70;flex:0 0 auto}
 #bridgedot.on{background:var(--green);animation:dotpulse 2.2s ease-in-out infinite}
 @keyframes dotpulse{0%,100%{box-shadow:0 0 5px var(--green)}50%{box-shadow:0 0 14px var(--green)}}
-@media(max-width:400px){#usbtext{display:none}#usbpill{padding:7px 11px}}
+/* keep the label as long as it fits · a lone dot reads as an empty button */
+@media(max-width:400px){#usbpill{padding:7px 10px;font-size:12px}
+#sitelink{padding:6px 11px}#topbar{gap:7px}}
+@media(max-width:339px){#usbtext{display:none}}
 /* free-demo ribbon · only rendered on the hosted demo copies */
 #demobar{position:sticky;top:calc(env(safe-area-inset-top) + 56px);z-index:29;display:flex;
 align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
@@ -84,8 +87,9 @@ color:var(--dim);font-size:14px;font-weight:600;min-height:44px;display:inline-f
 .chip.sel{background:linear-gradient(180deg,#5cb0ff,#3a8ce6);border-color:var(--blue);color:#06130b;
 box-shadow:0 3px 10px rgba(61,143,232,.3)}
 .banner{border-radius:var(--r);padding:16px;margin-bottom:10px;text-align:center;position:sticky;
-top:calc(env(safe-area-inset-top) + 54px);z-index:20;border:1px solid var(--line);
-/* the free-demo ribbon sits between the bar and the banner when present */
+/* --stickytop grows when the free-demo ribbon is on screen, so the DO NOT BUY
+   banner is never painted over by it */
+top:calc(env(safe-area-inset-top) + var(--stickytop,54px));z-index:20;border:1px solid var(--line);
 transition:background .3s,border-color .3s,box-shadow .3s}
 .banner .btitle{font-size:26px;font-weight:800;letter-spacing:-.5px}
 .banner .bsub{font-size:14px;margin-top:4px;opacity:.92}
@@ -232,7 +236,7 @@ main,#topbar,#tabbar,#toast{position:relative;z-index:2}
 <section id="scr-check" class="screen">
   <div id="banner" class="banner idle"></div>
   <div id="timerrow">⏱ <span id="timer">0:00</span><span style="opacity:.7">/ 8:00 target</span>
-    <button class="chip" style="margin-left:auto" onclick="FC.timerReset()">reset</button>
+    <button class="chip" style="margin-left:auto" onclick="FC.timerReset()">Reset</button>
     <button class="chip" onclick="FC.comps('ebay')" title="eBay sold comps">📊</button>
     <button class="chip bridgebtn hidden" onclick="FC.autoRead()">🔌</button>
   </div>
@@ -258,14 +262,20 @@ main,#topbar,#tabbar,#toast{position:relative;z-index:2}
 
 <!-- ============ 6. LISTING GENERATOR ============ -->
 <section id="scr-listings" class="screen">
-  <button class="chip" style="margin-top:8px" onclick="FC.nav('inv')">← Inventory</button>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+    <button class="chip" onclick="FC.nav('inv')">← Inventory</button>
+    <h2 style="margin:0">Listings</h2>
+  </div>
   <div class="card" id="listhead" style="margin-top:10px"></div>
   <div id="listbody"></div>
 </section>
 
 <!-- ============ BILL OF SALE ============ -->
 <section id="scr-bos" class="screen">
-  <button class="chip" style="margin-top:8px" onclick="FC.nav('inv')">← Inventory</button>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+    <button class="chip" onclick="FC.nav('inv')">← Inventory</button>
+    <h2 style="margin:0">Bill of sale</h2>
+  </div>
   <div class="card" id="boshead" style="margin-top:10px"></div>
   <div class="card">
     <div class="row2">
@@ -376,8 +386,8 @@ main,#topbar,#tabbar,#toast{position:relative;z-index:2}
   <h2>USB auto-read</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
   <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.9.1 ·
-    <a href="https://getflipcheck.netlify.app" target="_blank" rel="noopener" style="color:var(--blue)">website</a> ·
-    <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck" style="color:var(--blue)">support</a></div>
+    <a href="https://flipchecka.com" target="_blank" rel="noopener" style="color:var(--blue)">Website</a> ·
+    <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck" style="color:var(--blue)">Support</a></div>
 </section>
 
 </main>
@@ -679,6 +689,15 @@ function renderBanner(){
   }else if(g.score>=90&&g.fails===0&&coreChecksDone(session)){
     el.className='banner good';
     el.innerHTML='<div class="btitle">💪 STRONG BUY · OFFER '+money(g.buy)+'</div><div class="bsub">Grade A · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
+  }else if(done===0){
+    /* nothing answered yet · show the SAME cautious Grade-B provisional the
+       intake screen shows. Starting at a perfect score would quote a higher
+       number for doing nothing, which is exactly backwards at a meetup. */
+    const list=round5(g.mint*((parseFloat(settings.gradeMult.B)||85)/100));
+    const buy=round5(list*((parseFloat(settings.margin)||62)/100));
+    el.className='banner ok';
+    el.innerHTML='<div class="btitle">PROVISIONAL OFFER '+money(buy)+'</div>'+
+      '<div class="bsub">Assumes Grade B mid · List '+money(list)+' · answer the checks below and this becomes your real number</div>';
   }else{
     el.className='banner ok';
     el.innerHTML='<div class="btitle">OFFER '+money(g.buy)+'</div><div class="bsub">Grade '+g.letter+' · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
@@ -800,7 +819,7 @@ function buildChecklist(){
 /* ================= intake rendering ================= */
 function renderIntake(){
   const sel=$('#in-model');
-  let opts='<option value="">— pick model —</option>';
+  let opts='<option value="">— Pick a model —</option>';
   settings.models.forEach(m=>{opts+='<option value="'+esc(m.name)+'"'+(!session.custom&&session.model===m.name?' selected':'')+'>'+
     esc(m.name)+' · $'+esc(m.mint)+'</option>';});
   opts+='<option value="__custom"'+(session.custom?' selected':'')+'>Other / custom…</option>';
@@ -817,7 +836,7 @@ function renderIntake(){
   const clist=!session.custom?MODEL_COLORS[session.model]:null;
   if(clist&&!session.colorFree){
     $('#colorwrap').innerHTML='<select onchange="FC.colorSel(this.value)">'+
-      '<option value="">— color —</option>'+
+      '<option value="">— Pick a colour —</option>'+
       clist.map(c=>'<option'+(session.color===c[0]?' selected':'')+'>'+c[0]+'</option>').join('')+
       '<option value="__other">Other / not listed</option></select>';
   }else{
@@ -861,6 +880,11 @@ function renderDemoBar(){
   const left=Math.max(0,DEMO_MAX-inv.length);
   const el=$('#demoleft');
   if(el)el.textContent=left?(left+' left'):'limit reached';
+  /* push every sticky element below the ribbon's real height */
+  requestAnimationFrame(()=>{
+    const h=bar.offsetHeight||0;
+    document.documentElement.style.setProperty('--stickytop',(54+h)+'px');
+  });
 }
 function saveEntry(){
   const modelName=session.custom?(session.customName||'').trim():session.model;
@@ -986,7 +1010,8 @@ function openListings(id){
     '<button class="chip" onclick="document.getElementById(\'photoin\').click()">＋ Add</button></div>'+
     '<div class="chips" style="margin-top:10px">'+photoThumbs()+'</div>'+
     '<div style="font-size:12px;color:var(--dim);margin-top:8px">Shots: front · back · screen-on · ports · any wear. '+
-    'Photos ride along when you tap 📤 Share (tap a thumbnail to remove; not stored in the app).</div>'+
+    (canShare?'Photos ride along when you tap 📤 Share. ':'Copy a draft, then attach these photos in the app you post to. ')+
+    'Tap a thumbnail to remove · photos are never stored in the app.</div>'+
     '<input id="photoin" type="file" accept="image/*" multiple class="hidden" onchange="FC.photosPicked(this)"></div>';
   $('#listbody').innerHTML=photosCard+[['fb','Facebook Marketplace'],['ou','OfferUp / Craigslist'],['sw','Swappa'],['eb','eBay']].map(p=>
     '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px">'+
@@ -1119,6 +1144,10 @@ function bosPDF(){
 }
 
 /* ================= inventory ================= */
+/* internal status codes stay stable (CSV, saved data); these are what people see */
+const STATUS_LABEL={all:'All',bought:'Bought',listed:'Listed',sold:'Sold',
+  'dead-DOA':'Walk-away',returned:'Returned'};
+const statusText=s=>STATUS_LABEL[s]||s;
 let invFilter='all';let expanded=null;
 function renderInv(){
   let spent=0,realized=0,inflight=0,spentSold=0;
@@ -1175,12 +1204,18 @@ function renderInv(){
     } else fitEl.innerHTML='';
   }
   $('#invfilters').innerHTML=['all'].concat(STATUSES).map(s=>
-    '<button class="chip'+(invFilter===s?' sel':'')+'" onclick="FC.filter(\''+s+'\')">'+s+'</button>').join('');
+    '<button class="chip'+(invFilter===s?' sel':'')+'" onclick="FC.filter(\''+s+'\')">'+esc(statusText(s))+'</button>').join('');
   const list=inv.filter(e=>invFilter==='all'||e.status===invFilter);
   $('#invlist').innerHTML=list.length?list.map(rowHTML).join(''):
-    '<div class="card" style="color:var(--dim);text-align:center">'+
-    (inv.length?'Nothing with this status yet':
-     'No phones yet. Run an intake and every phone, every check and every price logs itself here · nothing to type up.')+'</div>';
+    (inv.length?
+     '<div class="card" style="color:var(--dim);text-align:center">Nothing with this status yet.</div>':
+     '<div class="card" style="text-align:center">'+
+       '<div style="font-size:34px;line-height:1;margin-bottom:8px">📦</div>'+
+       '<b style="font-size:16px">No phones logged yet</b>'+
+       '<div style="color:var(--dim);font-size:13.5px;margin:8px 0 14px">Check your first phone and it lands here by itself · '+
+       'every price, every answer, timestamped. You never type it up.</div>'+
+       '<button class="btn" style="margin:0" onclick="FC.nav(\'intake\')">Start your first phone</button>'+
+     '</div>');
 }
 function rowHTML(e){
   const open=expanded===e.id;
@@ -1190,7 +1225,7 @@ function rowHTML(e){
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
     '<b style="font-size:16px">'+esc(e.model)+' '+esc(e.storage||'')+'</b>'+
     '<span class="badge g'+e.grade+'">'+e.grade+'·'+e.score+'</span>'+
-    '<span class="pill '+stCls+'">'+e.status+'</span>'+
+    '<span class="pill '+stCls+'">'+esc(statusText(e.status))+'</span>'+
     (e.hard&&e.hard.length?'<span class="pill st-dead">🚫 do not buy</span>':'')+
     (e.manual?'<span class="pill st-returned">⚠ review</span>':'')+'</div>'+
     '<div class="help">Buy '+money(e.buyPrice)+(e.paid?' · Paid '+money(e.paid):'')+
@@ -1202,7 +1237,7 @@ function editorHTML(e){
   return '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+
     '<label class="f">Status (auto-timestamps the change)</label>'+
     '<select onchange="FC.setStatus(\''+e.id+'\',this.value)">'+
-    STATUSES.map(s=>'<option'+(s===e.status?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
+    STATUSES.map(s=>'<option value="'+esc(s)+'"'+(s===e.status?' selected':'')+'>'+esc(statusText(s))+'</option>').join('')+'</select>'+
     '<div class="row2">'+
     '<div><label class="f">Paid $</label><input type="number" inputmode="numeric" value="'+esc(e.paid||'')+'" oninput="FC.entryField(\''+e.id+'\',\'paid\',this.value)"></div>'+
     '<div><label class="f">Sold $</label><input type="number" inputmode="numeric" value="'+esc(e.salePrice||'')+'" oninput="FC.entryField(\''+e.id+'\',\'salePrice\',this.value)"></div>'+
@@ -1324,16 +1359,27 @@ function renderSyncStatus(){
 }
 function updateBridgeStatus(){
   const el=$('#bridgestatus');if(!el)return;
-  el.innerHTML=bridgeUp?
-    '<span style="color:var(--green)">● Connected</span> · auto-read available on Intake &amp; Check screens (port '+BRIDGE_PORT+')':
-    '<span style="color:var(--dim)">○ Not detected (looking on port '+BRIDGE_PORT+').</span> On the laptop, run <b style="color:var(--tx)">python3 bridge/bridge.py</b> then reload. Non-default port? Open the app with ?bridge=PORT. Manual entry always works without it.';
+  if(bridgeUp){
+    el.innerHTML='<span style="color:var(--green)">● Connected</span> · Auto-Read is live on the Intake and Check screens (port '+BRIDGE_PORT+'). '+
+      'Plug in a phone, have the seller unlock it and tap "Trust This Computer".';
+  }else if(IS_DEMO){
+    el.innerHTML='<span style="color:var(--dim)">○ Not available in the free demo.</span> USB auto-read runs from the copy you download · '+
+      'it fills model, storage, IMEI and battery health for you. '+
+      '<a href="https://flipchecka.com/#pricing" target="_blank" rel="noopener" style="color:var(--blue)">See the full app</a>. '+
+      'Everything here works by hand in the meantime.';
+  }else{
+    el.innerHTML='<span style="color:var(--dim)">○ Not detected (looking on port '+BRIDGE_PORT+').</span> On the laptop, run <b style="color:var(--tx)">python3 bridge/bridge.py</b>, then reload this page. '+
+      'Using a different port? Open the app with ?bridge=PORT. Manual entry always works without it.';
+  }
 }
 
 /* ================= navigation ================= */
 function showScreen(name){
   $$('.screen').forEach(s=>s.classList.remove('active'));
   const scr=$('#scr-'+name);if(scr)scr.classList.add('active');
-  $$('#tabbar button').forEach(b=>b.classList.toggle('sel',b.dataset.s===name));
+  /* Listings and Bill of Sale hang off Stock · keep that tab lit rather than none */
+  const tab=(name==='listings'||name==='bos')?'inv':name;
+  $$('#tabbar button').forEach(b=>b.classList.toggle('sel',b.dataset.s===tab));
   window.scrollTo(0,0);
 }
 function nav(name){
@@ -1351,8 +1397,14 @@ function nav(name){
 setInterval(()=>{
   const el=$('#timer');if(!el)return;
   if(!session.startedAt){el.textContent='0:00';el.classList.remove('over');return;}
-  const s=Math.max(0,Math.floor((Date.now()-session.startedAt)/1000));
-  el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  let s=Math.max(0,Math.floor((Date.now()-session.startedAt)/1000));
+  /* a session left open overnight showed things like "743:12" · cap the display */
+  if(s>=3600){
+    const h=Math.floor(s/3600);
+    el.textContent=h+'h '+String(Math.floor((s%3600)/60)).padStart(2,'0')+'m';
+  }else{
+    el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  }
   el.classList.toggle('over',s>480);
 },1000);
 
@@ -1563,7 +1615,7 @@ window.FC={
   setStatus(id,v){
     const e=inv.find(x=>x.id===id);if(!e)return;
     e.status=v;(e.history=e.history||[]).push({ts:Date.now(),status:v});
-    saveInv();renderInv();toast('Status → '+v);
+    saveInv();renderInv();toast('Status → '+statusText(v));
   },
   entryField(id,k,v){const e=inv.find(x=>x.id===id);if(!e)return;e[k]=v;saveInv();},
   del(id){
@@ -1601,7 +1653,7 @@ window.FC={
   listEdit(k,v){const e=inv.find(x=>x.id===curListing);if(e&&e.listings){e.listings[k]=v;saveInv();}},
   regen(){
     const e=inv.find(x=>x.id===curListing);if(!e)return;
-    if(!confirm('Regenerate all three drafts? Your edits will be overwritten.'))return;
+    if(!confirm('Regenerate all four drafts? Your edits will be overwritten.'))return;
     e.listings=genListings(e);saveInv();openListings(e.id);
   },
   /* settings */
