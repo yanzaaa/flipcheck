@@ -6,6 +6,7 @@
 <title>FlipCheck</title>
 <meta name="description" content="Phone intake, inspection, pricing & listing tool for used-phone flipping">
 <meta name="theme-color" content="#0b0f14">
+<meta name="color-scheme" content="dark">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -14,7 +15,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FlipCheck">
 <style>
-:root{--bg:#0b0f14;--card:#131b26;--card2:#0f1620;--line:#223042;--tx:#e8eef5;--dim:#8fa1b5;
+:root{color-scheme:dark;--bg:#0b0f14;--card:#131b26;--card2:#0f1620;--line:#223042;--tx:#e8eef5;--dim:#8fa1b5;
 --green:#2ecc71;--red:#ff4d4f;--amber:#f5a623;--blue:#4aa3ff;--r:14px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;color:var(--tx);background:var(--bg);
@@ -29,6 +30,8 @@ padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(11,15,20
 -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 #topbar:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
 background:linear-gradient(90deg,transparent,#2ecc71 30%,#4aa3ff 70%,transparent);opacity:.55}
+#topbar{transition:box-shadow .25s ease,background .25s ease}
+#topbar.stuck{background:rgba(11,15,20,.99);box-shadow:0 8px 26px rgba(0,0,0,.5)}
 #topbar h1{font-size:19px;margin:0;letter-spacing:.2px;display:flex;align-items:center;gap:9px;font-weight:800}
 #livechip{margin-left:auto;font-size:11px;color:var(--green);border:1px solid rgba(46,204,113,.35);
 background:rgba(46,204,113,.08);border-radius:999px;padding:5px 10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
@@ -75,8 +78,15 @@ font-family:inherit;-webkit-appearance:none;appearance:none}
 select{background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);
 background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
 textarea{min-height:70px}
+::placeholder{color:#7f93a8;opacity:1}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,163,255,.16)}
 button{font-family:inherit;cursor:pointer}
+/* one monoline icon set · vertical rhythm handled centrally */
+.ic{vertical-align:-3px;flex:0 0 auto}
+.btn .ic,.chip .ic{vertical-align:-3px;margin-right:2px}
+.btn,.chip{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn{display:flex}
+#timerrow .ic{opacity:.85}
 .btn{display:block;width:100%;padding:16px;border-radius:999px;border:0;font-size:18px;font-weight:700;
 background:linear-gradient(180deg,#5cb0ff,#3a8ce6);color:#04121f;margin-top:10px;
 box-shadow:0 6px 16px rgba(61,143,232,.28);transition:transform .12s,box-shadow .2s}
@@ -94,7 +104,8 @@ box-shadow:0 3px 10px rgba(61,143,232,.3)}
    banner is never painted over by it */
 top:calc(env(safe-area-inset-top) + var(--stickytop,54px));z-index:20;border:1px solid var(--line);
 transition:background .3s,border-color .3s,box-shadow .3s}
-.banner .btitle{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.12}
+.banner .btitle{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.12;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.banner .bic{flex:0 0 auto}
 .banner .bsub{font-size:14px;margin-top:4px;opacity:.92}
 .banner.bad{background:linear-gradient(180deg,#48151a,#330e12);border-color:var(--red);color:#ffb3b5;
 box-shadow:0 0 24px rgba(255,77,79,.25)}
@@ -192,7 +203,7 @@ main{position:relative;z-index:2}
 <body>
 
 <header id="topbar">
-  <h1><svg width="26" height="26" viewBox="0 0 24 24" style="border-radius:8px;background:linear-gradient(135deg,#2ecc71 0%,#4aa3ff 100%);padding:4px;flex:0 0 auto" fill="#071018"><path d="M13 2 4.5 13.5h5L10 22l8.5-11.5h-5z"/></svg><span id="brandname">FlipCheck</span></h1>
+  <h1><svg width="30" height="30" viewBox="0 0 512 512" style="border-radius:9px;flex:0 0 auto" aria-hidden="true"><defs><linearGradient id="fcg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2ee584"/><stop offset="1" stop-color="#4aa3ff"/></linearGradient></defs><rect width="512" height="512" rx="116" fill="url(#fcg)"/><g transform="rotate(-13 256 256)"><rect x="163" y="96" width="186" height="320" rx="40" fill="#0a1420"/><rect x="180" y="113" width="152" height="286" rx="26" fill="#0f1b28"/><rect x="228" y="132" width="56" height="10" rx="5" fill="#2b3b4d"/></g><path d="M150 268 L226 344 L392 166" fill="none" stroke="#0a1420" stroke-width="66" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 268 L226 344 L392 166" fill="none" stroke="#2ee584" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="brandname">FlipCheck</span></h1>
   <button id="usbpill" onclick="FC.usbTap()" title="USB auto-read status">
     <span id="bridgedot"></span><span id="usbtext">Manual</span>
   </button>
@@ -210,49 +221,49 @@ main{position:relative;z-index:2}
 <section id="scr-intake" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <h2 style="margin:8px 2px">New Intake</h2>
-    <button class="chip bridgebtn hidden" id="autoreadbtn" onclick="FC.autoRead()">🔌 Auto-Read</button>
+    <button class="chip bridgebtn hidden" id="autoreadbtn" onclick="FC.autoRead()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M7 8h10v3.5a5 5 0 0 1-10 0zM12 16.5V21"/></svg> Auto-Read</button>
   </div>
   <div class="card">
-    <label class="f">Model</label>
-    <select id="in-model" onchange="FC.model(this.value)"></select>
+    <label class="f" for="in-model">Model</label>
+    <select id="in-model" onchange="FC.model(this.value)" aria-label="Phone model"></select>
     <div id="customwrap" class="hidden">
       <div class="row2">
-        <div><label class="f">Custom model name</label>
-          <input id="in-custom" type="text" placeholder="e.g. Pixel 8" oninput="FC.customName(this.value)"></div>
-        <div style="flex:0 0 120px"><label class="f">Mint value $</label>
-          <input id="in-mint" type="number" inputmode="numeric" placeholder="0" oninput="FC.customMint(this.value)"></div>
+        <div><label class="f" for="in-custom">Custom model name</label>
+    <input id="in-custom" type="text" placeholder="e.g. Pixel 8" oninput="FC.customName(this.value)"></div>
+        <div style="flex:0 0 120px"><label class="f" for="in-mint">Mint value $</label>
+    <input id="in-mint" type="number" inputmode="numeric" placeholder="0" oninput="FC.customMint(this.value)"></div>
       </div>
     </div>
     <label class="f">Storage</label>
     <div class="chips" id="in-storage"></div>
     <div class="row2">
       <div><label class="f">Color</label><div id="colorwrap"></div></div>
-      <div><label class="f">Carrier / SIM</label>
-        <select id="in-carrier" onchange="FC.field('carrier',this.value)">
+      <div><label class="f" for="in-carrier">Carrier / SIM</label>
+    <select id="in-carrier" onchange="FC.field('carrier',this.value)" aria-label="Carrier or SIM lock status">
           <option>Unlocked</option><option>AT&amp;T</option><option>T-Mobile</option>
           <option>Verizon</option><option>Other / unknown</option>
         </select></div>
     </div>
     <label class="f">Accessories included (move the price)</label>
     <div class="chips" id="in-accs"></div>
-    <input id="in-acc" type="text" placeholder="anything else: case, screen protector…" style="margin-top:8px" oninput="FC.field('accessories',this.value)">
+    <input id="in-acc" type="text" placeholder="anything else: case, screen protector…" style="margin-top:8px" oninput="FC.field('accessories',this.value)" aria-label="Other accessories included">
   </div>
   <div class="card provcard" id="provcard"></div>
   <div class="row2">
-    <button class="btn ghost" style="margin:0" onclick="FC.comps('ebay')">📊 eBay sold comps</button>
-    <button class="btn ghost" style="margin:0" onclick="FC.comps('swappa')">📊 Swappa prices</button>
+    <button class="btn ghost" style="margin:0" onclick="FC.comps('ebay')"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M9.5 20V4M15 20v-7M20.5 20V7"/></svg> eBay sold comps</button>
+    <button class="btn ghost" style="margin:0" onclick="FC.comps('swappa')"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M9.5 20V4M15 20v-7M20.5 20V7"/></svg> Swappa prices</button>
   </div>
-  <button class="btn" onclick="FC.startInspection()">▶ Start Inspection</button>
-  <button class="btn ghost" onclick="FC.newPhone()">↺ Clear / new phone</button>
+  <button class="btn" onclick="FC.startInspection()"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M7 4.5 19 12 7 19.5z"/></svg> Start Inspection</button>
+  <button class="btn ghost" onclick="FC.newPhone()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 3.5V9h-5.5"/></svg> Clear / new phone</button>
 </section>
 
 <!-- ============ 2+3. CHECKLIST + GRADE/PRICE ENGINE ============ -->
 <section id="scr-check" class="screen">
   <div id="banner" class="banner idle" role="status" aria-live="polite" aria-atomic="true"></div>
-  <div id="timerrow">⏱ <span id="timer">0:00</span><span style="opacity:.7">/ 8:00 target</span>
+  <div id="timerrow"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5.5l3.5 2"/></svg> <span id="timer">0:00</span><span style="opacity:.7">/ 8:00 target</span>
     <button class="chip" style="margin-left:auto" onclick="FC.timerReset()">Reset</button>
-    <button class="chip" onclick="FC.comps('ebay')" title="eBay sold comps" aria-label="eBay sold comps">📊</button>
-    <button class="chip bridgebtn hidden" onclick="FC.autoRead()" aria-label="Auto-read the connected phone">🔌</button>
+    <button class="chip" onclick="FC.comps('ebay')" title="eBay sold comps" aria-label="eBay sold comps"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M9.5 20V4M15 20v-7M20.5 20V7"/></svg></button>
+    <button class="chip bridgebtn hidden" onclick="FC.autoRead()" aria-label="Auto-read the connected phone"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M7 8h10v3.5a5 5 0 0 1-10 0zM12 16.5V21"/></svg></button>
   </div>
   <div id="prog"><i></i></div>
   <div class="card gradecard" id="gradecard"></div>
@@ -267,17 +278,17 @@ main{position:relative;z-index:2}
   <div class="chips" id="invfilters" style="margin-bottom:10px"></div>
   <div id="invlist"></div>
   <div class="row2" style="margin-top:12px">
-    <button class="btn ghost" onclick="FC.exportCSV()">⬇ CSV</button>
-    <button class="btn ghost" onclick="FC.copyCSV()">📋 Copy CSV</button>
-    <button class="btn ghost" onclick="document.getElementById('csvfile').click()">⬆ Import</button>
+    <button class="btn ghost" onclick="FC.exportCSV()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 11.5l5 5 5-5M5 20.5h14"/></svg> CSV</button>
+    <button class="btn ghost" onclick="FC.copyCSV()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v11H9zM5 15V4h10"/></svg> Copy</button>
+    <button class="btn ghost" onclick="document.getElementById('csvfile').click()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V8M7 12.5l5-5 5 5M5 3.5h14"/></svg> Import</button>
   </div>
-  <input id="csvfile" type="file" accept=".csv,text/csv" class="hidden" onchange="FC.importCSV(this)">
+  <input id="csvfile" type="file" accept=".csv,text/csv" class="hidden" onchange="FC.importCSV(this)" aria-label="Import inventory CSV file">
 </section>
 
 <!-- ============ 6. LISTING GENERATOR ============ -->
 <section id="scr-listings" class="screen">
   <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-    <button class="chip" onclick="FC.nav('inv')">← Inventory</button>
+    <button class="chip" onclick="FC.nav('inv')"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Inventory</button>
     <h2 style="margin:0">Listings</h2>
   </div>
   <div class="card" id="listhead" style="margin-top:10px"></div>
@@ -287,25 +298,31 @@ main{position:relative;z-index:2}
 <!-- ============ BILL OF SALE ============ -->
 <section id="scr-bos" class="screen">
   <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-    <button class="chip" onclick="FC.nav('inv')">← Inventory</button>
+    <button class="chip" onclick="FC.nav('inv')"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg> Inventory</button>
     <h2 style="margin:0">Bill of sale</h2>
   </div>
   <div class="card" id="boshead" style="margin-top:10px"></div>
   <div class="card">
     <div class="row2">
-      <div><label class="f">Buyer (you)</label><input id="bos-buyer" type="text" oninput="FC.bosField('buyer',this.value)"></div>
-      <div><label class="f">Seller name</label><input id="bos-seller" type="text" placeholder="from their ID" oninput="FC.bosField('seller',this.value)"></div>
+      <div><label class="f" for="bos-buyer">Buyer (you)</label>
+    <input id="bos-buyer" type="text" oninput="FC.bosField('buyer',this.value)"></div>
+      <div><label class="f" for="bos-seller">Seller name</label>
+    <input id="bos-seller" type="text" placeholder="from their ID" oninput="FC.bosField('seller',this.value)"></div>
     </div>
     <div class="row2">
-      <div><label class="f">Price paid $</label><input id="bos-price" type="number" inputmode="numeric" oninput="FC.bosField('price',this.value)"></div>
-      <div><label class="f">Location</label><input id="bos-loc" type="text" placeholder="city / spot" oninput="FC.bosField('loc',this.value)"></div>
+      <div><label class="f" for="bos-price">Price paid $</label>
+    <input id="bos-price" type="number" inputmode="numeric" oninput="FC.bosField('price',this.value)"></div>
+      <div><label class="f" for="bos-loc">Location</label>
+    <input id="bos-loc" type="text" placeholder="city / spot" oninput="FC.bosField('loc',this.value)"></div>
     </div>
     <label class="f">Seller signature (finger-sign below)</label>
-    <canvas id="sigpad" width="640" height="200"></canvas>
+    <canvas id="sigpad" width="640" height="200" role="img" tabindex="0"
+  aria-label="Signature pad · the seller signs here with a finger or mouse"></canvas>
+  <div style="font-size:12px;color:var(--dim);margin-top:6px">No touchscreen? Sign with a mouse, or print the PDF and sign it by hand.</div>
     <div class="row2" style="margin-top:10px">
-      <button class="btn ghost" style="margin:0" onclick="FC.sigClear()">✕ Clear</button>
-      <button class="btn green" style="margin:0" onclick="FC.bosPNG()">🧾 PNG receipt</button>
-      <button class="btn ghost" style="margin:0" onclick="FC.bosPDF()">📄 PDF</button>
+      <button class="btn ghost" style="margin:0" onclick="FC.sigClear()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg> Clear</button>
+      <button class="btn green" style="margin:0" onclick="FC.bosPNG()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9.5 8h5M9.5 12h5"/></svg> PNG</button>
+      <button class="btn ghost" style="margin:0" onclick="FC.bosPDF()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9.5 8h5M9.5 12h5"/></svg> PDF</button>
     </div>
     <div style="font-size:12px;color:var(--dim);margin-top:8px">Generates a signed receipt · PNG to text the seller, PDF to print or file. Simple protection that most flippers skip.</div>
   </div>
@@ -317,12 +334,12 @@ main{position:relative;z-index:2}
   <h2>Market prices</h2>
   <div class="card">
     <div id="syncstatus" style="font-size:13.5px;color:var(--dim);margin-bottom:4px"></div>
-    <button class="btn" onclick="FC.syncNow()">↻ Sync prices now</button>
+    <button class="btn" onclick="FC.syncNow()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 3.5V9h-5.5"/></svg> Sync prices now</button>
     <button class="btn ghost" onclick="FC.togglePriceSync()" id="syncbtn">…</button>
   </div>
   <h2>Your data</h2>
   <div class="card">
-    <button class="btn" onclick="FC.exportCSV()">⬇ Download my flip log (CSV)</button>
+    <button class="btn" onclick="FC.exportCSV()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 11.5l5 5 5-5M5 20.5h14"/></svg> Download my flip log (CSV)</button>
     <div class="row2" style="margin-top:10px">
       <button class="btn ghost" style="margin:0" onclick="FC.backup()">Backup</button>
       <button class="btn ghost" style="margin:0" onclick="FC.copyBackup()">Copy backup</button>
@@ -332,7 +349,7 @@ main{position:relative;z-index:2}
       <button class="btn ghost" style="margin:0" onclick="document.getElementById('restorefile').click()">Restore file</button>
       <button class="btn ghost" style="margin:0;color:var(--red);border-color:#5c2326" onclick="FC.clearAll()">Erase all</button>
     </div>
-    <input id="restorefile" type="file" accept=".json,application/json" class="hidden" onchange="FC.restore(this)">
+    <input id="restorefile" type="file" accept=".json,application/json" class="hidden" onchange="FC.restore(this)" aria-label="Restore from backup file">
     <div style="font-size:12px;color:var(--dim);margin-top:8px">Move to a new device: Copy backup there → Paste backup here. Everything stays on your devices.</div>
   </div>
   <details class="adv"><summary>Phone values · what a clean one sells for</summary>
@@ -340,29 +357,29 @@ main{position:relative;z-index:2}
   </details>
   <details class="adv"><summary>Connections · eBay drafts &amp; AI wear check (optional)</summary>
     <div class="card">
-      <label class="f">eBay token (Sell API user token from developer.ebay.com)</label>
-      <input id="set-ebay" type="text" placeholder="v^1.1#i^1#…" oninput="FC.ebayTok(this.value)">
+      <label class="f" for="set-ebay">eBay token (Sell API user token from developer.ebay.com)</label>
+    <input id="set-ebay" type="text" placeholder="v^1.1#i^1#…" oninput="FC.ebayTok(this.value)">
       <div style="font-size:12px;color:var(--dim);margin:4px 0 8px">Adds a "Draft on eBay" button to listings · creates the draft, you add photos in the eBay app. Goes through the USB bridge.</div>
-      <label class="f">Anthropic API key (console.anthropic.com)</label>
-      <input id="set-aikey" type="text" placeholder="sk-ant-…" oninput="FC.aiKey(this.value)">
-      <div style="font-size:12px;color:var(--dim);margin-top:4px">Adds "📸 AI wear check" to the checklist · photos in, suggested cosmetic grade out. Keys never leave this device.</div>
+      <label class="f" for="set-aikey">Anthropic API key (console.anthropic.com)</label>
+    <input id="set-aikey" type="text" placeholder="sk-ant-…" oninput="FC.aiKey(this.value)">
+      <div style="font-size:12px;color:var(--dim);margin-top:4px">Adds an AI wear check to the checklist · photos in, suggested cosmetic grade out. Keys never leave this device.</div>
     </div>
   </details>
   <details class="adv"><summary>Branding · put your own name on it</summary>
     <div class="card">
       <div class="row2">
-        <div><label class="f">App name</label>
-          <input id="set-brand" type="text" oninput="FC.brandName(this.value)"></div>
-        <div style="flex:0 0 110px"><label class="f">Accent</label>
-          <input id="set-accent" type="color" style="height:49px;padding:6px" oninput="FC.brandAccent(this.value)"></div>
+        <div><label class="f" for="set-brand">App name</label>
+    <input id="set-brand" type="text" oninput="FC.brandName(this.value)"></div>
+        <div style="flex:0 0 110px"><label class="f" for="set-accent">Accent</label>
+    <input id="set-accent" type="color" style="height:49px;padding:6px" oninput="FC.brandAccent(this.value)"></div>
       </div>
     </div>
   </details>
   <details class="adv"><summary>Share FlipCheck · earn on referrals</summary>
     <div class="card">
-      <label class="f">Your referral / affiliate link</label>
-      <input id="set-aff" type="text" placeholder="https://…" oninput="FC.affLink(this.value)">
-      <button class="btn ghost" onclick="FC.copyAff()">📋 Copy ready-to-post promo (your link inside)</button>
+      <label class="f" for="set-aff">Your referral / affiliate link</label>
+    <input id="set-aff" type="text" placeholder="https://…" oninput="FC.affLink(this.value)">
+      <button class="btn ghost" onclick="FC.copyAff()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v11H9zM5 15V4h10"/></svg> Copy ready-to-post promo (your link inside)</button>
       <div style="font-size:12px;color:var(--dim);margin-top:6px">No link yet? Email
         <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck affiliate" style="color:var(--blue)">flipchecklist@gmail.com</a>
         · resellers earn 30% per copy. The promo text drops your link in automatically.</div>
@@ -374,16 +391,16 @@ main{position:relative;z-index:2}
     <div class="grid2" id="set-storadj"></div>
     <label class="f">Per-carrier discount (% off mint)</label>
     <div class="grid2" id="set-carriers"></div>
-    <label class="f">Fallback % for carriers not listed</label>
+    <label class="f" for="set-carrier">Fallback % for carriers not listed</label>
     <input id="set-carrier" type="number" inputmode="numeric" oninput="FC.sUpd('carrierLockPct',this.value)">
     <div class="grid2" id="set-extras"></div>
   </div>
   <h2>Grade engine</h2>
   <div class="card">
     <div class="grid2" id="set-grades"></div>
-    <label class="f">Max buy = list × margin %</label>
+    <label class="f" for="set-margin">Max buy = list × margin %</label>
     <input id="set-margin" type="number" inputmode="numeric" oninput="FC.sUpd('margin',this.value)">
-    <label class="f">Per functional-fail penalty (pts, also $ off list)</label>
+    <label class="f" for="set-fail">Per functional-fail penalty (pts, also $ off list)</label>
     <input id="set-fail" type="number" inputmode="numeric" oninput="FC.sUpd('failPenalty',this.value)">
   </div>
   <h2>Cosmetic deductions (pts, also $ off list)</h2>
@@ -394,7 +411,7 @@ main{position:relative;z-index:2}
   </div>
   <h2>Storage options</h2>
   <div class="card">
-    <input id="set-storages" type="text" onchange="FC.storUpd(this.value)">
+    <input id="set-storages" type="text" aria-label="Storage options, comma separated" onchange="FC.storUpd(this.value)">
     <div class="help" style="font-size:12.5px;color:var(--dim);margin-top:6px">Comma-separated list</div>
   </div>
   </details>
@@ -418,6 +435,46 @@ main{position:relative;z-index:2}
 
 <script>
 'use strict';
+/* ================= icon set =================
+   One hand-drawn monoline set so the whole product speaks with one voice.
+   Emoji were rendering as full-colour platform glyphs next to our monoline
+   chrome, which is what made the UI read as generic. */
+const IC_PATHS={
+  plug:'M9 3v5M15 3v5M7 8h10v3.5a5 5 0 0 1-10 0zM12 16.5V21',
+  chart:'M4 20V10M9.5 20V4M15 20v-7M20.5 20V7',
+  save:'M5 4h10.5L19 7.5V20H5zM8.5 4v5h7M8.5 20v-6h7v6',
+  copy:'M9 9h10v11H9zM5 15V4h10',
+  receipt:'M6 3h12v18l-3-2-3 2-3-2-3 2zM9.5 8h5M9.5 12h5',
+  share:'M12 15V3M8.5 6.5 12 3l3.5 3.5M5 13v6.5h14V13',
+  camera:'M4 8h3.5L9 5.5h6L16.5 8H20v12H4zM12 17a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8z',
+  trash:'M4.5 6.5h15M9.5 6.5V4h5v2.5M7 6.5 8 21h8l1-14.5M10.5 10.5v6M13.5 10.5v6',
+  plus:'M12 5v14M5 12h14',
+  down:'M12 3v13M7 11.5l5 5 5-5M5 20.5h14',
+  up:'M12 21V8M7 12.5l5-5 5 5M5 3.5h14',
+  refresh:'M20 12a8 8 0 1 1-2.6-5.9M20 3.5V9h-5.5',
+  play:'M7 4.5 19 12 7 19.5z',
+  box:'M3 7.5 12 3l9 4.5-9 4.5zM3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5',
+  cable:'M6 3v6a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v6M4 3h4M16 21h4',
+  cart:'M3 4h2.5l2.5 11h9l2.5-8H7M10 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2m7 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2',
+  clock:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5.5l3.5 2',
+  check:'M4.5 12.5 9.5 17.5 19.5 6.5',
+  x:'M6 6l12 12M18 6 6 18',
+  ban:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM5.6 5.6l12.8 12.8',
+  warn:'M12 3.5 22 20H2zM12 10v4.5M12 17.4v.2',
+  note:'M5 4h11l3 3v13H5zM8.5 10h7M8.5 14h4',
+  trend:'M4 17l5.5-6 3.5 3.5L20 7M20 7h-4.5M20 7v4.5',
+  home:'M3 10.5 12 3l9 7.5M5.5 9.5V21h13V9.5',
+  ext:'M14 4h6v6M20 4l-8.5 8.5M18 14v6H4V6h6',
+  back:'M15 5 8 12l7 7',
+  bolt:'M13 2 4.5 13.5h5L10 22l8.5-11.5h-5z'
+};
+function ic(n,size,cls){
+  const d=IC_PATHS[n];if(!d)return '';
+  const s=size||18;
+  return '<svg class="ic'+(cls?' '+cls:'')+'" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" '+
+    'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" '+
+    'stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>';
+}
 /* ================= helpers ================= */
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
@@ -427,7 +484,7 @@ const money=v=>'$'+(Math.round(v)||0);
 const dateStr=ts=>{const d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate();};
 function toast(msg,ms=2600){const t=$('#toast');t.textContent=msg;t.classList.add('show');
 clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),ms);}
-function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('⚠️ Could not save · storage full?');}}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('Could not save · storage full?');}}
 function load(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}}
 async function copyText(t){
   try{await navigator.clipboard.writeText(t);toast('Copied ✓');return;}catch(e){}
@@ -591,7 +648,7 @@ const CHECKLIST=[
    opts:[{v:'pass',l:'GOOD ✓',c:'ok'},{v:'wear',l:'MINOR WEAR',c:'mid'},{v:'fail',l:'NOT WORKING',c:'bad'}]},
   {id:'reset',t:'check',label:'Factory reset completed',
    help:'Settings > General > Transfer or Reset iPhone > Erase All Content and Settings',
-   note:'⚠️ Do this AFTER cash changes hands and the phone is yours · never mid-negotiation.'}
+   note:'Do this AFTER cash changes hands and the phone is yours · never mid-negotiation.'}
 ];
 function labelOf(id){const it=CHECKLIST.find(x=>x.id===id);return SHORT_LABELS[id]||(it?it.label:id);}
 
@@ -694,16 +751,16 @@ function renderBanner(){
   const bar=$('#prog i');if(bar)bar.style.width=Math.round(100*done/CHECKLIST.length)+'%';
   if(g.hard.length){
     el.className='banner bad';
-    el.innerHTML='<div class="btitle">🚫 DO NOT BUY</div><div class="bsub">'+g.hard.map(esc).join(' · ')+'</div>';
+    el.innerHTML='<div class="btitle"><svg class="bic" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>DO NOT BUY</div><div class="bsub">'+g.hard.map(esc).join(' · ')+'</div>';
   }else if(!g.mint){
     el.className='banner idle';
     el.innerHTML='<div class="btitle" style="font-size:18px">Pick a model on Intake to price this phone</div>';
   }else if(g.manual){
     el.className='banner warn';
-    el.innerHTML='<div class="btitle">⚠️ MANUAL REVIEW</div><div class="bsub">3+ functional fails · Grade '+g.letter+' · '+g.score+' · would be Offer '+money(g.buy)+' / List '+money(g.list)+'</div>';
+    el.innerHTML='<div class="btitle"><svg class="bic" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 22 20H2zM12 10v4.5M12 17.4v.2"/></svg>MANUAL REVIEW</div><div class="bsub">3+ functional fails · Grade '+g.letter+' · '+g.score+' · would be Offer '+money(g.buy)+' / List '+money(g.list)+'</div>';
   }else if(g.score>=90&&g.fails===0&&coreChecksDone(session)){
     el.className='banner good';
-    el.innerHTML='<div class="btitle">💪 STRONG BUY · OFFER '+money(g.buy)+'</div><div class="bsub">Grade A · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
+    el.innerHTML='<div class="btitle"><svg class="bic" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>STRONG BUY · OFFER '+money(g.buy)+'</div><div class="bsub">Grade A · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
   }else if(done===0){
     /* nothing answered yet · show the SAME cautious Grade-B provisional the
        intake screen shows. Starting at a perfect score would quote a higher
@@ -750,7 +807,7 @@ function buildChecklist(){
     const remaining=CHECKLIST.filter(it=>it.t==='battery'?session.battery==='':!session.checks[it.id])
       .map(it=>SHORT_LABELS[it.id]||it.label.split('—')[0].split('(')[0].trim());
     h+='<div class="item" style="border-color:var(--blue)">'+
-      '<div class="lab">🔌 '+(ar.simulated?'Auto-read done · demo phone':'Auto-read done')+'</div>'+
+      '<div class="lab">'+ic('plug',16)+' '+(ar.simulated?'Auto-read done · demo phone':'Auto-read done')+'</div>'+
       (ar.simulated?'<div class="help" style="color:var(--blue)">This is a sample handset so you can see the flow. With the real app, plugging in your phone fills these same fields off the device itself.</div>':'')+
       '<div class="help">Filled from the cable: '+ar.filled.map(esc).join(', ')+'</div>'+
       (remaining.length?
@@ -792,7 +849,7 @@ function buildChecklist(){
       h+='<div class="item'+(session.battery!==''?' done':'')+'">'+
         '<div class="lab">'+it.label+'</div>'+
         '<div class="help">'+it.help+'</div>'+
-        '<input type="number" inputmode="numeric" min="0" max="100" placeholder="e.g. 87" value="'+esc(session.battery)+'"'+
+        '<input type="number" aria-label="Battery health percentage" inputmode="numeric" min="0" max="100" placeholder="e.g. 87" value="'+esc(session.battery)+'"'+
         ' oninput="FC.batt(this.value,this)" style="margin-top:8px;font-size:22px;font-weight:700;text-align:center">'+
         '</div>';
     }
@@ -801,17 +858,17 @@ function buildChecklist(){
       h+='<div class="item'+(v==='clean'?' done':v==='flagged'?' failed':'')+'">'+
         '<div class="lab">'+it.label+'</div>'+
         '<div class="help">'+it.help+'</div>'+
-        '<input type="text" inputmode="numeric" maxlength="17" placeholder="IMEI (from *#06#)" value="'+esc(session.imei)+'"'+
+        '<input type="text" aria-label="IMEI number" inputmode="numeric" maxlength="17" placeholder="IMEI (from *#06#)" value="'+esc(session.imei)+'"'+
         ' oninput="FC.imei(this.value)" style="margin-top:8px">'+
         '<div id="imeistat" style="font-size:12.5px;margin-top:6px">'+imeiStatHTML()+'</div>'+
         '<div class="row2" style="margin-top:8px">'+
-        '<button class="btn ghost" style="margin:0" onclick="FC.copyImei()">📋 Copy</button>'+
+        '<button class="btn ghost" style="margin:0" onclick="FC.copyImei()">'+ic('copy',15)+' Copy</button>'+
         '<button class="btn ghost" style="margin:0" onclick="FC.openCheck(\'https://www.stolenphonechecker.org/\')">Stolen ↗</button>'+
         '<button class="btn ghost" style="margin:0" onclick="FC.openCheck(\'https://swappa.com/imei\')">Swappa ↗</button>'+
         '</div>'+
         '<div class="seg">'+
         '<button class="ok'+(v==='clean'?' sel':'')+'" onclick="FC.seg(\'imei_check\',\'clean\')">CLEAN ✓</button>'+
-        '<button class="bad'+(v==='flagged'?' sel':'')+'" onclick="FC.seg(\'imei_check\',\'flagged\')">FLAGGED 🚫</button>'+
+        '<button class="bad'+(v==='flagged'?' sel':'')+'" onclick="FC.seg(\'imei_check\',\'flagged\')">FLAGGED</button>'+
         '</div></div>';
     }
     if(it.id==='screen'){
@@ -820,7 +877,7 @@ function buildChecklist(){
       lastCosm=Object.keys(settings.cosmetic);
       h+='<div class="item"><div style="display:flex;justify-content:space-between;align-items:center">'+
         '<div class="lab">Cosmetic condition</div>'+
-        (settings.aikey?'<button class="chip" onclick="FC.aiGrade()">📸 AI wear check</button>':'')+
+        (settings.aikey?'<button class="chip" onclick="FC.aiGrade()">'+ic('camera',15)+' AI wear check</button>':'')+
         '</div><div class="chips" style="margin-top:10px">'+
         lastCosm.map((c,i)=>
           '<button class="chip'+(session.cosmetic===c?' sel':'')+'" onclick="FC.cosmIdx('+i+')">'+esc(c)+'</button>'
@@ -828,8 +885,8 @@ function buildChecklist(){
     }
   });
   h+='<div class="item"><div class="lab">Notes</div>'+
-    '<textarea placeholder="scratch on corner, seller story, meetup spot…" oninput="FC.notes(this.value)">'+esc(session.notes)+'</textarea></div>';
-  h+='<button class="btn green" onclick="FC.save()">💾 Save &amp; Draft Listings</button>'+
+    '<textarea aria-label="Notes about this phone" placeholder="scratch on corner, seller story, meetup spot…" oninput="FC.notes(this.value)">'+esc(session.notes)+'</textarea></div>';
+  h+='<button class="btn green" onclick="FC.save()"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10.5L19 7.5V20H5zM8.5 4v5h7M8.5 20v-6h7v6"/></svg> Save &amp; Draft Listings</button>'+
     '<div style="text-align:center;font-size:12.5px;color:var(--dim);margin-top:8px">Logs this phone to inventory and opens ready-to-post listings</div>';
   wrap.innerHTML=h;
 }
@@ -853,18 +910,18 @@ function renderIntake(){
   /* color: real per-model dropdown (pricing adjusts itself); text input otherwise */
   const clist=!session.custom?MODEL_COLORS[session.model]:null;
   if(clist&&!session.colorFree){
-    $('#colorwrap').innerHTML='<select onchange="FC.colorSel(this.value)">'+
+    $('#colorwrap').innerHTML='<select aria-label="Phone colour" onchange="FC.colorSel(this.value)">'+
       '<option value="">— Pick a colour —</option>'+
       clist.map(c=>'<option'+(session.color===c[0]?' selected':'')+'>'+c[0]+'</option>').join('')+
       '<option value="__other">Other / not listed</option></select>';
   }else{
-    $('#colorwrap').innerHTML='<input type="text" placeholder="Midnight" value="'+esc(session.color||'')+'"'+
+    $('#colorwrap').innerHTML='<input type="text" aria-label="Phone colour" placeholder="Midnight" value="'+esc(session.color||'')+'"'+
       ' oninput="FC.field(\'color\',this.value)">'+
       (clist?'<button class="chip" style="margin-top:6px" onclick="FC.colorList()">↩ pick from list</button>':'');
   }
   $('#in-carrier').value=session.carrier||'Unlocked';
   const accs=session.accs||{};
-  $('#in-accs').innerHTML=[['box','📦 Original box'],['cable','🔌 Cable / charger']].map(p=>
+  $('#in-accs').innerHTML=[['box',ic('box',15)+' Original box'],['cable',ic('cable',15)+' Cable / charger']].map(p=>
     '<button class="chip'+(accs[p[0]]?' sel':'')+'" onclick="FC.accTgl(\''+p[0]+'\')">'+p[1]+'</button>').join('');
   $('#in-acc').value=session.accessories||'';
   updateProv();
@@ -929,7 +986,7 @@ function saveEntry(){
     return;
   }
   const g=computeGrade(session);
-  if(g.hard.length&&!confirm('🚫 DO NOT BUY · '+g.hard.join(', ')+'.\nLog it anyway as a walk-away / dead entry?'))return;
+  if(g.hard.length&&!confirm('DO NOT BUY · '+g.hard.join(', ')+'.\nLog it anyway as a walk-away / dead entry?'))return;
   const entry={
     id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     ts:Date.now(),model:modelName,storage:session.storage,color:session.color,
@@ -1026,7 +1083,7 @@ function photoThumbs(){
   return photoFiles.length?photoFiles.map((f,i)=>
     '<img src="'+photoURL(f)+'" onclick="FC.photoDel('+i+')" alt="photo" '+
     'style="width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">'
-  ).join(''):'<span style="color:var(--dim);font-size:13px">none yet · tap ＋ Add</span>';
+  ).join(''):'<span style="color:var(--dim);font-size:13px">none yet · tap + Add</span>';
 }
 function openListings(id){
   const e=inv.find(x=>x.id===id);if(!e){toast('Entry not found');return;}
@@ -1035,25 +1092,25 @@ function openListings(id){
   if(!e.listings)e.listings=genListings(e);
   else if(!e.listings.eb)e.listings.eb=genListings(e).eb; /* entries saved before v1.1 */
   $('#listhead').innerHTML='<b>'+esc(e.model)+' '+esc(e.storage||'')+'</b> · Grade '+e.grade+' · List '+money(e.listPrice)+
-    (e.hard&&e.hard.length?'<div style="color:var(--red);font-weight:700;margin-top:6px">🚫 DO NOT BUY was flagged: '+e.hard.map(esc).join(' · ')+' · list as PARTS / AS-IS only, if at all.</div>':'')+
+    (e.hard&&e.hard.length?'<div style="color:var(--red);font-weight:700;margin-top:6px">DO NOT BUY was flagged: '+e.hard.map(esc).join(' · ')+' · list as PARTS / AS-IS only, if at all.</div>':'')+
     '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Edit freely below, then copy per platform. Photos are the only manual step left.</div>';
   const L=e.listings;
   const canShare=typeof navigator.share==='function';
   const photosCard='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">'+
-    '<b>📷 Photos ('+photoFiles.length+')</b>'+
-    '<button class="chip" onclick="document.getElementById(\'photoin\').click()">＋ Add</button></div>'+
+    '<b>'+ic('camera',16)+' Photos ('+photoFiles.length+')</b>'+
+    '<button class="chip" onclick="document.getElementById(\'photoin\').click()">'+ic('plus',15)+' Add</button></div>'+
     '<div class="chips" style="margin-top:10px">'+photoThumbs()+'</div>'+
     '<div style="font-size:12px;color:var(--dim);margin-top:8px">Shots: front · back · screen-on · ports · any wear. '+
-    (canShare?'Photos ride along when you tap 📤 Share. ':'Copy a draft, then attach these photos in the app you post to. ')+
+    (canShare?'Photos ride along when you tap Share. ':'Copy a draft, then attach these photos in the app you post to. ')+
     'Tap a thumbnail to remove · photos are never stored in the app.</div>'+
-    '<input id="photoin" type="file" accept="image/*" multiple class="hidden" onchange="FC.photosPicked(this)"></div>';
+    '<input id="photoin" type="file" accept="image/*" multiple class="hidden" onchange="FC.photosPicked(this)" aria-label="Add listing photos"></div>';
   $('#listbody').innerHTML=photosCard+[['fb','Facebook Marketplace'],['ou','OfferUp / Craigslist'],['sw','Swappa'],['eb','eBay']].map(p=>
     '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px">'+
     '<b>'+p[1]+'</b><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">'+
-    (p[0]==='eb'&&((settings.ebay||{}).token||'').trim()?'<button class="chip" onclick="FC.ebayDraft()">🛒 Draft on eBay</button>':'')+
-    (canShare?'<button class="chip" onclick="FC.shareListing(\''+p[0]+'\')">📤 Share</button>':'')+
-    '<button class="chip" onclick="FC.copyListing(\''+p[0]+'\')">📋 Copy</button></span></div>'+
-    '<textarea rows="10" oninput="FC.listEdit(\''+p[0]+'\',this.value)">'+esc(L[p[0]])+'</textarea></div>'
+    (p[0]==='eb'&&((settings.ebay||{}).token||'').trim()?'<button class="chip" onclick="FC.ebayDraft()">'+ic('cart',15)+' Draft on eBay</button>':'')+
+    (canShare?'<button class="chip" onclick="FC.shareListing(\''+p[0]+'\')">'+ic('share',15)+' Share</button>':'')+
+    '<button class="chip" onclick="FC.copyListing(\''+p[0]+'\')">'+ic('copy',15)+' Copy</button></span></div>'+
+    '<textarea rows="10" aria-label="'+p[1]+' listing draft" oninput="FC.listEdit(\''+p[0]+'\',this.value)">'+esc(L[p[0]])+'</textarea></div>'
   ).join('')+
   '<button class="btn ghost" onclick="FC.regen()">↻ Regenerate drafts (overwrites edits)</button>';
   showScreen('listings');
@@ -1228,7 +1285,7 @@ function renderInv(){
           xy.map(p=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.6" fill="var(--blue)"/>').join('')+
           '</svg><div style="font-size:11.5px;color:var(--dim)">Sold ÷ list per sale, oldest → newest · dashed line = full list price</div></div>';
       }
-      fitEl.innerHTML='<div class="card" style="padding:12px 14px"><b style="font-size:14px">📈 Your market fit</b>'+
+      fitEl.innerHTML='<div class="card" style="padding:12px 14px"><b style="font-size:14px">'+ic('trend',16)+' Your market fit</b>'+
         rows.map(x=>'<div style="font-size:13px;color:var(--dim);margin-top:4px">'+esc(x.m)+
           ' · sells at <b style="color:var(--tx)">'+Math.round(x.r*100)+'%</b> of your list (n='+x.n+')</div>').join('')+
         spark+
@@ -1244,7 +1301,7 @@ function renderInv(){
     (inv.length?
      '<div class="card" style="color:var(--dim);text-align:center">Nothing with this status yet.</div>':
      '<div class="card" style="text-align:center">'+
-       '<div style="font-size:34px;line-height:1;margin-bottom:8px">📦</div>'+
+       '<div style="color:var(--dim);margin-bottom:10px">'+ic('box',38)+'</div>'+
        '<b style="font-size:16px">No phones logged yet</b>'+
        '<div style="color:var(--dim);font-size:13.5px;margin:8px 0 14px">Check your first phone and it lands here by itself · '+
        'every price, every answer, timestamped. You never type it up.</div>'+
@@ -1260,8 +1317,8 @@ function rowHTML(e){
     '<b style="font-size:16px">'+esc(e.model)+' '+esc(e.storage||'')+'</b>'+
     '<span class="badge g'+e.grade+'">'+e.grade+'·'+e.score+'</span>'+
     '<span class="pill '+stCls+'">'+esc(statusText(e.status))+'</span>'+
-    (e.hard&&e.hard.length?'<span class="pill st-dead">🚫 do not buy</span>':'')+
-    (e.manual?'<span class="pill st-returned">⚠ review</span>':'')+'</div>'+
+    (e.hard&&e.hard.length?'<span class="pill st-dead">Do not buy</span>':'')+
+    (e.manual?'<span class="pill st-returned">Review</span>':'')+'</div>'+
     '<div class="help">Buy '+money(e.buyPrice)+(e.paid?' · Paid '+money(e.paid):'')+
     ' · List '+money(e.listPrice)+(e.salePrice?' · Sold '+money(e.salePrice):'')+
     ' · '+dateStr(e.ts)+(e.imeiLast4?' · …'+esc(e.imeiLast4):'')+'</div>'+
@@ -1270,17 +1327,17 @@ function rowHTML(e){
 function editorHTML(e){
   return '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">'+
     '<label class="f">Status (auto-timestamps the change)</label>'+
-    '<select onchange="FC.setStatus(\''+e.id+'\',this.value)">'+
+    '<select aria-label="Status for this phone" onchange="FC.setStatus(\''+e.id+'\',this.value)">'+
     STATUSES.map(s=>'<option value="'+esc(s)+'"'+(s===e.status?' selected':'')+'>'+esc(statusText(s))+'</option>').join('')+'</select>'+
     '<div class="row2">'+
-    '<div><label class="f">Paid $</label><input type="number" inputmode="numeric" value="'+esc(e.paid||'')+'" oninput="FC.entryField(\''+e.id+'\',\'paid\',this.value)"></div>'+
-    '<div><label class="f">Sold $</label><input type="number" inputmode="numeric" value="'+esc(e.salePrice||'')+'" oninput="FC.entryField(\''+e.id+'\',\'salePrice\',this.value)"></div>'+
+    '<div><label class="f">Paid $</label><input type="number" aria-label="Amount paid" inputmode="numeric" value="'+esc(e.paid||'')+'" oninput="FC.entryField(\''+e.id+'\',\'paid\',this.value)"></div>'+
+    '<div><label class="f">Sold $</label><input type="number" aria-label="Amount sold for" inputmode="numeric" value="'+esc(e.salePrice||'')+'" oninput="FC.entryField(\''+e.id+'\',\'salePrice\',this.value)"></div>'+
     '</div>'+
-    '<label class="f">Notes</label><textarea oninput="FC.entryField(\''+e.id+'\',\'notes\',this.value)">'+esc(e.notes||'')+'</textarea>'+
+    '<label class="f">Notes</label><textarea aria-label="Notes for this entry" oninput="FC.entryField(\''+e.id+'\',\'notes\',this.value)">'+esc(e.notes||'')+'</textarea>'+
     '<div class="row2" style="margin-top:10px">'+
-    '<button class="btn ghost" style="margin:0" onclick="FC.openListings(\''+e.id+'\')">📝 Listings</button>'+
-    '<button class="btn ghost" style="margin:0" onclick="FC.openBoS(\''+e.id+'\')">🧾 Bill of Sale</button>'+
-    '<button class="btn ghost" style="margin:0;color:var(--red);border-color:#5c2326" onclick="FC.del(\''+e.id+'\')">🗑</button>'+
+    '<button class="btn ghost" style="margin:0" onclick="FC.openListings(\''+e.id+'\')">'+ic('note',15)+' Listings</button>'+
+    '<button class="btn ghost" style="margin:0" onclick="FC.openBoS(\''+e.id+'\')">'+ic('receipt',15)+' Bill of Sale</button>'+
+    '<button class="btn ghost" style="margin:0;color:var(--red);border-color:#5c2326" onclick="FC.del(\''+e.id+'\')">'+ic('trash',16)+'</button>'+
     '</div></div>';
 }
 
@@ -1341,34 +1398,34 @@ function renderSettings(){
   const s=settings;
   $('#set-models').innerHTML=s.models.map((m,i)=>
     '<div class="row2" style="margin-bottom:8px;align-items:center">'+
-    '<input type="text" value="'+esc(m.name)+'" oninput="FC.mUpd('+i+',\'name\',this.value)">'+
-    '<input type="number" inputmode="numeric" value="'+esc(m.mint)+'" style="flex:0 0 100px" oninput="FC.mUpd('+i+',\'mint\',this.value)">'+
+    '<input type="text" aria-label="Model name" value="'+esc(m.name)+'" oninput="FC.mUpd('+i+',\'name\',this.value)">'+
+    '<input type="number" aria-label="Clean market value for '+esc(m.name)+'" inputmode="numeric" value="'+esc(m.mint)+'" style="flex:0 0 100px" oninput="FC.mUpd('+i+',\'mint\',this.value)">'+
     '<button class="chip" style="flex:0 0 auto" onclick="FC.mDel('+i+')">✕</button></div>'
-  ).join('')+'<button class="btn ghost" onclick="FC.mAdd()">＋ Add model</button>';
+  ).join('')+'<button class="btn ghost" onclick="FC.mAdd()">'+ic('plus',15)+' Add model</button>';
   $('#set-grades').innerHTML=['A','B','C','D'].map(g=>
     '<div><label class="f">Grade '+g+' × %</label>'+
-    '<input type="number" inputmode="numeric" value="'+esc(s.gradeMult[g])+'" oninput="FC.gUpd(\''+g+'\',this.value)"></div>'
+    '<input type="number" aria-label="Grade '+g+' multiplier percent" inputmode="numeric" value="'+esc(s.gradeMult[g])+'" oninput="FC.gUpd(\''+g+'\',this.value)"></div>'
   ).join('');
   $('#set-margin').value=s.margin;
   $('#set-fail').value=s.failPenalty;
   lastCosm=Object.keys(s.cosmetic);   /* index-addressed: keys may come from a restored backup */
   $('#set-cosm').innerHTML=lastCosm.map((c,i)=>
     '<div><label class="f">'+esc(c)+' (−pts)</label>'+
-    '<input type="number" inputmode="numeric" value="'+esc(s.cosmetic[c])+'" oninput="FC.cUpdIdx('+i+',this.value)"></div>'
+    '<input type="number" aria-label="Points deducted for '+esc(c)+'" inputmode="numeric" value="'+esc(s.cosmetic[c])+'" oninput="FC.cUpdIdx('+i+',this.value)"></div>'
   ).join('');
   $('#set-batt').innerHTML=[['t85','85–89%'],['t80','80–84%'],['t0','Below 80%']].map(p=>
     '<div><label class="f">'+p[1]+' (−pts)</label>'+
-    '<input type="number" inputmode="numeric" value="'+esc(s.battery[p[0]])+'" oninput="FC.bUpd(\''+p[0]+'\',this.value)"></div>'
+    '<input type="number" aria-label="Points deducted for battery '+p[1]+'" inputmode="numeric" value="'+esc(s.battery[p[0]])+'" oninput="FC.bUpd(\''+p[0]+'\',this.value)"></div>'
   ).join('');
   $('#set-storadj').innerHTML=s.storages.map((st,i)=>
     '<div><label class="f">'+esc(st)+' (±$ vs base)</label>'+
-    '<input type="number" inputmode="numeric" value="'+esc((s.storageAdj||{})[st]??0)+'" oninput="FC.saUpd('+i+',this.value)"></div>'
+    '<input type="number" aria-label="Price adjustment for '+esc(st)+'" inputmode="numeric" value="'+esc((s.storageAdj||{})[st]??0)+'" oninput="FC.saUpd('+i+',this.value)"></div>'
   ).join('');
   $('#set-carrier').value=s.carrierLockPct??12;
   const cmap=s.carrierAdjPct||{};
   $('#set-carriers').innerHTML=['AT&T','T-Mobile','Verizon','Other / unknown'].map(c=>
     '<div><label class="f">'+esc(c)+' (−%)</label>'+
-    '<input type="number" inputmode="numeric" value="'+esc(cmap[c]??12)+'" oninput="FC.carUpd(\''+esc(c).replace(/'/g,'')+'\',this.value)"></div>'
+    '<input type="number" aria-label="Percent discount for '+esc(c)+'" inputmode="numeric" value="'+esc(cmap[c]??12)+'" oninput="FC.carUpd(\''+esc(c).replace(/'/g,'')+'\',this.value)"></div>'
   ).join('');
   $('#set-ebay').value=(s.ebay&&s.ebay.token)||'';
   $('#set-aikey').value=s.aikey||'';
@@ -1377,8 +1434,8 @@ function renderSettings(){
   $('#set-accent').value=(s.brand&&s.brand.accent)||'#4aa3ff';
   const aa=s.accessoryAdj||{box:10,cable:5};
   $('#set-extras').innerHTML=
-    '<div><label class="f">Original box (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.box)+'" oninput="FC.exUpd(\'accessoryAdj\',\'box\',this.value)"></div>'+
-    '<div><label class="f">Cable/charger (+$)</label><input type="number" inputmode="numeric" value="'+esc(aa.cable)+'" oninput="FC.exUpd(\'accessoryAdj\',\'cable\',this.value)"></div>';
+    '<div><label class="f">Original box (+$)</label><input type="number" aria-label="Dollar value of the original box" inputmode="numeric" value="'+esc(aa.box)+'" oninput="FC.exUpd(\'accessoryAdj\',\'box\',this.value)"></div>'+
+    '<div><label class="f">Cable/charger (+$)</label><input type="number" aria-label="Dollar value of the cable or charger" inputmode="numeric" value="'+esc(aa.cable)+'" oninput="FC.exUpd(\'accessoryAdj\',\'cable\',this.value)"></div>';
   $('#set-storages').value=s.storages.join(', ');
   renderSyncStatus();
   updateBridgeStatus();
@@ -1469,7 +1526,7 @@ async function pingBridge(){
   if(pill)pill.classList.toggle('live',bridgeUp);
   if(ptx)ptx.textContent=bridgeUp?'USB ready':(IS_DEMO?'Try USB':'Manual');
   const arb=$('#autoreadbtn');
-  if(arb)arb.textContent=bridgeUp?'🔌 Auto-Read':'🔌 Try Auto-Read (demo phone)';
+  if(arb)arb.textContent=bridgeUp?'Auto-Read':'Try Auto-Read (demo phone)';
   updateBridgeStatus();
 }
 /* Demo devices · the hosted demo has no bridge (a browser cannot speak
@@ -1544,7 +1601,7 @@ function applyDeviceRead(d){
     }
     /* Find My hint · informational only; the iCloud hard-fail stays a manual confirm */
     d.warnings=d.warnings||[];
-    if(dev.findMyOn===true)d.warnings.unshift('⚠️ Find My reports ON · seller must turn it off BEFORE cash');
+    if(dev.findMyOn===true)d.warnings.unshift('Find My reports ON · seller must turn it off BEFORE cash');
     if(dev.findMyOn===false)d.warnings.push('Find My reports OFF · confirm on screen, then mark it ✓');
     session.meta.autoRead={filled:filled.slice(),ts:Date.now(),simulated:!!d.simulated};
     saveSession();
@@ -1580,7 +1637,7 @@ async function syncPrices(force){
     if(d.storageAdj)settings.storageAdj=Object.assign({},settings.storageAdj,d.storageAdj);
     settings.pricesApplied=d.updated;
     saveSettings();
-    toast('📈 Pricing updated from market file ('+d.updated+')',3500);
+    toast('Pricing updated from market file ('+d.updated+')',3500);
     if($('#scr-intake').classList.contains('active'))renderIntake();
     if($('#scr-settings').classList.contains('active'))renderSettings();
     renderBanner();
@@ -1873,6 +1930,14 @@ function applyBrand(){
 }
 applyBrand();
 renderDemoBar();
+/* elevate the app header once the screen scrolls beneath it */
+(function(){
+  var tb=document.getElementById('topbar'),t=false;
+  if(!tb)return;
+  function u(){t=false;tb.classList.toggle('stuck',(scrollY||0)>12);}
+  addEventListener('scroll',function(){if(!t){t=true;requestAnimationFrame(u);}},{passive:true});
+  u();
+})();
 nav('intake');
 pingBridge();
 syncPrices();
