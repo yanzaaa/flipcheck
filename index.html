@@ -53,7 +53,9 @@ padding:7px 13px;min-height:38px;white-space:nowrap;font-family:inherit}
 #demobar{position:sticky;top:calc(env(safe-area-inset-top) + 56px);z-index:29;display:flex;
 align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
 padding:9px 14px;font-size:12.5px;color:#cfe6ff;
-background:linear-gradient(90deg,rgba(46,204,113,.14),rgba(74,163,255,.14));
+/* opaque base · content scrolls underneath this ribbon and used to show through */
+background:#0e1723 linear-gradient(90deg,rgba(46,204,113,.16),rgba(74,163,255,.16));
+-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
 border-bottom:1px solid var(--line)}
 #demobar b{color:var(--tx)}
 #demobar a{color:#06130b;background:linear-gradient(180deg,#41e08b,#1fb562);border-radius:999px;
