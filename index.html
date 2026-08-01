@@ -210,7 +210,7 @@ main{position:relative;z-index:2}
 <section id="scr-intake" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <h2 style="margin:8px 2px">New Intake</h2>
-    <button class="chip bridgebtn hidden" onclick="FC.autoRead()">🔌 Auto-Read</button>
+    <button class="chip bridgebtn hidden" id="autoreadbtn" onclick="FC.autoRead()">🔌 Auto-Read</button>
   </div>
   <div class="card">
     <label class="f">Model</label>
@@ -750,7 +750,8 @@ function buildChecklist(){
     const remaining=CHECKLIST.filter(it=>it.t==='battery'?session.battery==='':!session.checks[it.id])
       .map(it=>SHORT_LABELS[it.id]||it.label.split('—')[0].split('(')[0].trim());
     h+='<div class="item" style="border-color:var(--blue)">'+
-      '<div class="lab">🔌 Auto-read done</div>'+
+      '<div class="lab">🔌 '+(ar.simulated?'Auto-read done · demo phone':'Auto-read done')+'</div>'+
+      (ar.simulated?'<div class="help" style="color:var(--blue)">This is a sample handset so you can see the flow. With the real app, plugging in your phone fills these same fields off the device itself.</div>':'')+
       '<div class="help">Filled from the cable: '+ar.filled.map(esc).join(', ')+'</div>'+
       (remaining.length?
         '<div class="note" style="color:var(--dim)">Still needs your hands: '+remaining.map(esc).join(' · ')+'</div>':
@@ -1462,14 +1463,39 @@ async function pingBridge(){
     const r=await fetch(BRIDGE+'/health',{signal:c.signal});clearTimeout(t);
     bridgeUp=r.ok;
   }catch(e){bridgeUp=false;}
-  $$('.bridgebtn').forEach(b=>b.classList.toggle('hidden',!bridgeUp));
+  $$('.bridgebtn').forEach(b=>b.classList.toggle('hidden',!(bridgeUp||IS_DEMO)));
   const dot=$('#bridgedot');if(dot)dot.classList.toggle('on',bridgeUp);
   const pill=$('#usbpill'),ptx=$('#usbtext');
   if(pill)pill.classList.toggle('live',bridgeUp);
-  if(ptx)ptx.textContent=bridgeUp?'USB ready':'Manual';
+  if(ptx)ptx.textContent=bridgeUp?'USB ready':(IS_DEMO?'Try USB':'Manual');
+  const arb=$('#autoreadbtn');
+  if(arb)arb.textContent=bridgeUp?'🔌 Auto-Read':'🔌 Try Auto-Read (demo phone)';
   updateBridgeStatus();
 }
+/* Demo devices · the hosted demo has no bridge (a browser cannot speak
+   lockdownd to an iPhone), so tapping Auto-Read there replays a real read
+   against a sample handset. Clearly labelled, never presented as a live read. */
+const DEMO_DEVICES=[
+  {model:'iPhone 14 Pro',storage:'256GB',color:'Space Black',imei:'356728111234567',
+   batteryPct:91,serial:'F2LX8K9PQ1MN',os:'iOS 18.5',findMyOn:false},
+  {model:'iPhone 13',storage:'128GB',color:'Midnight',imei:'353012110987654',
+   batteryPct:86,serial:'G7HJ2M4KLP09',os:'iOS 18.4',findMyOn:false},
+  {model:'Galaxy S24',storage:'256GB',color:'Onyx Black',imei:'352099001122334',
+   batteryPct:94,serial:'RF8X70ABCDE',os:'Android 15',findMyOn:false}
+];
+let demoDeviceIx=0;
+function simulatedRead(){
+  const dev=DEMO_DEVICES[demoDeviceIx%DEMO_DEVICES.length];demoDeviceIx++;
+  return {ok:true,device:JSON.parse(JSON.stringify(dev)),simulated:true,
+    warnings:['Demo device · the real app reads this off the phone you plug in']};
+}
 async function autoRead(){
+  /* demo hosts with no bridge: replay a real read instead of dead-ending */
+  if(IS_DEMO&&!bridgeUp){
+    toast('Reading device over USB…');
+    await new Promise(r=>setTimeout(r,900));
+    return applyDeviceRead(simulatedRead());
+  }
   toast('Reading device over USB…');
   try{
     /* a wedged read chains several tool timeouts bridge-side — cap our wait */
@@ -1477,6 +1503,14 @@ async function autoRead(){
     const r=await fetch(BRIDGE+'/device-info',{signal:c.signal});clearTimeout(t);
     const d=await r.json();
     if(!d.ok){toast('Bridge: '+((d.warnings&&d.warnings.join(' · '))||'no device found'),4500);return;}
+    applyDeviceRead(d);
+  }catch(e){
+    toast(e&&e.name==='AbortError'?'Read took too long · replug the cable and retry':'Bridge not reachable · is bridge.py running?',3500);
+  }
+}
+/* shared by the real bridge read and the demo replay · identical logic, so the
+   demo shows exactly what a buyer's phone will do */
+function applyDeviceRead(d){
     const dev=d.device;const filled=[];
     if(dev.model){
       const m=settings.models.find(x=>x.name.toLowerCase()===String(dev.model).toLowerCase());
@@ -1512,15 +1546,12 @@ async function autoRead(){
     d.warnings=d.warnings||[];
     if(dev.findMyOn===true)d.warnings.unshift('⚠️ Find My reports ON · seller must turn it off BEFORE cash');
     if(dev.findMyOn===false)d.warnings.push('Find My reports OFF · confirm on screen, then mark it ✓');
-    session.meta.autoRead={filled:filled.slice(),ts:Date.now()};
+    session.meta.autoRead={filled:filled.slice(),ts:Date.now(),simulated:!!d.simulated};
     saveSession();
     if($('#scr-intake').classList.contains('active'))renderIntake();
     if($('#scr-check').classList.contains('active')){buildChecklist();renderBanner();}
-    toast('Auto-read ✓ '+filled.join(', ')+
+    toast((d.simulated?'Demo auto-read ✓ ':'Auto-read ✓ ')+filled.join(', ')+
       (d.warnings&&d.warnings.length?' · '+d.warnings.join(' · '):''),5000);
-  }catch(e){
-    toast(e&&e.name==='AbortError'?'Read took too long · replug the cable and retry':'Bridge not reachable · is bridge.py running?',3500);
-  }
 }
 /* on a hosted (https) origin some browsers block page→localhost fetches; keep
    retrying for the first ~2 minutes (covers the browser's permission prompt),
