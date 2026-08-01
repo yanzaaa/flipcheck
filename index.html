@@ -27,6 +27,8 @@ background:radial-gradient(1100px 700px at 50% -220px,#13202f 0%,rgba(11,15,20,0
 #topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;
 padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:rgba(11,15,20,.94);
 -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+#topbar:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
+background:linear-gradient(90deg,transparent,#2ecc71 30%,#4aa3ff 70%,transparent);opacity:.55}
 #topbar h1{font-size:19px;margin:0;letter-spacing:.2px;display:flex;align-items:center;gap:9px;font-weight:800}
 #livechip{margin-left:auto;font-size:11px;color:var(--green);border:1px solid rgba(46,204,113,.35);
 background:rgba(46,204,113,.08);border-radius:999px;padding:5px 10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
@@ -157,7 +159,7 @@ main,#topbar,#tabbar,#toast{position:relative;z-index:2}
 
 <header id="topbar">
   <h1><svg width="26" height="26" viewBox="0 0 24 24" style="border-radius:8px;background:linear-gradient(135deg,#2ecc71 0%,#4aa3ff 100%);padding:4px;flex:0 0 auto" fill="#071018"><path d="M13 2 4.5 13.5h5L10 22l8.5-11.5h-5z"/></svg><span id="brandname">FlipCheck</span></h1>
-  <span id="livechip">● live pricing</span>
+  <span id="livechip">● Live pricing</span>
   <a id="sitelink" href="https://getflipcheck.netlify.app" target="_blank" rel="noopener" title="FlipCheck website">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/></svg>Home</a>
   <div id="bridgedot" title="Auto-read bridge"></div>
@@ -352,7 +354,7 @@ main,#topbar,#tabbar,#toast{position:relative;z-index:2}
   </details>
   <h2>USB auto-read</h2>
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
-  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.9.0 ·
+  <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v1.9.1 ·
     <a href="https://getflipcheck.netlify.app" target="_blank" rel="noopener" style="color:var(--blue)">website</a> ·
     <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck" style="color:var(--blue)">support</a></div>
 </section>
@@ -825,9 +827,20 @@ function updateProv(){
 }
 
 /* ================= save to inventory ================= */
+/* the hosted copies are the free demo · the purchased zip (localhost/file/own
+   host) is never limited. Three logged phones is plenty to feel the value. */
+const DEMO_HOSTS=['flipcheck-app.netlify.app','flipcheck-omega.vercel.app','yanzaaa.github.io'];
+function demoLimitHit(){
+  return DEMO_HOSTS.includes(location.hostname)&&inv.length>=3;
+}
 function saveEntry(){
   const modelName=session.custom?(session.customName||'').trim():session.model;
   if(!modelName){toast('Pick a model first');FC.nav('intake');return;}
+  if(demoLimitHit()){
+    if(confirm('Demo limit reached: 3 phones logged. The full app ($39, one-time) logs unlimited phones, keeps your data, and includes the USB auto-read bridge.\n\nOpen the checkout page?'))
+      window.open('https://flipchecka.com/#pricing','_blank','noopener');
+    return;
+  }
   const g=computeGrade(session);
   if(g.hard.length&&!confirm('🚫 DO NOT BUY · '+g.hard.join(', ')+'.\nLog it anyway as a walk-away / dead entry?'))return;
   const entry={
@@ -1366,6 +1379,18 @@ async function autoRead(){
     if(dev.serial)session.meta.serial=dev.serial;
     if(dev.os)session.meta.os=dev.os;
     if(dev.activationState)session.meta.activation=dev.activationState;
+    /* checks the cable itself already proves · auto-answer them so only the
+       human-only items (screen, cameras, calls, resets) are left */
+    if(dev.imei&&session.checks.imei_match!=='done'){
+      session.checks.imei_match='done';filled.push('IMEI match (read from the phone itself)');
+    }
+    if((dev.serial||dev.imei)&&session.checks.about_match!=='done'){
+      session.checks.about_match='done';filled.push('serial/storage cross-check');
+    }
+    if(session.checks.charging!=='pass'){
+      /* a successful USB read = the port carries power AND data */
+      session.checks.charging='pass';filled.push('charging port (USB read proves it)');
+    }
     /* Find My hint · informational only; the iCloud hard-fail stays a manual confirm */
     d.warnings=d.warnings||[];
     if(dev.findMyOn===true)d.warnings.unshift('⚠️ Find My reports ON · seller must turn it off BEFORE cash');
@@ -1482,9 +1507,20 @@ window.FC={
   comps(site){
     const m=session.custom?(session.customName||''):session.model;
     if(!m){toast('Pick a model first');return;}
-    const q=encodeURIComponent((m+' '+(session.storage||'')).trim());
-    if(site==='ebay')window.open('https://www.ebay.com/sch/i.html?_nkw='+q+'&LH_Sold=1&LH_Complete=1','_blank','noopener');
-    else window.open('https://swappa.com/search?q='+q,'_blank','noopener');
+    if(site==='ebay'){
+      const q=encodeURIComponent((m+' '+(session.storage||'')).trim());
+      window.open('https://www.ebay.com/sch/i.html?_nkw='+q+'&LH_Sold=1&LH_Complete=1','_blank','noopener');
+      return;
+    }
+    /* Swappa: their search chokes on "model + storage" · deep-link the model's
+       buy page for catalog phones, plain model search otherwise */
+    const slug=m.toLowerCase().replace(/[()]/g,'').replace(/\s+/g,'-');
+    let url;
+    if(/^iphone/i.test(m))url='https://swappa.com/buy/apple-'+slug;
+    else if(/^galaxy/i.test(m))url='https://swappa.com/buy/samsung-'+slug;
+    else if(/^pixel/i.test(m))url='https://swappa.com/buy/google-'+slug;
+    else url='https://swappa.com/search?q='+encodeURIComponent(m);
+    window.open(url,'_blank','noopener');
   },
   timerReset(){session.startedAt=Date.now();saveSession();},
   save:saveEntry,
