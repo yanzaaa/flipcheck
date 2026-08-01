@@ -1516,7 +1516,8 @@ window.FC={
        buy page for catalog phones, plain model search otherwise */
     const slug=m.toLowerCase().replace(/[()]/g,'').replace(/\s+/g,'-');
     let url;
-    if(/^iphone/i.test(m))url='https://swappa.com/buy/apple-'+slug;
+    if(/\bSE\b/i.test(m))url='https://swappa.com/search?q='+encodeURIComponent(m);
+    else if(/^iphone/i.test(m))url='https://swappa.com/buy/apple-'+slug;
     else if(/^galaxy/i.test(m))url='https://swappa.com/buy/samsung-'+slug;
     else if(/^pixel/i.test(m))url='https://swappa.com/buy/google-'+slug;
     else url='https://swappa.com/search?q='+encodeURIComponent(m);
