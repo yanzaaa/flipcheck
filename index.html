@@ -880,11 +880,15 @@ function renderDemoBar(){
   const left=Math.max(0,DEMO_MAX-inv.length);
   const el=$('#demoleft');
   if(el)el.textContent=left?(left+' left'):'limit reached';
-  /* push every sticky element below the ribbon's real height */
-  requestAnimationFrame(()=>{
+  /* push every sticky element clear of the ribbon · the ribbon itself sticks at
+     56px, so the banner has to clear 56 + its rendered height (it wraps to two
+     lines on narrow phones), plus a little breathing room */
+  const place=()=>{
     const h=bar.offsetHeight||0;
-    document.documentElement.style.setProperty('--stickytop',(54+h)+'px');
-  });
+    document.documentElement.style.setProperty('--stickytop',(56+h+8)+'px');
+  };
+  requestAnimationFrame(place);
+  if(!renderDemoBar._bound){renderDemoBar._bound=true;addEventListener('resize',place);}
 }
 function saveEntry(){
   const modelName=session.custom?(session.customName||'').trim():session.model;
