@@ -172,7 +172,11 @@ z-index:99;max-width:88vw;text-align:center}
 .hidden{display:none!important}
 body:after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.04;
 background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
-main,#topbar,#tabbar,#toast{position:relative;z-index:2}
+/* lift content above the film-grain overlay. NOTE: only `main` gets a position
+   here · listing #topbar/#tabbar/#toast in this rule silently overrode their
+   sticky/fixed positioning, so the header and the whole bottom nav scrolled
+   away mid-inspection. They already carry their own position + z-index. */
+main{position:relative;z-index:2}
 </style>
 </head>
 <body>
