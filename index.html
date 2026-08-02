@@ -3,7 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>FlipCheck</title>
+<title>FlipCheck · free live demo</title>
+<link rel="canonical" href="https://flipchecka.com/app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FlipCheck">
+<meta property="og:url" content="https://flipchecka.com/app/">
+<meta property="og:title" content="FlipCheck · try the free live demo">
+<meta property="og:description" content="Plug a phone in and watch it price itself. Free demo, no signup, runs in your browser.">
+<meta property="og:image" content="https://flipchecka.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Phone intake, inspection, pricing & listing tool for used-phone flipping">
 <meta name="theme-color" content="#0b0f14">
 <meta name="color-scheme" content="dark">
@@ -35,6 +43,12 @@ background:linear-gradient(90deg,transparent,#2ecc71 30%,#4aa3ff 70%,transparent
 #topbar h1{font-size:19px;margin:0;letter-spacing:.2px;display:flex;align-items:center;gap:9px;font-weight:800}
 #livechip{margin-left:auto;font-size:11px;color:var(--green);border:1px solid rgba(46,204,113,.35);
 background:rgba(46,204,113,.08);border-radius:999px;padding:5px 10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+#buylink{font-size:12.5px;font-weight:700;color:#06130b;
+background:linear-gradient(180deg,#41e08b,#1fb562);border:0;border-radius:999px;
+padding:6px 14px;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;
+text-decoration:none;box-shadow:0 4px 14px rgba(46,204,113,.25)}
+#buylink:active{transform:scale(.96)}
+@media(max-width:430px){#buylink{padding:6px 11px}}
 #sitelink{font-size:12.5px;color:var(--dim);border:1px solid var(--line);background:var(--card2);
 border-radius:999px;padding:6px 14px;font-weight:600;white-space:nowrap;min-height:44px;text-decoration:none;
 display:inline-flex;align-items:center}
@@ -207,6 +221,7 @@ main{position:relative;z-index:2}
   <button id="usbpill" onclick="FC.usbTap()" title="USB auto-read status">
     <span id="bridgedot"></span><span id="usbtext">Manual</span>
   </button>
+  <a id="buylink" class="hidden" href="https://flipchecka.com/#pricing" target="_blank" rel="noopener" title="Buy FlipCheck">Buy</a>
   <a id="sitelink" href="https://flipchecka.com" target="_blank" rel="noopener" title="FlipCheck website">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/></svg>Home</a>
 </header>
@@ -944,7 +959,10 @@ function updateProv(){
 /* ================= save to inventory ================= */
 /* the hosted copies are the free demo · the purchased zip (localhost/file/own
    host) is never limited. Three logged phones is plenty to feel the value. */
-const DEMO_HOSTS=['flipcheck-app.netlify.app','flipcheck-omega.vercel.app','yanzaaa.github.io'];
+/* the free demo copies · the paid zip runs from file:// or the buyer's own
+   host and is never limited. flipchecka.com/app/ is the canonical demo. */
+const DEMO_HOSTS=['flipchecka.com','www.flipchecka.com','getflipcheck.netlify.app',
+  'flipcheck-app.netlify.app','flipcheck-omega.vercel.app','yanzaaa.github.io'];
 const IS_DEMO=DEMO_HOSTS.includes(location.hostname);
 const DEMO_MAX=3;
 function demoLimitHit(){return IS_DEMO&&inv.length>=DEMO_MAX;}
@@ -956,6 +974,7 @@ function renderDemoBar(){
   const bar=$('#demobar');if(!bar)return;
   syncTopbarH();
   bar.classList.toggle('hidden',!IS_DEMO);
+  const bl=$('#buylink');if(bl)bl.classList.toggle('hidden',!IS_DEMO);
   if(!IS_DEMO){
     /* paid/local copies have no ribbon · still clear the real topbar height,
        otherwise the sticky DO NOT BUY banner tucks under it */
