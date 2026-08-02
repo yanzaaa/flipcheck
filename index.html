@@ -1949,6 +1949,14 @@ function applyBrand(){
 }
 applyBrand();
 renderDemoBar();
+/* on the demo copies the bridge will never answer, so reveal Auto-Read at once
+   rather than after the ping times out */
+if(IS_DEMO){
+  $$('.bridgebtn').forEach(b=>b.classList.remove('hidden'));
+  const _arb=$('#autoreadbtn');
+  if(_arb)_arb.textContent='Try Auto-Read (demo phone)';
+  const _ut=$('#usbtext');if(_ut)_ut.textContent='Try USB';
+}
 /* elevate the app header once the screen scrolls beneath it */
 (function(){
   var tb=document.getElementById('topbar'),t=false;
