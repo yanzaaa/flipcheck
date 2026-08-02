@@ -95,6 +95,20 @@ textarea{min-height:70px}
 ::placeholder{color:#7f93a8;opacity:1}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(74,163,255,.16)}
 button{font-family:inherit;cursor:pointer}
+/* tooltips · tap or hover the ? beside anything that isn't obvious */
+.tipwrap{position:relative;display:inline-flex;vertical-align:middle;margin-left:6px}
+.tipbtn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);
+background:var(--card2);color:var(--dim);font-size:12px;font-weight:800;line-height:1;
+display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:0 0 auto}
+.tipbtn:hover,.tipbtn[aria-expanded=true]{color:var(--tx);border-color:var(--blue)}
+.tipbody{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 9px);
+width:260px;max-width:78vw;background:#0c1622;border:1px solid var(--blue);border-radius:12px;
+padding:11px 13px;font-size:13px;line-height:1.5;color:var(--tx);font-weight:400;
+box-shadow:0 14px 38px rgba(0,0,0,.6);z-index:40;display:none;text-align:left;white-space:normal}
+.tipbody:after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+border:7px solid transparent;border-top-color:var(--blue)}
+.tipwrap.open .tipbody{display:block}
+@media(max-width:430px){.tipbody{width:230px}}
 /* one monoline icon set · vertical rhythm handled centrally */
 .ic{vertical-align:-3px;flex:0 0 auto}
 .btn .ic,.chip .ic{vertical-align:-3px;margin-right:2px}
@@ -396,7 +410,7 @@ main{position:relative;z-index:2}
     <input id="set-aff" type="text" placeholder="https://…" oninput="FC.affLink(this.value)">
       <button class="btn ghost" onclick="FC.copyAff()"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h10v11H9zM5 15V4h10"/></svg> Copy ready-to-post promo (your link inside)</button>
       <div style="font-size:12px;color:var(--dim);margin-top:6px">No link yet? Email
-        <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck affiliate" style="color:var(--blue)">flipchecklist@gmail.com</a>
+        <a href="mailto:support@flipchecka.com?subject=FlipCheck affiliate" style="color:var(--blue)">support@flipchecka.com</a>
         · resellers earn 30% per copy. The promo text drops your link in automatically.</div>
     </div>
   </details>
@@ -434,7 +448,7 @@ main{position:relative;z-index:2}
   <div class="card"><div id="bridgestatus" style="font-size:14px;color:var(--dim)">Checking…</div></div>
   <div style="text-align:center;color:var(--dim);font-size:12px;margin:16px 0 4px">FlipCheck v2.1.0 ·
     <a href="https://flipchecka.com" target="_blank" rel="noopener" style="color:var(--blue)">Website</a> ·
-    <a href="mailto:flipchecklist@gmail.com?subject=FlipCheck" style="color:var(--blue)">Support</a></div>
+    <a href="mailto:support@flipchecka.com?subject=FlipCheck" style="color:var(--blue)">Support</a></div>
 </section>
 
 </main>
@@ -636,6 +650,22 @@ let lastCosm=[];   /* cosmetic tier chips, same index-addressed pattern */
 
 /* ================= checklist definition ================= */
 const FUNC_IDS=['sim_call','cameras','flashlight','speaker_mic','biometric','charging'];
+const TIPS={
+  imei_match:'Dial *#06# on the phone. A 15-digit number appears. Type it below. If it does not match the box or the listing, the phone has been swapped or repaired with mismatched parts.',
+  imei_check:'This is the theft check. Paste the IMEI into a blacklist registry (the two buttons below open them). If it comes back reported lost or stolen, walk away — carriers can brick it later and you have no recourse.',
+  about_match:'On the phone: Settings > General > About. Confirm the model and storage match what the seller advertised. A 64GB sold as 256GB is the oldest trick there is.',
+  battery:'On the phone: Settings > Battery > Battery Health & Charging. Under 80% means the battery is due for replacement, which is roughly $50-70 off your offer.',
+  icloud_off:'The single most expensive mistake in flipping. On the phone: Settings > tap the name at the top > Find My > Find My iPhone, and it must be OFF. If the seller cannot turn it off, the phone is not really theirs to sell.',
+  financing:'Ask directly: "is this paid off?" Phones on a carrier instalment plan get blacklisted the moment payments stop. Red flags: "still paying it off", a carrier payment plan, or any leasing app on the home screen.',
+  sim_call:'Put a SIM in, or use the seller\'s, and actually place a call. This proves the modem and antenna work. A phone that cannot make calls is worth parts money only.',
+  cameras:'Open the camera. Take one photo with the back camera, switch, take one with the front. Check for spots, haze or a black frame — those mean a dead module.',
+  flashlight:'Swipe into Control Centre and tap the torch. It shares hardware with the flash, so if it fails the rear camera flash is usually gone too.',
+  speaker_mic:'Open Voice Memos, record five seconds of yourself talking, then play it back. That single test covers both the microphone and the speaker.',
+  biometric:'Ask the seller to unlock it with Face ID or the fingerprint reader in front of you. A broken sensor is a costly repair and it cannot be fixed with a screen swap.',
+  charging:'Plug in a cable and confirm it charges. Wiggle it gently — if it cuts in and out, the port is dirty or worn.',
+  screen:'Look at it under a bright light. Check for dead pixels, burn-in ghosting, lifting edges, and swipe every corner to be sure the touch layer responds everywhere.',
+  reset:'Do this only AFTER the cash has changed hands and the phone is yours. Settings > General > Transfer or Reset iPhone > Erase All Content and Settings. Never let a seller do it mid-negotiation.'
+};
 const SHORT_LABELS={sim_call:'SIM/calls',cameras:'cameras',flashlight:'flashlight',
   speaker_mic:'speaker & mic',biometric:'Face ID / Touch ID',charging:'charging port'};
 const CHECKLIST=[
@@ -665,6 +695,12 @@ const CHECKLIST=[
    help:'Settings > General > Transfer or Reset iPhone > Erase All Content and Settings',
    note:'Do this AFTER cash changes hands and the phone is yours · never mid-negotiation.'}
 ];
+function tipHTML(id){
+  const t=TIPS[id];if(!t)return '';
+  return '<span class="tipwrap"><button type="button" class="tipbtn" aria-expanded="false" '+
+    'aria-label="What does this mean?" onclick="FC.tip(event,this)">?</button>'+
+    '<span class="tipbody" role="tooltip">'+esc(t)+'</span></span>';
+}
 function labelOf(id){const it=CHECKLIST.find(x=>x.id===id);return SHORT_LABELS[id]||(it?it.label:id);}
 
 /* ================= grade + price engine ================= */
@@ -837,7 +873,7 @@ function buildChecklist(){
         ' aria-pressed="'+(done?'true':'false')+'"'+
         ' onclick="FC.tgl(\''+it.id+'\')" onkeydown="FC.keyTgl(event,\''+it.id+'\')">'+
         '<div class="itemhead"><div class="tick">✓</div><div>'+
-        '<div class="lab">'+it.label+'</div>'+
+        '<div class="lab">'+it.label+tipHTML(it.id)+'</div>'+
         (it.help?'<div class="help">'+it.help+'</div>':'')+
         (it.note?'<div class="note">'+it.note+'</div>':'')+
         '</div></div></div>';
@@ -845,7 +881,7 @@ function buildChecklist(){
     else if(it.t==='pf'){
       const v=session.checks[it.id];
       h+='<div class="item'+(v==='pass'?' done':v==='fail'?' failed':'')+'">'+
-        '<div class="lab">'+it.label+'</div>'+
+        '<div class="lab">'+it.label+tipHTML(it.id)+'</div>'+
         '<div class="seg">'+
         '<button class="ok'+(v==='pass'?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\'pass\')">PASS ✓</button>'+
         '<button class="bad'+(v==='fail'?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\'fail\')">FAIL ✗</button>'+
@@ -854,7 +890,7 @@ function buildChecklist(){
     else if(it.t==='seg'){
       const v=session.checks[it.id];
       h+='<div class="item'+(v&&v!=='locked'&&v!=='fail'?' done':(v==='locked'||v==='fail')?' failed':'')+'">'+
-        '<div class="lab">'+it.label+'</div>'+
+        '<div class="lab">'+it.label+tipHTML(it.id)+'</div>'+
         (it.help?'<div class="help">'+it.help+'</div>':'')+
         '<div class="seg">'+it.opts.map(o=>
           '<button class="'+o.c+(v===o.v?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\''+o.v+'\')">'+o.l+'</button>'
@@ -862,7 +898,7 @@ function buildChecklist(){
     }
     else if(it.t==='battery'){
       h+='<div class="item'+(session.battery!==''?' done':'')+'">'+
-        '<div class="lab">'+it.label+'</div>'+
+        '<div class="lab">'+it.label+tipHTML(it.id)+'</div>'+
         '<div class="help">'+it.help+'</div>'+
         '<input type="number" aria-label="Battery health percentage" inputmode="numeric" min="0" max="100" placeholder="e.g. 87" value="'+esc(session.battery)+'"'+
         ' oninput="FC.batt(this.value,this)" style="margin-top:8px;font-size:22px;font-weight:700;text-align:center">'+
@@ -871,7 +907,7 @@ function buildChecklist(){
     else if(it.t==='imei'){
       const v=session.checks[it.id];
       h+='<div class="item'+(v==='clean'?' done':v==='flagged'?' failed':'')+'">'+
-        '<div class="lab">'+it.label+'</div>'+
+        '<div class="lab">'+it.label+tipHTML(it.id)+'</div>'+
         '<div class="help">'+it.help+'</div>'+
         '<input type="text" aria-label="IMEI number" inputmode="numeric" maxlength="17" placeholder="IMEI (from *#06#)" value="'+esc(session.imei)+'"'+
         ' oninput="FC.imei(this.value)" style="margin-top:8px">'+
@@ -1606,6 +1642,17 @@ function applyDeviceRead(d){
     if(dev.serial)session.meta.serial=dev.serial;
     if(dev.os)session.meta.os=dev.os;
     if(dev.activationState)session.meta.activation=dev.activationState;
+    /* deep-read facts · evidence for the human, never a silent auto-pass */
+    d.warnings=d.warnings||[];
+    ['passcodeOn','hasBaseband','freePct','cycleCount','region','simStatus'].forEach(k=>{
+      if(dev[k]!==undefined&&dev[k]!==null&&dev[k]!=='')session.meta[k]=dev[k];
+    });
+    if(dev.passcodeOn===true)
+      d.warnings.push('The phone still has a passcode set · it has NOT been erased yet');
+    if(typeof dev.cycleCount==='number')
+      filled.push('battery cycles '+dev.cycleCount);
+    if(typeof dev.freePct==='number')
+      filled.push('storage '+dev.freePct+'% free');
     /* checks the cable itself already proves · auto-answer them so only the
        human-only items (screen, cameras, calls, resets) are left */
     if(dev.imei&&session.checks.imei_match!=='done'){
@@ -1619,7 +1666,6 @@ function applyDeviceRead(d){
       session.checks.charging='pass';filled.push('charging port (USB read proves it)');
     }
     /* Find My hint · informational only; the iCloud hard-fail stays a manual confirm */
-    d.warnings=d.warnings||[];
     if(dev.findMyOn===true)d.warnings.unshift('Find My reports ON · seller must turn it off BEFORE cash');
     if(dev.findMyOn===false)d.warnings.push('Find My reports OFF · confirm on screen, then mark it ✓');
     session.meta.autoRead={filled:filled.slice(),ts:Date.now(),simulated:!!d.simulated};
@@ -1699,6 +1745,13 @@ window.FC={
     session=blankSession();saveSession();renderIntake();toast('Fresh intake ready');
   },
   /* checklist */
+  tip(e,btn){
+    e.preventDefault();e.stopPropagation();
+    const w=btn.parentElement,open=w.classList.contains('open');
+    $$('.tipwrap.open').forEach(x=>{x.classList.remove('open');
+      const b=x.querySelector('.tipbtn');if(b)b.setAttribute('aria-expanded','false');});
+    if(!open){w.classList.add('open');btn.setAttribute('aria-expanded','true');}
+  },
   keyTgl(e,id){
     if(e.key===' '||e.key==='Enter'||e.key==='Spacebar'){e.preventDefault();FC.tgl(id);}
   },
