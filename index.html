@@ -264,7 +264,9 @@ details.adv[open]>summary{margin-bottom:4px;color:var(--tx)}
 #toast{position:fixed;left:50%;transform:translateX(-50%) translateY(20px);
 bottom:calc(96px + env(safe-area-inset-bottom));background:#1e2b3b;border:1px solid var(--line);
 padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;
-z-index:99;max-width:88vw;text-align:center}
+z-index:99;max-width:min(88vw,420px);text-align:center;line-height:1.4;
+/* hard ceiling · a long message must never grow into a wall over the app */
+max-height:30vh;overflow:hidden}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .hidden{display:none!important}
 body:after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.04;
@@ -337,7 +339,7 @@ main{position:relative;z-index:2}
 <!-- ============ 2+3. CHECKLIST + GRADE/PRICE ENGINE ============ -->
 <section id="scr-check" class="screen">
   <div id="banner" class="banner idle" role="status" aria-live="polite" aria-atomic="true"></div>
-  <div id="timerrow"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5.5l3.5 2"/></svg> <span id="timer">0:00</span><span style="opacity:.7">/ 8:00 target</span>
+  <div id="timerrow"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5.5l3.5 2"/></svg> <span id="timer">0:00</span><span style="opacity:.7">on this phone</span>
     <button class="chip" style="margin-left:auto" onclick="FC.timerReset()">Reset</button>
     <button class="chip" onclick="FC.comps('ebay')" title="eBay sold comps" aria-label="eBay sold comps"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M9.5 20V4M15 20v-7M20.5 20V7"/></svg></button>
     <button class="chip bridgebtn hidden" onclick="FC.autoRead()" aria-label="Auto-read the connected phone"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5M7 8h10v3.5a5 5 0 0 1-10 0zM12 16.5V21"/></svg></button>
@@ -1914,8 +1916,17 @@ function applyDeviceRead(d){
     saveSession();
     if($('#scr-intake').classList.contains('active'))renderIntake();
     if($('#scr-check').classList.contains('active')){buildChecklist();renderBanner();}
-    toast((d.simulated?'Demo auto-read ✓ ':'Auto-read ✓ ')+filled.join(', ')+
-      (d.warnings&&d.warnings.length?' · '+d.warnings.join(' · '):''),5000);
+    /* The toast is a confirmation, not a report. Listing all fifteen filled
+       fields buried the screen on a phone, so it states the outcome and the one
+       thing that needs attention · the panel below carries the full detail. */
+    const answered=progressCount();
+    let msg=(d.simulated?'Demo auto-read ✓ ':'Auto-read ✓ ')+
+      (session.model||session.customName||'device')+
+      (session.color?', '+session.color:'')+
+      ' · '+answered+' of '+CHECKLIST.length+' answered';
+    const alert=(d.warnings||[]).find(w=>/NOT been|reports ON|passcode/i.test(w));
+    if(alert)msg+=' · '+alert;
+    toast(msg,4500);
 }
 /* on a hosted (https) origin some browsers block page→localhost fetches; keep
    retrying for the first ~2 minutes (covers the browser's permission prompt),
