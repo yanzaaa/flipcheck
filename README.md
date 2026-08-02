@@ -4,8 +4,8 @@
 max-offer calculator, instant DO-NOT-BUY alarms on blacklisted/iCloud-locked phones,
 USB auto-read, and auto-drafted listings for FB / OfferUp / Swappa / eBay.
 
-- 🌐 **Website:** https://getflipcheck.netlify.app
-- 📱 **Live app:** https://flipcheck-app.netlify.app
-- 💬 Contact: flipchecklist@gmail.com
+- 🌐 **Website:** https://flipchecka.com
+- 📱 **Live app:** https://flipchecka.com/app
+- 💬 Contact: support@flipchecka.com
 
 © 2026 Anthony Yanza — FlipCheck. This repo hosts the deployed static build.
