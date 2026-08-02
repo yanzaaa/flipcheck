@@ -180,6 +180,46 @@ color:var(--dim);font-size:13.5px;font-weight:700}
 .seg button.sel.bad{background:#c62a2c;border-color:var(--red);color:#fff}
 .seg button.sel.mid{background:var(--amber);border-color:var(--amber);color:#231a02}
 .note{font-size:12.5px;color:var(--amber);margin-top:8px}
+/* ---- auto-read panel + cable-evidence suggestions ---- */
+.autopanel{border-color:rgba(45,140,255,.45);
+  background:linear-gradient(180deg,rgba(45,140,255,.09),rgba(45,140,255,.03))}
+.autocount{display:block;font-size:11.5px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--blue);margin-top:3px}
+.runbtn{width:100%;margin-top:11px}
+.sugg{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:9px;
+  padding:9px 11px;border-radius:11px;border:1px dashed rgba(45,140,255,.5);
+  background:rgba(45,140,255,.07)}
+.suggwhy{flex:1;min-width:170px;font-size:12.5px;line-height:1.42;color:#a9cdf5;
+  display:flex;align-items:flex-start;gap:6px}
+.suggwhy svg{flex:none;margin-top:2px;opacity:.85}
+.suggbtn{flex:none;padding:8px 15px;min-height:38px;border-radius:9px;border:0;
+  background:var(--blue);color:#04121f;font-size:13px;font-weight:800;cursor:pointer}
+.suggbtn:hover{filter:brightness(1.08)}
+/* ---- guided hands-on run ---- */
+.handsov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  padding:18px;background:rgba(4,8,14,.86);backdrop-filter:blur(7px);
+  animation:handsIn .16s ease-out}
+@keyframes handsIn{from{opacity:0}to{opacity:1}}
+.handsbox{width:100%;max-width:440px;background:var(--card);border:1px solid var(--line);
+  border-radius:20px;padding:20px 20px 16px;box-shadow:0 26px 70px rgba(0,0,0,.6)}
+.handstop{display:flex;justify-content:space-between;align-items:center;
+  font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.handsx{border:0;background:transparent;color:var(--dim);font-size:19px;line-height:1;
+  padding:4px 6px;cursor:pointer;min-height:34px;min-width:34px}
+.handsbar{height:4px;border-radius:99px;background:var(--card2);overflow:hidden;margin:11px 0 16px}
+.handsbar i{display:block;height:100%;background:var(--blue);transition:width .25s ease}
+.handslab{font-size:20px;font-weight:800;line-height:1.25;letter-spacing:-.01em}
+.handshow{font-size:14.5px;line-height:1.55;color:var(--dim);margin-top:9px}
+.handsbtns{display:flex;gap:10px;margin-top:20px}
+.handsbtn{flex:1;padding:17px 8px;min-height:58px;border-radius:13px;border:1px solid var(--line);
+  background:var(--card2);color:var(--dim);font-size:14.5px;font-weight:800;cursor:pointer}
+.handsbtn.ok{color:#7fd7a6;border-color:rgba(46,204,113,.4)}
+.handsbtn.bad{color:#f0999a;border-color:rgba(255,77,79,.4)}
+.handsbtn.mid{color:#f0c579;border-color:rgba(245,166,35,.4)}
+.handsbtn:hover{filter:brightness(1.12)}
+.handsskip{width:100%;margin-top:11px;padding:11px;min-height:42px;border:0;background:transparent;
+  color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline}
+@media (max-width:430px){.handslab{font-size:18px}.handsbox{padding:17px 16px 13px}}
 .row2{display:flex;gap:8px}
 /* a 999px radius on a wrapped 2-line label renders as an egg */
 .row2>.btn{border-radius:16px}
@@ -444,7 +484,7 @@ main{position:relative;z-index:2}
   <div class="card"><div class="grid2" id="set-cosm"></div></div>
   <h2>Battery deductions (pts, also $ off list)</h2>
   <div class="card"><div class="grid2" id="set-batt"></div>
-    <div class="help" style="font-size:12.5px;color:var(--dim);margin-top:8px">≥90% = no deduction. Tiers: 85–89 · 80–84 (flags "battery likely needs replacement") · below 80.</div>
+    <div class="help" style="font-size:12.5px;color:var(--dim);margin-top:8px">≥90% = no deduction. Tiers: 85 to 89 · 80 to 84 (flags "battery likely needs replacement") · below 80.</div>
   </div>
   <h2>Storage options</h2>
   <div class="card">
@@ -566,7 +606,7 @@ const DEF_SETTINGS={
   failPenalty:8
 };
 /* fill anything a stored/restored settings object is missing (older versions,
-   hand-edited backups) — one level deep so engine sub-keys can never be undefined */
+   hand-edited backups), one level deep so engine sub-keys can never be undefined */
 function mergeDefaults(s){
   for(const k in DEF_SETTINGS){
     if(s[k]===undefined){s[k]=JSON.parse(JSON.stringify(DEF_SETTINGS[k]));continue;}
@@ -581,7 +621,7 @@ let settings=(()=>{const s=load('fc_settings_v1',null);
   if(!s)return JSON.parse(JSON.stringify(DEF_SETTINGS));
   return mergeDefaults(s);})();
 function saveSettings(){store('fc_settings_v1',settings);}
-/* inventory entries can arrive from CSV import or a restored backup file —
+/* inventory entries can arrive from CSV import or a restored backup file 
    scrub the fields that feed class names / onclick handlers so a hostile
    file can't smuggle markup next to the localStorage API keys */
 const STATUSES=['bought','listed','sold','dead-DOA','returned'];
@@ -608,43 +648,120 @@ function blankSession(){return {model:'',custom:false,customName:'',mint:'',
   checks:{},notes:'',startedAt:null,meta:{}};}
 
 /* Real color lineups per model with market $ adjustments (dark/neutral colors
-   move fastest per marketplace sale data; bright ones sit). Background data —
+   move fastest per marketplace sale data; bright ones sit). Background data 
    the user just picks the color, pricing adjusts itself. */
 const MODEL_COLORS={
+/* Full retail lineups including online exclusives and special editions.
+   Second value = market $ adjustment: dark/neutral finishes move fastest,
+   loud colours sit longer, so they price slightly under. */
+'iPhone 11':[['Black',5],['White',0],['Red',0],['Purple',-5],['Green',-5],['Yellow',-10]],
 'iPhone 11 Pro':[['Midnight Green',5],['Space Gray',5],['Silver',0],['Gold',0]],
 'iPhone 11 Pro Max':[['Midnight Green',5],['Space Gray',5],['Silver',0],['Gold',0]],
-'iPhone 12 mini':[['Black',5],['White',0],['Blue',0],['Green',-5],['Purple',-5],['Red',-5]],
-'iPhone 12 Pro Max':[['Graphite',5],['Silver',0],['Gold',0],['Pacific Blue',5]],
-'iPhone 13 mini':[['Midnight',5],['Starlight',0],['Blue',0],['Pink',-5],['Green',-5],['Red',-5]],
-'Galaxy S23 Ultra':[['Phantom Black',5],['Cream',0],['Green',-5],['Lavender',-5]],
-'Galaxy S24 Ultra':[['Titanium Black',5],['Titanium Gray',0],['Titanium Violet',-5],['Titanium Yellow',-10]],
-'Pixel 8':[['Obsidian',5],['Hazel',0],['Rose',-5]],
-'Pixel 9':[['Obsidian',5],['Porcelain',0],['Wintergreen',-5],['Peony',-5]],
-'iPhone 11':[['Black',5],['White',0],['Purple',-5],['Green',-5],['Yellow',-10],['Red',-5]],
-'iPhone 12':[['Black',5],['White',0],['Blue',0],['Green',-5],['Purple',-5],['Red',-5]],
+'iPhone 12 mini':[['Black',5],['White',0],['Blue',0],['Red',0],['Green',-5],['Purple',-5]],
+'iPhone 12':[['Black',5],['White',0],['Blue',0],['Red',0],['Green',-5],['Purple',-5]],
 'iPhone 12 Pro':[['Graphite',5],['Silver',0],['Gold',0],['Pacific Blue',5]],
-'iPhone 13':[['Midnight',5],['Starlight',0],['Blue',0],['Pink',-5],['Green',-5],['Red',-5]],
+'iPhone 12 Pro Max':[['Graphite',5],['Silver',0],['Gold',0],['Pacific Blue',5]],
+'iPhone 13 mini':[['Midnight',5],['Starlight',0],['Blue',0],['Red',0],['Pink',-5],['Green',-5]],
+'iPhone 13':[['Midnight',5],['Starlight',0],['Blue',0],['Red',0],['Pink',-5],['Green',-5]],
 'iPhone 13 Pro':[['Graphite',5],['Silver',0],['Gold',0],['Sierra Blue',5],['Alpine Green',-5]],
 'iPhone 13 Pro Max':[['Graphite',5],['Silver',0],['Gold',0],['Sierra Blue',5],['Alpine Green',-5]],
-'iPhone 14':[['Midnight',5],['Starlight',0],['Blue',0],['Purple',-5],['Yellow',-10],['Red',-5]],
-'iPhone 14 Plus':[['Midnight',5],['Starlight',0],['Blue',0],['Purple',-5],['Yellow',-10],['Red',-5]],
+'iPhone 14':[['Midnight',5],['Starlight',0],['Blue',0],['Red',0],['Purple',-5],['Yellow',-10]],
+'iPhone 14 Plus':[['Midnight',5],['Starlight',0],['Blue',0],['Red',0],['Purple',-5],['Yellow',-10]],
 'iPhone 14 Pro':[['Space Black',5],['Silver',0],['Gold',0],['Deep Purple',5]],
 'iPhone 14 Pro Max':[['Space Black',5],['Silver',0],['Gold',0],['Deep Purple',5]],
-'iPhone 15':[['Black',5],['Blue',0],['Green',-5],['Yellow',-10],['Pink',-5]],
-'iPhone 15 Plus':[['Black',5],['Blue',0],['Green',-5],['Yellow',-10],['Pink',-5]],
-'iPhone 15 Pro':[['Black Titanium',5],['White Titanium',0],['Blue Titanium',0],['Natural Titanium',5]],
-'iPhone 15 Pro Max':[['Black Titanium',5],['White Titanium',0],['Blue Titanium',0],['Natural Titanium',5]],
+'iPhone 15':[['Black',5],['Blue',0],['Pink',-5],['Green',-5],['Yellow',-10]],
+'iPhone 15 Plus':[['Black',5],['Blue',0],['Pink',-5],['Green',-5],['Yellow',-10]],
+'iPhone 15 Pro':[['Black Titanium',5],['White Titanium',0],['Natural Titanium',5],['Blue Titanium',0]],
+'iPhone 15 Pro Max':[['Black Titanium',5],['White Titanium',0],['Natural Titanium',5],['Blue Titanium',0]],
 'iPhone 16':[['Black',5],['White',0],['Ultramarine',0],['Teal',-5],['Pink',-5]],
 'iPhone 16 Plus':[['Black',5],['White',0],['Ultramarine',0],['Teal',-5],['Pink',-5]],
-'iPhone 16 Pro Max':[['Black Titanium',5],['White Titanium',0],['Natural Titanium',5],['Desert Titanium',0]],
+'iPhone 16 Pro':[['Black Titanium',5],['Natural Titanium',5],['White Titanium',0],['Desert Titanium',0]],
+'iPhone 16 Pro Max':[['Black Titanium',5],['Natural Titanium',5],['White Titanium',0],['Desert Titanium',0]],
 'iPhone 16e':[['Black',5],['White',0]],
-'iPhone SE (3rd gen)':[['Midnight',5],['Starlight',0],['Red',-5]],
-'iPhone 16 Pro':[['Black Titanium',5],['White Titanium',0],['Natural Titanium',5],['Desert Titanium',0]],
-'Galaxy S23':[['Phantom Black',5],['Cream',0],['Green',-5],['Lavender',-5]],
-'Galaxy S24':[['Onyx Black',5],['Marble Gray',0],['Cobalt Violet',-5],['Amber Yellow',-10]],
-'Galaxy S25':[['Navy',5],['Silver Shadow',0],['Icy Blue',0],['Mint',-5]],
-'Galaxy S25 Ultra':[['Titanium Black',5],['Titanium Gray',0],['Titanium Silver Blue',0],['Titanium White Silver',0]]
+'iPhone SE (3rd gen)':[['Midnight',5],['Starlight',0],['Red',0]],
+/* Samsung: the online exclusive finishes are real retail colours and show up
+   constantly on the used market, so they belong here. */
+'Galaxy S23':[['Phantom Black',5],['Cream',0],['Graphite',5],['Green',-5],['Lavender',-5],['Lime',-10]],
+'Galaxy S23 Ultra':[['Phantom Black',5],['Cream',0],['Graphite',5],['Green',-5],['Lavender',-5],['Sky Blue',-5],['Red',-5],['Lime',-10]],
+'Galaxy S24':[['Onyx Black',5],['Marble Gray',0],['Cobalt Violet',-5],['Jade Green',-5],['Sapphire Blue',0],['Sandstone Orange',-10],['Amber Yellow',-10]],
+'Galaxy S24 Ultra':[['Titanium Black',5],['Titanium Gray',0],['Titanium Blue',0],['Titanium Violet',-5],['Titanium Green',-5],['Titanium Orange',-10],['Titanium Yellow',-10]],
+'Galaxy S25':[['Navy',5],['Silver Shadow',0],['Icyblue',0],['Mint',-5],['Blueblack',5],['Coralred',-5],['Pinkgold',-5]],
+'Galaxy S25 Ultra':[['Titanium Black',5],['Titanium Silverblue',0],['Titanium Whitesilver',0],['Titanium Gray',0],['Titanium Jadegreen',-5],['Titanium Jetblack',5],['Titanium Pinkgold',-5]],
+'Pixel 8':[['Obsidian',5],['Hazel',0],['Mint',-5],['Rose',-5]],
+'Pixel 9':[['Obsidian',5],['Porcelain',0],['Wintergreen',-5],['Peony',-5]]
 };
+/* Approximate sRGB for every finish above. The phone reports its own enclosure
+   colour as a code (often a hex like #3b3b3c) rather than a name, so we match
+   that code to the nearest finish IN THAT MODEL'S OWN LINEUP. Matching inside
+   one lineup instead of across all 167 finishes is what makes it reliable:
+   Desert Titanium only ever competes with the other three iPhone 16 Pro colours. */
+const COLOR_HEX={
+'Black':'#1c1c1e','White':'#f5f5f0','Red':'#ba0c2e','Purple':'#d8c8e8','Green':'#d3e0d0',
+'Yellow':'#f7e08a','Midnight Green':'#4e5851','Space Gray':'#4c4c4c','Silver':'#e3e4e5',
+'Gold':'#f9e5c9','Blue':'#22364a','Pacific Blue':'#2d4d5e','Graphite':'#52514d',
+'Midnight':'#1f2430','Starlight':'#faf6f2','Pink':'#f0d3d8','Sierra Blue':'#a7c1d9',
+'Alpine Green':'#576856','Space Black':'#35383b','Deep Purple':'#56506b',
+'Black Titanium':'#3c3c3e','White Titanium':'#f2f1ed','Natural Titanium':'#bfbdb8',
+'Blue Titanium':'#5b6d80','Desert Titanium':'#bfa48f','Ultramarine':'#7683d4','Teal':'#a3c8c9',
+'Phantom Black':'#24242a','Cream':'#eee7dc','Lavender':'#cbc3e0','Lime':'#d6e04b',
+'Sky Blue':'#a8c8dd','Onyx Black':'#26262a','Marble Gray':'#c8c6c1','Cobalt Violet':'#b7a8d6',
+'Jade Green':'#99a893','Sapphire Blue':'#4a5a72','Sandstone Orange':'#c99a72',
+'Amber Yellow':'#e8d9a8','Titanium Black':'#3a3a3c','Titanium Gray':'#a8a29b',
+'Titanium Blue':'#5c6b7a','Titanium Violet':'#8f83a3','Titanium Green':'#7f8c7c',
+'Titanium Orange':'#c98a5e','Titanium Yellow':'#ddd0a0','Navy':'#33404f',
+'Silver Shadow':'#c9c9c6','Icyblue':'#b8cfe0','Mint':'#c9ddc8','Blueblack':'#2b3340',
+'Coralred':'#d4614f','Pinkgold':'#e3c3b8','Titanium Silverblue':'#b9c4cc',
+'Titanium Whitesilver':'#e8e6e1','Titanium Jadegreen':'#8d9c8c','Titanium Jetblack':'#26262a',
+'Titanium Pinkgold':'#d9bfb2','Obsidian':'#2a2a2c','Hazel':'#77787a','Rose':'#e8c9c6',
+'Porcelain':'#ece6dc','Wintergreen':'#b9cbbd','Peony':'#e9b8c4'
+};
+/* Names Apple/Samsung used on phones older than the catalog, plus the codes the
+   OS hands back instead of a name. Keeps a hand-typed "rose gold" landing on a
+   real finish rather than being thrown away. */
+const COLOR_ALIASES={
+'rose gold':'Pinkgold','rosegold':'Pinkgold','rose':'Rose','jet black':'Black',
+'matte black':'Black','space grey':'Space Gray','spacegray':'Space Gray',
+'product red':'Red','(product)red':'Red','productred':'Red','#ba0c2e':'Red',
+'natural':'Natural Titanium','desert':'Desert Titanium','titanium':'Natural Titanium',
+'stardust':'Starlight','phantom silver':'Silver','phantom white':'White',
+'awesome black':'Black','graphite grey':'Graphite','midnight blue':'Midnight'
+};
+function hexToRGB(h){
+  h=String(h||'').trim().replace(/^#/,'');
+  if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if(!/^[0-9a-fA-F]{6}$/.test(h))return null;
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
+}
+/* Resolve whatever the phone (or the user) gave us to a finish this model
+   actually shipped in. Returns the catalog name, or '' when nothing is close. */
+function resolveColor(model,raw){
+  const lineup=MODEL_COLORS[model];
+  if(!lineup||!raw)return '';
+  const v=String(raw).trim(), low=v.toLowerCase();
+  const exact=lineup.find(c=>c[0].toLowerCase()===low);
+  if(exact)return exact[0];
+  const alias=COLOR_ALIASES[low];
+  if(alias){
+    const hit=lineup.find(c=>c[0]===alias);
+    if(hit)return hit[0];
+    raw=COLOR_HEX[alias]||raw;                 /* fall through to nearest-hex */
+  }
+  const loose=lineup.find(c=>c[0].toLowerCase().includes(low)||low.includes(c[0].toLowerCase()));
+  if(loose&&low.length>2)return loose[0];
+  const target=hexToRGB(raw)||hexToRGB(COLOR_HEX[v]);
+  if(!target)return '';
+  let best='',bestD=Infinity;
+  lineup.forEach(c=>{
+    const rgb=hexToRGB(COLOR_HEX[c[0]]);
+    if(!rgb)return;
+    /* weighted RGB distance · green carries most perceived brightness, so a
+       plain sum would call Natural Titanium and Desert Titanium the same grey */
+    const d=2*Math.pow(rgb[0]-target[0],2)+4*Math.pow(rgb[1]-target[1],2)+3*Math.pow(rgb[2]-target[2],2);
+    if(d<bestD){bestD=d;best=c[0];}
+  });
+  return bestD<120000?best:'';               /* too far off = admit we don't know */
+}
+
 function colorAdjOf(sn){
   if(sn.custom||!sn.color)return 0;
   const l=MODEL_COLORS[sn.model];if(!l)return 0;
@@ -660,17 +777,17 @@ let lastCosm=[];   /* cosmetic tier chips, same index-addressed pattern */
 const FUNC_IDS=['sim_call','cameras','flashlight','speaker_mic','biometric','charging'];
 const TIPS={
   imei_match:'Dial *#06# on the phone. A 15-digit number appears. Type it below. If it does not match the box or the listing, the phone has been swapped or repaired with mismatched parts.',
-  imei_check:'This is the theft check. Paste the IMEI into a blacklist registry (the two buttons below open them). If it comes back reported lost or stolen, walk away — carriers can brick it later and you have no recourse.',
+  imei_check:'This is the theft check. Paste the IMEI into a blacklist registry (the two buttons below open them). If it comes back reported lost or stolen, walk away. Carriers can brick it later and you have no recourse.',
   about_match:'On the phone: Settings > General > About. Confirm the model and storage match what the seller advertised. A 64GB sold as 256GB is the oldest trick there is.',
   battery:'On the phone: Settings > Battery > Battery Health & Charging. Under 80% means the battery is due for replacement, which is roughly $50-70 off your offer.',
   icloud_off:'The single most expensive mistake in flipping. On the phone: Settings > tap the name at the top > Find My > Find My iPhone, and it must be OFF. If the seller cannot turn it off, the phone is not really theirs to sell.',
   financing:'Ask directly: "is this paid off?" Phones on a carrier instalment plan get blacklisted the moment payments stop. Red flags: "still paying it off", a carrier payment plan, or any leasing app on the home screen.',
   sim_call:'Put a SIM in, or use the seller\'s, and actually place a call. This proves the modem and antenna work. A phone that cannot make calls is worth parts money only.',
-  cameras:'Open the camera. Take one photo with the back camera, switch, take one with the front. Check for spots, haze or a black frame — those mean a dead module.',
+  cameras:'Open the camera. Take one photo with the back camera, switch, take one with the front. Check for spots, haze or a black frame. Those mean a dead module.',
   flashlight:'Swipe into Control Centre and tap the torch. It shares hardware with the flash, so if it fails the rear camera flash is usually gone too.',
   speaker_mic:'Open Voice Memos, record five seconds of yourself talking, then play it back. That single test covers both the microphone and the speaker.',
   biometric:'Ask the seller to unlock it with Face ID or the fingerprint reader in front of you. A broken sensor is a costly repair and it cannot be fixed with a screen swap.',
-  charging:'Plug in a cable and confirm it charges. Wiggle it gently — if it cuts in and out, the port is dirty or worn.',
+  charging:'Plug in a cable and confirm it charges. Wiggle it gently. If it cuts in and out, the port is dirty or worn.',
   screen:'Look at it under a bright light. Check for dead pixels, burn-in ghosting, lifting edges, and swipe every corner to be sure the touch layer responds everywhere.',
   reset:'Do this only AFTER the cash has changed hands and the phone is yours. Settings > General > Transfer or Reset iPhone > Erase All Content and Settings. Never let a seller do it mid-negotiation.'
 };
@@ -857,21 +974,104 @@ function imeiStatHTML(){
   if(s==='len')return '<span style="color:var(--dim)">'+(session.imei||'').replace(/\D/g,'').length+'/15 digits</span>';
   return '<span style="color:var(--dim)">15-digit IMEI from *#06#</span>';
 }
+/* The cable can prove some checks outright and merely hint at others. Where it
+   hints, show the evidence and a single confirm button instead of silently
+   ticking the box · a wrong auto-pass on iCloud costs the buyer the whole phone. */
+function suggestHTML(id){
+  const sg=session.meta&&session.meta.suggest&&session.meta.suggest[id];
+  if(!sg||session.checks[id])return '';
+  return '<div class="sugg">'+
+    '<span class="suggwhy">'+ic('plug',13)+' '+esc(sg.why)+'</span>'+
+    '<button type="button" class="suggbtn" onclick="FC.seg(\''+id+'\',\''+sg.v+'\')">'+
+    'Confirm ✓</button></div>';
+}
+function handsOnLeft(){
+  return CHECKLIST.filter(it=>(it.t==='pf'||it.t==='seg')&&!session.checks[it.id]);
+}
+/* ---- guided hands-on run -------------------------------------------------
+   The honest ceiling on automation. iOS gives a tethered computer no way to
+   fire the flashlight, place a call or drive the speaker: that is the sandbox,
+   not a gap in this tool, and no software can get around it. So instead of
+   pretending to drive the phone, we drive the person: one instruction on
+   screen at a time, two big buttons, no scrolling and no hunting a list. */
+const HOW_TO={
+  sim_call:'Call your own number from the phone. Listen through the earpiece, then flip to speaker.',
+  cameras:'Open Camera. Take one photo on the back lens, flip, take one on the front. Check both for spots.',
+  flashlight:'Swipe down for Control Centre and tap the torch. It should be bright and instant.',
+  speaker_mic:'Voice Memos: record three seconds of yourself talking, then play it back at full volume.',
+  biometric:'Settings > Face ID (or Touch ID) and Passcode. It must let the SELLER in, and enrol should be clear.',
+  icloud_off:'Settings > tap the name at the top > Find My > Find My iPhone. It must read Off.',
+  financing:'Ask straight out: is it paid off? Then Settings > General > VPN and Device Management. Anything listed there is a lock.',
+  screen:'White screen first, then black. Look for dead pixels, burn-in, a dark corner, and drag a finger across every edge.'
+};
+const handsRun={on:false,ix:0,items:[]};
+function startHands(){
+  handsRun.items=handsOnLeft();
+  if(!handsRun.items.length){toast('Nothing left that needs your hands ✓');return;}
+  handsRun.on=true;handsRun.ix=0;stepHands();
+}
+function endHands(){
+  handsRun.on=false;
+  const ov=$('#handsov');if(ov)ov.remove();
+  document.body.style.overflow='';
+  buildChecklist();renderBanner();
+  const left=handsOnLeft().length;
+  toast(left?left+' left whenever you are ready':'Hands-on checks done ✓',2500);
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&handsRun.on){e.preventDefault();endHands();}
+});
+function stepHands(){
+  /* re-resolve each step: answering one item shortens the queue */
+  const it=handsRun.items[handsRun.ix];
+  if(!it){endHands();return;}
+  if(session.checks[it.id]){handsRun.ix++;stepHands();return;}
+  let ov=$('#handsov');
+  if(!ov){
+    ov=document.createElement('div');ov.id='handsov';ov.className='handsov';
+    ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');
+    document.body.appendChild(ov);document.body.style.overflow='hidden';
+  }
+  const total=handsRun.items.length,pos=handsRun.ix+1;
+  const opts=it.t==='pf'
+    ?[{v:'pass',l:'WORKS ✓',c:'ok'},{v:'fail',l:'DOES NOT ✗',c:'bad'}]
+    :it.opts;
+  ov.innerHTML=
+    '<div class="handsbox">'+
+      '<div class="handstop"><span>Step '+pos+' of '+total+'</span>'+
+        '<button type="button" class="handsx" onclick="FC.handsQuit()" aria-label="Close">✕</button></div>'+
+      '<div class="handsbar"><i style="width:'+Math.round(100*(pos-1)/total)+'%"></i></div>'+
+      '<div class="handslab">'+esc(SHORT_LABELS[it.id]||it.label)+'</div>'+
+      '<div class="handshow">'+esc(HOW_TO[it.id]||it.help||'')+'</div>'+
+      '<div class="handsbtns">'+opts.map(o=>
+        '<button type="button" class="handsbtn '+o.c+'" onclick="FC.seg(\''+it.id+'\',\''+o.v+'\')">'+
+        esc(o.l)+'</button>').join('')+'</div>'+
+      '<button type="button" class="handsskip" onclick="FC.handsNext()">Skip for now</button>'+
+    '</div>';
+  const first=ov.querySelector('.handsbtn');if(first)first.focus();
+}
 function buildChecklist(){
   const wrap=$('#checklist');if(!wrap)return;
   let h='';
-  /* auto-read report: what the cable filled, what's still on you */
+  /* auto-read report: what the cable settled, what is genuinely left for you */
   if(session.meta&&session.meta.autoRead){
     const ar=session.meta.autoRead;
     const remaining=CHECKLIST.filter(it=>it.t==='battery'?session.battery==='':!session.checks[it.id])
-      .map(it=>SHORT_LABELS[it.id]||it.label.split('—')[0].split('(')[0].trim());
-    h+='<div class="item" style="border-color:var(--blue)">'+
-      '<div class="lab">'+ic('plug',16)+' '+(ar.simulated?'Auto-read done · demo phone':'Auto-read done')+'</div>'+
+      .map(it=>SHORT_LABELS[it.id]||it.label.split('. ')[0].split('(')[0].trim());
+    const hands=handsOnLeft().length;
+    h+='<div class="item autopanel">'+
+      '<div class="lab">'+ic('plug',16)+' '+(ar.simulated?'Auto-read done · demo phone':'Auto-read done')+
+        '<span class="autocount">'+progressCount()+' of '+CHECKLIST.length+' answered by the cable</span></div>'+
       (ar.simulated?'<div class="help" style="color:var(--blue)">This is a sample handset so you can see the flow. With the real app, plugging in your phone fills these same fields off the device itself.</div>':'')+
       '<div class="help">Filled from the cable: '+ar.filled.map(esc).join(', ')+'</div>'+
       (remaining.length?
         '<div class="note" style="color:var(--dim)">Still needs your hands: '+remaining.map(esc).join(' · ')+'</div>':
         '<div class="note" style="color:var(--green)">Every check answered ✓</div>')+
+      (hands?'<button type="button" class="btn p runbtn" onclick="FC.runHands()">'+
+        'Run the '+hands+' hands-on checks</button>'+
+        '<div class="note" style="color:var(--dim)">One at a time, big buttons, about 40 seconds. '+
+        'iOS gives no computer a way to fire a flashlight or place a call, so these '+
+        'are the ones no tool can do for you.</div>':'')+
       '</div>';
   }
   CHECKLIST.forEach(it=>{
@@ -893,7 +1093,7 @@ function buildChecklist(){
         '<div class="seg">'+
         '<button class="ok'+(v==='pass'?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\'pass\')">PASS ✓</button>'+
         '<button class="bad'+(v==='fail'?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\'fail\')">FAIL ✗</button>'+
-        '</div></div>';
+        '</div>'+suggestHTML(it.id)+'</div>';
     }
     else if(it.t==='seg'){
       const v=session.checks[it.id];
@@ -902,7 +1102,7 @@ function buildChecklist(){
         (it.help?'<div class="help">'+it.help+'</div>':'')+
         '<div class="seg">'+it.opts.map(o=>
           '<button class="'+o.c+(v===o.v?' sel':'')+'" onclick="FC.seg(\''+it.id+'\',\''+o.v+'\')">'+o.l+'</button>'
-        ).join('')+'</div></div>';
+        ).join('')+'</div>'+suggestHTML(it.id)+'</div>';
     }
     else if(it.t==='battery'){
       h+='<div class="item'+(session.battery!==''?' done':'')+'">'+
@@ -953,7 +1153,7 @@ function buildChecklist(){
 /* ================= intake rendering ================= */
 function renderIntake(){
   const sel=$('#in-model');
-  let opts='<option value="">— Pick a model —</option>';
+  let opts='<option value="">Pick a model</option>';
   settings.models.forEach(m=>{opts+='<option value="'+esc(m.name)+'"'+(!session.custom&&session.model===m.name?' selected':'')+'>'+
     esc(m.name)+' · $'+esc(m.mint)+'</option>';});
   opts+='<option value="__custom"'+(session.custom?' selected':'')+'>Other / custom…</option>';
@@ -970,7 +1170,7 @@ function renderIntake(){
   const clist=!session.custom?MODEL_COLORS[session.model]:null;
   if(clist&&!session.colorFree){
     $('#colorwrap').innerHTML='<select aria-label="Phone colour" onchange="FC.colorSel(this.value)">'+
-      '<option value="">— Pick a colour —</option>'+
+      '<option value="">Pick a colour</option>'+
       clist.map(c=>'<option'+(session.color===c[0]?' selected':'')+'>'+c[0]+'</option>').join('')+
       '<option value="__other">Other / not listed</option></select>';
   }else{
@@ -988,7 +1188,7 @@ function renderIntake(){
 function updateProv(){
   const em=effectiveMint(session);const el=$('#provcard');if(!el)return;
   if(!em.mint){
-    el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div><div class="big dim">—</div>'+
+    el.innerHTML='<div class="k">PROVISIONAL MAX OFFER</div><div class="big dim">no model yet</div>'+
     '<div style="font-size:13px;color:var(--dim)">Pick a model (or enter a custom mint value)</div>';return;
   }
   const list=round5(em.mint*((parseFloat(settings.gradeMult.B)||85)/100));
@@ -1107,8 +1307,8 @@ function genListings(e){
     '\n\nLocal pickup, cash or Zelle. No trades.';
   const sw=photos+'\n\n'+e.model+' · '+(e.storage||'')+colorStr+'\n\n'+
     'Carrier status: '+carrier+'\n'+
-    'Battery health: '+(e.battery?e.battery+'%':'—')+'\n'+
-    'Storage: '+(e.storage||'—')+'\n'+
+    'Battery health: '+(e.battery?e.battery+'%':'not recorded')+'\n'+
+    'Storage: '+(e.storage||'not recorded')+'\n'+
     'Condition: '+cond+'\n'+
     'Functional: '+passStr+' · pass\n'+
     resetLine+'\n'+
@@ -1132,7 +1332,7 @@ function genListings(e){
 }
 let curListing=null;
 let photoFiles=[];   /* session-only: ride along with Share, never stored (quota + privacy) */
-/* object URLs are cached per file and revoked on removal — recreating them on
+/* object URLs are cached per file and revoked on removal, recreating them on
    every re-render leaks blob memory fast on iOS Safari with camera photos */
 const photoURLs=new Map();
 function photoURL(f){
@@ -1184,7 +1384,7 @@ let bos={entry:null,buyer:load('fc_myname',''),seller:'',price:'',loc:''};
 function openBoS(id){
   const e=inv.find(x=>x.id===id);if(!e){toast('Entry not found');return;}
   bos.entry=id;bos.seller='';bos.price=e.paid||e.buyPrice||'';bos.loc='';
-  $('#boshead').innerHTML='<b>'+esc(e.model)+' '+esc(e.storage||'')+'</b> · IMEI …'+esc(e.imeiLast4||'—')+
+  $('#boshead').innerHTML='<b>'+esc(e.model)+' '+esc(e.storage||'')+'</b> · IMEI …'+esc(e.imeiLast4||'none')+
     ' · '+new Date().toLocaleDateString()+
     '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">Fill in, have the seller sign, generate · done before the cash leaves your hand.</div>';
   $('#bos-buyer').value=bos.buyer;$('#bos-seller').value='';
@@ -1218,8 +1418,8 @@ function bosCanvas(){
   const lines=[
     'Date: '+new Date().toLocaleString(),
     'Device: '+e.model+' '+(e.storage||'')+(e.color?' · '+e.color:''),
-    'IMEI (last 4): …'+(e.imeiLast4||'—')+'     Serial: '+((e.meta&&e.meta.serial)||'—'),
-    'Sale price: $'+(bos.price||0)+'     Location: '+(bos.loc||'—'),
+    'IMEI (last 4): …'+(e.imeiLast4||'none')+'     Serial: '+((e.meta&&e.meta.serial)||''),
+    'Sale price: $'+(bos.price||0)+'     Location: '+(bos.loc||'not recorded'),
     '',
     'Seller: '+(bos.seller||'_____________________________'),
     'Buyer:  '+(bos.buyer||'_____________________________'),
@@ -1256,7 +1456,7 @@ function bosPNG(){
     setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
   },'image/png');
 }
-/* hand-rolled single-page PDF wrapping the receipt as an embedded JPEG —
+/* hand-rolled single-page PDF wrapping the receipt as an embedded JPEG 
    printable/attachable without shipping a PDF library */
 function jpegToPDF(jp,w,h){
   const enc=new TextEncoder();const chunks=[];let pos=0;const xref=[];
@@ -1476,7 +1676,7 @@ function renderSettings(){
     '<div><label class="f">'+esc(c)+' (−pts)</label>'+
     '<input type="number" aria-label="Points deducted for '+esc(c)+'" inputmode="numeric" value="'+esc(s.cosmetic[c])+'" oninput="FC.cUpdIdx('+i+',this.value)"></div>'
   ).join('');
-  $('#set-batt').innerHTML=[['t85','85–89%'],['t80','80–84%'],['t0','Below 80%']].map(p=>
+  $('#set-batt').innerHTML=[['t85','85 to 89%'],['t80','80 to 84%'],['t0','Below 80%']].map(p=>
     '<div><label class="f">'+p[1]+' (−pts)</label>'+
     '<input type="number" aria-label="Points deducted for battery '+p[1]+'" inputmode="numeric" value="'+esc(s.battery[p[0]])+'" oninput="FC.bUpd(\''+p[0]+'\',this.value)"></div>'
   ).join('');
@@ -1578,7 +1778,7 @@ async function pingBridge(){
   bridgeTries++;
   try{
     /* generous timeout: on hosted https origins Chrome shows a local-network
-       permission prompt on the first fetch — a short abort loses the race */
+       permission prompt on the first fetch, a short abort loses the race */
     const c=new AbortController();const t=setTimeout(()=>c.abort(),8000);
     const r=await fetch(BRIDGE+'/health',{signal:c.signal});clearTimeout(t);
     bridgeUp=r.ok;
@@ -1596,12 +1796,17 @@ async function pingBridge(){
    lockdownd to an iPhone), so tapping Auto-Read there replays a real read
    against a sample handset. Clearly labelled, never presented as a live read. */
 const DEMO_DEVICES=[
-  {model:'iPhone 14 Pro',storage:'256GB',color:'Space Black',imei:'356728111234567',
-   batteryPct:91,serial:'F2LX8K9PQ1MN',os:'iOS 18.5',findMyOn:false},
-  {model:'iPhone 13',storage:'128GB',color:'Midnight',imei:'353012110987654',
-   batteryPct:86,serial:'G7HJ2M4KLP09',os:'iOS 18.4',findMyOn:false},
+  {model:'iPhone 16 Pro',storage:'256GB',enclosureColorCode:'#bfa48f',imei:'356728111234567',
+   batteryPct:91,serial:'F2LX8K9PQ1MN',os:'iOS 18.5',findMyOn:false,activationState:'Activated',
+   setupFinished:false,passcodeOn:false,hasBaseband:true,simStatus:'kCTSIMSupportSIMStatusReady',
+   carrierBundle:'Verizon_US',iccid:'8914800000123456789',cycleCount:187,freePct:96,region:'LL/A'},
+  {model:'iPhone 13',storage:'128GB',enclosureColorCode:'#1f2430',imei:'353012110987654',
+   batteryPct:86,serial:'G7HJ2M4KLP09',os:'iOS 18.4',findMyOn:false,activationState:'Activated',
+   setupFinished:false,passcodeOn:false,hasBaseband:true,simStatus:'kCTSIMSupportSIMStatusReady',
+   carrierBundle:'ATT_US',cycleCount:612,freePct:98,region:'LL/A'},
   {model:'Galaxy S24',storage:'256GB',color:'Onyx Black',imei:'352099001122334',
-   batteryPct:94,serial:'RF8X70ABCDE',os:'Android 15',findMyOn:false}
+   batteryPct:94,serial:'RF8X70ABCDE',os:'Android 15',findMyOn:false,
+   setupFinished:false,hasBaseband:true,freePct:97}
 ];
 let demoDeviceIx=0;
 function simulatedRead(){
@@ -1618,7 +1823,7 @@ async function autoRead(){
   }
   toast('Reading device over USB…');
   try{
-    /* a wedged read chains several tool timeouts bridge-side — cap our wait */
+    /* a wedged read chains several tool timeouts bridge-side, cap our wait */
     const c=new AbortController();const t=setTimeout(()=>c.abort(),30000);
     const r=await fetch(BRIDGE+'/device-info',{signal:c.signal});clearTimeout(t);
     const d=await r.json();
@@ -1639,10 +1844,17 @@ function applyDeviceRead(d){
       filled.push('model');
     }
     if(dev.storage){session.storage=dev.storage;filled.push('storage');}
-    if(dev.color){
-      const cl=!session.custom?MODEL_COLORS[session.model]:null;
-      const hit=cl&&cl.find(c=>c[0].toLowerCase()===String(dev.color).toLowerCase());
-      if(hit){session.color=hit[0];session.colorFree=false;filled.push('color '+hit[0]);}
+    /* colour · the phone reports a code far more often than a name, so try the
+       name, then the enclosure code, then the paint code, against this model's
+       own lineup. Anything unmatched goes in as free text rather than vanishing. */
+    const rawColor=dev.color||dev.enclosureColorCode||dev.colorCode;
+    if(rawColor&&!session.custom){
+      const hit=resolveColor(session.model,rawColor);
+      if(hit){session.color=hit;session.colorFree=false;filled.push('colour '+hit);}
+      else if(dev.color){session.color=String(dev.color);session.colorFree=true;
+        filled.push('colour '+dev.color+' (not in this lineup, kept as typed)');}
+    }else if(rawColor&&dev.color){
+      session.color=String(dev.color);session.colorFree=true;filled.push('colour '+dev.color);
     }
     if(dev.imei){session.imei=String(dev.imei);filled.push('IMEI');}
     if(dev.batteryPct){const bp=Math.min(100,Math.max(1,Math.round(dev.batteryPct)));
@@ -1673,9 +1885,31 @@ function applyDeviceRead(d){
       /* a successful USB read = the port carries power AND data */
       session.checks.charging='pass';filled.push('charging port (USB read proves it)');
     }
+    /* A phone sitting at the Hello screen has genuinely been erased · that is
+       the device's own setup daemon talking, not the seller, so it settles the
+       reset check outright. Setup finished means somebody's account is still on it. */
+    if(dev.setupFinished===false&&session.checks.reset!=='done'){
+      session.checks.reset='done';filled.push('factory reset (phone is at the setup screen)');
+    }
+    if(dev.setupFinished===true)
+      d.warnings.push('Phone reports setup already finished · it has NOT been erased yet');
     /* Find My hint · informational only; the iCloud hard-fail stays a manual confirm */
     if(dev.findMyOn===true)d.warnings.unshift('Find My reports ON · seller must turn it off BEFORE cash');
     if(dev.findMyOn===false)d.warnings.push('Find My reports OFF · confirm on screen, then mark it ✓');
+    /* Suggestions, not answers. The cable gives strong evidence for these two but
+       cannot finish them: Find My can be re-armed after the read, and a live modem
+       does not prove the earpiece works. Both are the expensive ones to get wrong,
+       so they stay a deliberate human tap · we just make it one tap. */
+    const suggest={};
+    if(dev.findMyOn===false&&String(dev.activationState||'').toLowerCase().indexOf('activated')>-1)
+      suggest.icloud_off={v:'off',why:'Phone reports Find My not associated and the device is activated'};
+    const modemLive=dev.hasBaseband===true&&(dev.phoneNumber||dev.iccid||
+      /ready/i.test(String(dev.simStatus||'')));
+    if(modemLive)
+      suggest.sim_call={v:'pass',why:'Modem is alive and a SIM is seated'+
+        (dev.carrierBundle?' on '+String(dev.carrierBundle).replace(/[^\w .+-]/g,'').slice(0,28):'')+
+        ' · make one 5 second call to prove the earpiece'};
+    session.meta.suggest=suggest;
     session.meta.autoRead={filled:filled.slice(),ts:Date.now(),simulated:!!d.simulated};
     saveSession();
     if($('#scr-intake').classList.contains('active'))renderIntake();
@@ -1726,7 +1960,9 @@ window.FC={
     else{session.custom=false;session.model=v;
       const l=MODEL_COLORS[v];
       if(l&&session.color&&!l.some(c=>c[0].toLowerCase()===session.color.toLowerCase())){
-        session.color='';session.colorFree=false;   /* old color isn't in this model's lineup */
+        /* the old finish isn't in this lineup · map it to the closest one this
+           model actually shipped in rather than silently blanking the field */
+        session.color=resolveColor(v,session.color);session.colorFree=false;
       }
     }
     saveSession();renderIntake();
@@ -1769,8 +2005,12 @@ window.FC={
   },
   seg(id,v){
     if(session.checks[id]===v)delete session.checks[id];else session.checks[id]=v;
-    saveSession();buildChecklist();renderBanner();
+    saveSession();
+    if(handsRun.on)stepHands();else{buildChecklist();renderBanner();}
   },
+  runHands(){startHands();},
+  handsNext(){handsRun.ix++;stepHands();},
+  handsQuit(){endHands();},
   cosm(c){session.cosmetic=c;saveSession();buildChecklist();renderBanner();},
   cosmIdx(i){if(lastCosm[i]!=null)FC.cosm(lastCosm[i]);},
   batt(v,el){
@@ -1992,7 +2232,7 @@ window.FC={
     }
   }
 };
-/* ready-to-post promo blurb for resellers/affiliates — their link drops in */
+/* ready-to-post promo blurb for resellers/affiliates, their link drops in */
 const AFF_TEMPLATE='I buy and flip used phones and this is the tool I run every deal through: '+
 'FlipCheck. Plug the phone in and it reads IMEI, battery and lock status by itself, '+
 'flags stolen or iCloud-locked phones with a hard DO NOT BUY before any cash moves, '+
