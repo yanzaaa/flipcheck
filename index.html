@@ -76,6 +76,9 @@ background:#0e1723 linear-gradient(90deg,rgba(46,204,113,.16),rgba(74,163,255,.1
 -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
 border-bottom:1px solid var(--line)}
 #demobar b{color:var(--tx)}
+/* on small phones the ribbon scrolls away instead of pinning · mid-inspection
+   the checklist deserves the pixels, and the Buy pill stays in the topbar */
+@media(max-width:480px){#demobar{position:static;padding:7px 12px;font-size:12px}}
 #demobar a{color:#06130b;background:linear-gradient(180deg,#41e08b,#1fb562);border-radius:999px;
 padding:11px 16px;min-height:44px;display:inline-flex;align-items:center;font-weight:700;text-decoration:none;white-space:nowrap}
 main{padding:12px 14px calc(88px + env(safe-area-inset-bottom));max-width:640px;margin:0 auto}
@@ -101,10 +104,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 button{font-family:inherit;cursor:pointer}
 /* tooltips · tap or hover the ? beside anything that isn't obvious */
 .tipwrap{position:relative;display:inline-flex;vertical-align:middle;margin-left:6px}
-.tipbtn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);
+.tipbtn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);position:relative;
 background:var(--card2);color:var(--dim);font-size:12px;font-weight:800;line-height:1;
 display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:0 0 auto}
 .tipbtn:hover,.tipbtn[aria-expanded=true]{color:var(--tx);border-color:var(--blue)}
+/* a 20px circle is an easy miss next to a row that toggles a verification ·
+   grow the touch area without growing the visual */
+.tipbtn:after{content:'';position:absolute;inset:-8px;border-radius:50%}
 .tipbody{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 9px);
 width:260px;max-width:78vw;background:#0c1622;border:1px solid var(--blue);border-radius:12px;
 padding:11px 13px;font-size:13px;line-height:1.5;color:var(--tx);font-weight:400;
@@ -626,7 +632,7 @@ function saveSettings(){store('fc_settings_v1',settings);}
 /* inventory entries can arrive from CSV import or a restored backup file 
    scrub the fields that feed class names / onclick handlers so a hostile
    file can't smuggle markup next to the localStorage API keys */
-const STATUSES=['bought','listed','sold','dead-DOA','returned'];
+const STATUSES=['bought','listed','sold','passed','dead-DOA','returned'];
 function sanitizeInv(arr){
   if(!Array.isArray(arr))return [];
   return arr.filter(e=>e&&typeof e==='object').map(e=>{
@@ -1166,6 +1172,7 @@ function buildChecklist(){
   h+='<div class="item"><div class="lab">Notes</div>'+
     '<textarea aria-label="Notes about this phone" placeholder="scratch on corner, seller story, meetup spot…" oninput="FC.notes(this.value)">'+esc(session.notes)+'</textarea></div>';
   h+='<button class="btn green" onclick="FC.save()"><svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10.5L19 7.5V20H5zM8.5 4v5h7M8.5 20v-6h7v6"/></svg> Save &amp; Draft Listings</button>'+
+    '<button class="btn ghost" style="margin-top:8px" onclick="FC.savePassed()">Log as passed · did not buy</button>'+
     '<div style="text-align:center;font-size:12.5px;color:var(--dim);margin-top:8px">Logs this phone to inventory and opens ready-to-post listings</div>';
   wrap.innerHTML=h;
 }
@@ -1286,6 +1293,30 @@ function saveEntry(){
   session=blankSession();saveSession();
   toast(g.hard.length?'Logged as dead / walk-away (paid $0 · edit if you bought it)':'Saved to inventory ✓',3500);
   openListings(entry.id);
+}
+/* the deal you inspect and DON'T do is still worth a record · it trains the
+   sell-through chart and it must never count as money spent */
+function savePassedEntry(){
+  const modelName=session.custom?(session.customName||'').trim():session.model;
+  if(!modelName){toast('Pick a model first');FC.nav('intake');return;}
+  if(demoLimitHit()){toast('Demo limit reached · 3 phones logged');return;}
+  const g=computeGrade(session);
+  const entry={
+    id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    ts:Date.now(),model:modelName,storage:session.storage,color:session.color,
+    accs:Object.assign({},session.accs),
+    carrier:session.carrier,accessories:session.accessories,
+    imeiLast4:(session.imei||'').replace(/\D/g,'').slice(-4),
+    battery:session.battery,cosmetic:session.cosmetic,checks:Object.assign({},session.checks),
+    grade:g.letter,score:g.score,fails:g.fails,hard:g.hard.slice(),manual:g.manual,
+    buyPrice:g.buy,listPrice:g.list,paid:'0',salePrice:'',
+    notes:session.notes,status:'passed',
+    history:[{ts:Date.now(),status:'passed'}],meta:session.meta||{}
+  };
+  inv.unshift(entry);saveInv();renderDemoBar();
+  session=blankSession();saveSession();
+  toast('Logged as passed · $0 spent, and the price it wanted is on record',3500);
+  nav('stock');
 }
 
 /* ================= listing generator ================= */
@@ -1540,14 +1571,15 @@ function bosPDF(){
 /* ================= inventory ================= */
 /* internal status codes stay stable (CSV, saved data); these are what people see */
 const STATUS_LABEL={all:'All',bought:'Bought',listed:'Listed',sold:'Sold',
-  'dead-DOA':'Walk-away',returned:'Returned'};
+  passed:'Passed on it','dead-DOA':'Walk-away',returned:'Returned'};
 const statusText=s=>STATUS_LABEL[s]||s;
 let invFilter='all';let expanded=null;
 function renderInv(){
   let spent=0,realized=0,inflight=0,spentSold=0;
   inv.forEach(e=>{
     const pRaw=parseFloat(e.paid);                       /* honor an explicit $0 (walk-away) */
-    const paid=isNaN(pRaw)?(parseFloat(e.buyPrice)||0):pRaw;
+    const owned=e.status!=='passed'&&e.status!=='dead-DOA';
+    const paid=isNaN(pRaw)?(owned?(parseFloat(e.buyPrice)||0):0):pRaw;
     spent+=paid;
     if(e.status==='sold'){realized+=parseFloat(e.salePrice)||0;spentSold+=paid;}
     if(e.status==='bought'||e.status==='listed')inflight++;
@@ -2128,6 +2160,7 @@ window.FC={
   },
   timerReset(){session.startedAt=Date.now();saveSession();},
   save:saveEntry,
+  savePassed:savePassedEntry,
   /* inventory */
   filter(s){invFilter=s;renderInv();},
   expand(id){expanded=(expanded===id)?null:id;renderInv();},
