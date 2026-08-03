@@ -10,7 +10,7 @@
 <meta property="og:url" content="https://flipchecka.com/app/">
 <meta property="og:title" content="FlipCheck · try the free live demo">
 <meta property="og:description" content="Plug a phone in and watch it price itself. Free demo, no signup, runs in your browser.">
-<meta property="og:image" content="https://flipchecka.com/og.png">
+<meta property="og:image" content="https://flipchecka.com/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Phone intake, inspection, pricing & listing tool for used-phone flipping">
 <meta name="theme-color" content="#0b0f14">
@@ -66,7 +66,7 @@ padding:7px 13px;min-height:44px;white-space:nowrap;font-family:inherit}
 /* keep the label as long as it fits · a lone dot reads as an empty button */
 @media(max-width:400px){#usbpill{padding:7px 10px;font-size:12px}
 #sitelink{padding:6px 11px}#topbar{gap:7px}}
-@media(max-width:339px){#usbtext{display:none}}
+@media(max-width:339px){#usbtext{display:none}#topbar{padding-left:9px;padding-right:9px;gap:5px}}
 /* free-demo ribbon · only rendered on the hosted demo copies */
 #demobar{position:sticky;top:calc(env(safe-area-inset-top) + var(--topbar-h,58px));z-index:29;display:flex;
 align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
@@ -781,7 +781,7 @@ const TIPS={
   imei_match:'Dial *#06# on the phone. A 15-digit number appears. Type it below. If it does not match the box or the listing, the phone has been swapped or repaired with mismatched parts.',
   imei_check:'This is the theft check. Paste the IMEI into a blacklist registry (the two buttons below open them). If it comes back reported lost or stolen, walk away. Carriers can brick it later and you have no recourse.',
   about_match:'On the phone: Settings > General > About. Confirm the model and storage match what the seller advertised. A 64GB sold as 256GB is the oldest trick there is.',
-  battery:'On the phone: Settings > Battery > Battery Health & Charging. Under 80% means the battery is due for replacement, which is roughly $50-70 off your offer.',
+  battery:'On the phone: Settings > Battery > Battery Health & Charging. Under 80% means the battery is due for replacement, which is roughly $50 to $70 off your offer.',
   icloud_off:'The single most expensive mistake in flipping. On the phone: Settings > tap the name at the top > Find My > Find My iPhone, and it must be OFF. If the seller cannot turn it off, the phone is not really theirs to sell.',
   financing:'Ask directly: "is this paid off?" Phones on a carrier instalment plan get blacklisted the moment payments stop. Red flags: "still paying it off", a carrier payment plan, or any leasing app on the home screen.',
   sim_call:'Put a SIM in, or use the seller\'s, and actually place a call. This proves the modem and antenna work. A phone that cannot make calls is worth parts money only.',
@@ -950,7 +950,12 @@ function renderBanner(){
       '<div class="bsub">Assumes Grade B mid · List '+money(list)+' · answer the checks below and this becomes your real number</div>';
   }else{
     el.className='banner ok';
-    el.innerHTML='<div class="btitle">OFFER '+money(g.buy)+'</div><div class="bsub">Grade '+g.letter+' · Score '+g.score+' · List '+money(g.list)+' · '+prog+'</div>';
+    /* a single answered check must not flip a cautious provisional into a firm
+       Grade A offer · the label stays provisional until the core checks exist */
+    const firm=coreChecksDone(session);
+    el.innerHTML='<div class="btitle">'+(firm?'OFFER ':'PROVISIONAL OFFER ')+money(g.buy)+'</div>'+
+      '<div class="bsub">Grade '+g.letter+' · Score '+g.score+' · List '+money(g.list)+' · '+prog+
+      (firm?'':' · answer the core checks to firm this up')+'</div>';
   }
   renderGradeCard(g);
 }
@@ -1075,6 +1080,19 @@ function buildChecklist(){
         'iOS gives no computer a way to fire a flashlight or place a call, so these '+
         'are the ones no tool can do for you.</div>':'')+
       '</div>';
+  }else{
+    /* the phone-to-phone flow has no cable and no auto-read, but the guided
+       one-at-a-time run is exactly as useful there · give it a front door */
+    const hands=handsOnLeft().length;
+    if(hands>1){
+      h+='<div class="item autopanel">'+
+        '<div class="lab">'+ic('check',16)+' Guided check</div>'+
+        '<div class="help">One question at a time, big buttons, about 40 seconds for all '+hands+'. '+
+        'Faster than scrolling the list with a seller watching you.</div>'+
+        '<button type="button" class="btn p runbtn" onclick="FC.runHands()">'+
+        'Start the guided check ('+hands+' left)</button>'+
+        '</div>';
+    }
   }
   CHECKLIST.forEach(it=>{
     if(it.t==='check'){
@@ -1277,12 +1295,23 @@ function genListings(e){
   const carrier=e.carrier||'Unlocked';
   const colorStr=e.color?(' · '+e.color):'';
   const passItems=FUNC_IDS.filter(id=>e.checks&&e.checks[id]==='pass').map(id=>SHORT_LABELS[id]);
-  const passStr=passItems.length?passItems.join(', '):'all core functions';
+  /* only claim what was actually tested · an empty checklist must never become
+     "all core functions", that is a fabricated test result in a buyer's listing */
+  const passStr=passItems.join(', ');
   const bat=e.battery?(e.battery+'% battery health'):'battery health shared on request';
   const cond=e.cosmetic||'good condition';
   const imeiLine=(e.checks&&e.checks.imei_check==='clean')?'IMEI verified clean · check it yourself if you like':'';
   const icloudLocked=e.checks&&e.checks.icloud_off==='locked';
-  const resetLine=icloudLocked?'SOLD AS-IS FOR PARTS/REPAIR: iCloud / Activation Lock NOT removed':
+  /* hard fails make this a parts sale · the drafts must say so, at the top, and
+     must not quote the working-phone list price */
+  const hardBits=[];
+  if(e.checks&&e.checks.imei_check==='flagged')hardBits.push('IMEI reported lost or stolen');
+  if(icloudLocked)hardBits.push('iCloud / Activation Lock NOT removed');
+  if(e.checks&&e.checks.financing==='locked')hardBits.push('carrier financing lock');
+  if(e.checks&&e.checks.screen==='fail')hardBits.push('screen not working');
+  const isParts=hardBits.length>0;
+  const asisLine=isParts?('SOLD AS IS FOR PARTS OR REPAIR: '+hardBits.join(', ')):'';
+  const resetLine=icloudLocked?'iCloud / Activation Lock NOT removed · for parts or repair only':
     (e.checks&&e.checks.reset==='done')?'Factory reset with iCloud fully removed · sets up like new':
     'Will be factory reset + iCloud removed at handoff';
   const accBits=[];
@@ -1291,45 +1320,54 @@ function genListings(e){
   if(e.accessories)accBits.push(e.accessories);
   const accLine=accBits.length?('Includes: '+accBits.join(', ')):'';
   const notes=e.notes?('\nNote: '+e.notes):'';
-  const price=money(e.listPrice);
-  const fb=photos+'\n\n'+title+colorStr+' · '+carrier+' · '+price+'\n\n'+
+  /* a hard-failed phone gets a parts placeholder, never the working-phone price */
+  const price=isParts?'$[SET PARTS PRICE]':money(e.listPrice);
+  const asisTop=isParts?(asisLine+'\n\n'):'';
+  const testedFB=passStr?('• Tested working: '+passStr+'\n'):'';
+  const fb=asisTop+photos+'\n\n'+title+colorStr+' · '+carrier+' · '+price+'\n\n'+
     '• Condition: '+cond+'\n'+
     '• '+bat+'\n'+
-    '• Tested working: '+passStr+'\n'+
+    testedFB+
     '• '+resetLine+
     (imeiLine?'\n• '+imeiLine:'')+
     (accLine?'\n• '+accLine:'')+notes+
     '\n\nCash meetup, local. First come, first served.';
-  const ou=photos+'\n\n'+e.model+' '+(e.storage||'')+' ('+carrier+')'+colorStr+' for '+price+'.\n\n'+
-    'This phone has been through my full inspection: '+passStr+' · all tested and working. '+
+  const ouInspect=passStr?('Tested and working: '+passStr+'. '):'';
+  const ou=asisTop+photos+'\n\n'+e.model+' '+(e.storage||'')+' ('+carrier+')'+colorStr+' for '+price+'.\n\n'+
+    ouInspect+
     (e.battery?('Battery health is at '+e.battery+'%. '):'')+
     'Cosmetic condition is '+cond.toLowerCase()+'.'+
     (accLine?(' '+accLine+'.'):'')+'\n\n'+resetLine+'.'+
     (imeiLine?(' '+imeiLine+'.'):'')+notes+
     '\n\nLocal pickup, cash or Zelle. No trades.';
-  const sw=photos+'\n\n'+e.model+' · '+(e.storage||'')+colorStr+'\n\n'+
+  const sw=asisTop+photos+'\n\n'+e.model+' · '+(e.storage||'')+colorStr+'\n\n'+
     'Carrier status: '+carrier+'\n'+
     'Battery health: '+(e.battery?e.battery+'%':'not recorded')+'\n'+
     'Storage: '+(e.storage||'not recorded')+'\n'+
     'Condition: '+cond+'\n'+
-    'Functional: '+passStr+' · pass\n'+
+    (passStr?('Functional: '+passStr+' · pass\n'):'')+
     resetLine+'\n'+
     (imeiLine?imeiLine+'\n':'')+
     (accLine?accLine+'\n':'')+notes+
     '\nAsking '+price+'. Ships fast, well packed.';
-  const ebTitle=(e.model+' '+(e.storage||'')+' '+carrier+
+  const ebTitle=((isParts?'FOR PARTS ':'')+e.model+' '+(e.storage||'')+' '+carrier+
     (e.battery?' '+e.battery+'% Battery':'')+' · '+cond).replace(/\s+/g,' ').trim().slice(0,80);
+  /* the clean-IMEI promise only when the IMEI check actually came back clean */
+  const ebClose=isParts?
+    'Sold strictly as is for parts or repair, every issue above is disclosed. '+
+    'Check your marketplace rules before listing a blacklisted device.':
+    'Ships within 1 business day, tracked and well packed.'+
+    (imeiLine?' No returns on activation-lock issues · IMEI is verified clean before listing.':'');
   const eb='TITLE (max 80 chars · paste into the eBay title field):\n'+ebTitle+'\n\n'+
-    'DESCRIPTION:\n'+photos+'\n\n'+
+    'DESCRIPTION:\n'+asisTop+photos+'\n\n'+
     e.model+' '+(e.storage||'')+colorStr+', '+carrier+'.\n\n'+
     '• Condition: '+cond+'\n'+
     '• '+bat.charAt(0).toUpperCase()+bat.slice(1)+'\n'+
-    '• Tested working: '+passStr+'\n'+
+    (passStr?('• Tested working: '+passStr+'\n'):'')+
     '• '+resetLine+
     (imeiLine?'\n• '+imeiLine:'')+
     (accLine?'\n• '+accLine:'')+notes+
-    '\n\nShips within 1 business day, tracked and well packed. No returns on '+
-    'activation-lock issues · IMEI is verified clean before listing.';
+    '\n\n'+ebClose;
   return {fb:fb,ou:ou,sw:sw,eb:eb};
 }
 let curListing=null;
@@ -1610,7 +1648,11 @@ function editorHTML(e){
 const CSV_COLS=['date','model','storage','color','carrier','grade','score','battery_pct','cosmetic',
 'fail_count','buy_price','paid','list_price','sale_price','status','imei_last4','do_not_buy','hard_fails','notes'];
 function entryToRow(e){
-  return [new Date(e.ts).toISOString().slice(0,10),e.model,e.storage,e.color,e.carrier,e.grade,e.score,
+  /* restored or hand-edited backups can carry a bad ts · a broken date must not
+     take the whole CSV export down with it */
+  const d=new Date(e.ts);
+  const day=isNaN(d.getTime())?'':d.toISOString().slice(0,10);
+  return [day,e.model,e.storage,e.color,e.carrier,e.grade,e.score,
     e.battery,e.cosmetic,e.fails,e.buyPrice,e.paid,e.listPrice,e.salePrice,e.status,e.imeiLast4,
     (e.hard&&e.hard.length?'YES':''),(e.hard||[]).join('; '),e.notes];
 }
@@ -1639,10 +1681,19 @@ function importRows(rows){
   const idx=n=>head.indexOf(n);
   if(idx('model')<0){toast('CSV missing a "model" column');return 0;}
   let n=0;
+  /* re-importing your own export must not double the books · skip rows that
+     already exist (same day, model, storage and IMEI tail) */
+  const seen=new Set(inv.map(e=>{
+    const d=new Date(e.ts);const day=isNaN(d.getTime())?'':d.toISOString().slice(0,10);
+    return day+'|'+(e.model||'')+'|'+(e.storage||'')+'|'+(e.imeiLast4||'');
+  }));
   rows.slice(1).forEach(r=>{
     const get=c=>{const i=idx(c);return i>=0?(r[i]||''):'';};
     if(!get('model'))return;
     const ts=Date.parse(get('date'))||Date.now();
+    const key=(get('date')||'')+'|'+get('model')+'|'+get('storage')+'|'+get('imei_last4');
+    if(seen.has(key))return;
+    seen.add(key);
     const status=STATUSES.includes(get('status'))?get('status'):'bought';
     inv.push({id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+n,
       ts:ts,model:get('model'),storage:get('storage'),color:get('color'),carrier:get('carrier'),
@@ -1798,15 +1849,15 @@ async function pingBridge(){
    lockdownd to an iPhone), so tapping Auto-Read there replays a real read
    against a sample handset. Clearly labelled, never presented as a live read. */
 const DEMO_DEVICES=[
-  {model:'iPhone 16 Pro',storage:'256GB',enclosureColorCode:'#bfa48f',imei:'356728111234567',
+  {model:'iPhone 16 Pro',storage:'256GB',enclosureColorCode:'#bfa48f',imei:'356728111234569',
    batteryPct:91,serial:'F2LX8K9PQ1MN',os:'iOS 18.5',findMyOn:false,activationState:'Activated',
    setupFinished:false,passcodeOn:false,hasBaseband:true,simStatus:'kCTSIMSupportSIMStatusReady',
    carrierBundle:'Verizon_US',iccid:'8914800000123456789',cycleCount:187,freePct:96,region:'LL/A'},
-  {model:'iPhone 13',storage:'128GB',enclosureColorCode:'#1f2430',imei:'353012110987654',
+  {model:'iPhone 13',storage:'128GB',enclosureColorCode:'#1f2430',imei:'353012110987656',
    batteryPct:86,serial:'G7HJ2M4KLP09',os:'iOS 18.4',findMyOn:false,activationState:'Activated',
    setupFinished:false,passcodeOn:false,hasBaseband:true,simStatus:'kCTSIMSupportSIMStatusReady',
    carrierBundle:'ATT_US',cycleCount:612,freePct:98,region:'LL/A'},
-  {model:'Galaxy S24',storage:'256GB',color:'Onyx Black',imei:'352099001122334',
+  {model:'Galaxy S24',storage:'256GB',color:'Onyx Black',imei:'352099001122338',
    batteryPct:94,serial:'RF8X70ABCDE',os:'Android 15',findMyOn:false,
    setupFinished:false,hasBaseband:true,freePct:97}
 ];
@@ -2005,7 +2056,20 @@ window.FC={
     const w=btn.parentElement,open=w.classList.contains('open');
     $$('.tipwrap.open').forEach(x=>{x.classList.remove('open');
       const b=x.querySelector('.tipbtn');if(b)b.setAttribute('aria-expanded','false');});
-    if(!open){w.classList.add('open');btn.setAttribute('aria-expanded','true');}
+    if(!open){
+      w.classList.add('open');btn.setAttribute('aria-expanded','true');
+      /* clamp inside the viewport · rows near the screen edge otherwise clip
+         the first characters of the tip off screen */
+      const body=w.querySelector('.tipbody');
+      if(body){
+        body.style.transform='translateX(-50%)';
+        const r=body.getBoundingClientRect();
+        let dx=0;
+        if(r.left<8)dx=8-r.left;
+        else if(r.right>innerWidth-8)dx=(innerWidth-8)-r.right;
+        if(dx)body.style.transform='translateX(calc(-50% + '+Math.round(dx)+'px))';
+      }
+    }
   },
   keyTgl(e,id){
     if(e.key===' '||e.key==='Enter'||e.key==='Spacebar'){e.preventDefault();FC.tgl(id);}
@@ -2135,7 +2199,9 @@ window.FC={
       const d=JSON.parse(txt);
       if(!d.settings||!Array.isArray(d.inv))throw 0;
       if(!confirm('Replace current data with this backup ('+d.inv.length+' entries)?'))return;
-      settings=mergeDefaults(d.settings);inv=sanitizeInv(d.inv);saveSettings();saveInv();applyBrand();renderSettings();toast('Backup restored ✓');
+      settings=mergeDefaults(d.settings);inv=sanitizeInv(d.inv);
+      if(typeof d.myname==='string'&&d.myname){store('fc_myname',d.myname);bos.buyer=d.myname;}
+      saveSettings();saveInv();applyBrand();renderSettings();toast('Backup restored ✓');
     }catch(e){toast('Clipboard doesn’t hold a FlipCheck backup · use Copy backup on the other device first');}
   },
   async ebayDraft(){
@@ -2199,7 +2265,7 @@ window.FC={
   backup(){
     download('flipcheck-backup.json',JSON.stringify({settings:settings,inv:inv,exported:Date.now()},null,2),'application/json');
   },
-  copyBackup(){copyText(JSON.stringify({settings:settings,inv:inv,exported:Date.now()}));},
+  copyBackup(){copyText(JSON.stringify({settings:settings,inv:inv,myname:load('fc_myname',''),exported:Date.now()}));},
   restore(input){
     const f=input.files&&input.files[0];if(!f)return;
     const rd=new FileReader();
