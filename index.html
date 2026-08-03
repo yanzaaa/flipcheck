@@ -1075,7 +1075,7 @@ function buildChecklist(){
     h+='<div class="item autopanel">'+
       '<div class="lab">'+ic('plug',16)+' '+(ar.simulated?'Auto-read done · demo phone':'Auto-read done')+
         '<span class="autocount">'+progressCount()+' of '+CHECKLIST.length+' answered by the cable</span></div>'+
-      (ar.simulated?'<div class="help" style="color:var(--blue)">This is a sample handset so you can see the flow. With the real app, plugging in your phone fills these same fields off the device itself.</div>':'')+
+      (ar.simulated?'<div class="help" style="color:var(--blue)">This is a sample handset so you can see the flow. In the full app, the phone you plug in fills these same fields itself.</div>':'')+
       '<div class="help">Filled from the cable: '+ar.filled.map(esc).join(', ')+'</div>'+
       (remaining.length?
         '<div class="note" style="color:var(--dim)">Still needs your hands: '+remaining.map(esc).join(' · ')+'</div>':
@@ -1624,7 +1624,7 @@ function renderInv(){
         rows.map(x=>'<div style="font-size:13px;color:var(--dim);margin-top:4px">'+esc(x.m)+
           ' · sells at <b style="color:var(--tx)">'+Math.round(x.r*100)+'%</b> of your list (n='+x.n+')</div>').join('')+
         spark+
-        (overall<0.9?'<div style="font-size:12.5px;color:var(--amber);margin-top:6px">Selling ~'+Math.round((1-overall)*100)+'% under list · consider trimming list prices or margin in Settings.</div>':
+        (overall<0.9?'<div style="font-size:12.5px;color:var(--amber);margin-top:6px">Selling ~'+Math.round((1-overall)*100)+'% under list · trim list prices or margin in Settings.</div>':
          overall>1.0?'<div style="font-size:12.5px;color:var(--green);margin-top:6px">Selling above list · you can price more aggressively.</div>':'')+
         '</div>';
     } else fitEl.innerHTML='';
